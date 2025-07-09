@@ -1,0 +1,753 @@
+Database Table View Report
+Database Path: D:\eeg2go\database\eeg2go.db
+Generated Time: 2025-07-01 10:16:32
+Total Tables: 16
+================================================================================
+
+Table List:
+  - datasets
+  - experiment_definitions
+  - experiment_feature_results
+  - experiment_metadata
+  - experiment_results
+  - experiments
+  - feature_set_items
+  - feature_sets
+  - feature_values
+  - fxdef
+  - pipe_edges
+  - pipe_nodes
+  - pipedef
+  - recording_metadata
+  - recordings
+  - subjects
+
+================================================================================
+Table: datasets
+================================================================================
+Total Records: 2
+Columns: 5
+
+Column Names: id, name, description, source_type, path
+
+First 5 Records:
+--------------------------------------------------------------------------------
+Record 1:
+  id: 1
+  name: Harvard_S0001_demo
+  description: Harvard EEG demo data - S0001
+  source_type: edf
+  path: D:\eeg2go\data\harvard_EEG
+
+Record 2:
+  id: 3
+  name: minimal_harvard
+  description: Minimal Harvard dataset (small files) for fast ...
+  source_type: edf
+  path: data/harvard_EEG
+
+
+================================================================================
+Table: experiment_definitions
+================================================================================
+Total Records: 4
+Columns: 7
+
+Column Names: id, name, type, description, default_parameters, created_at, updated_at
+
+First 5 Records:
+--------------------------------------------------------------------------------
+Record 1:
+  id: 1
+  name: correlation
+  type: correlation
+  description: Analyze correlation between EEG features and su...
+  default_parameters: {"target_vars": ["age", "sex"], "method": "pear...
+  created_at: 2025-06-29 17:08:40
+  updated_at: 2025-06-29 17:08:40
+
+Record 2:
+  id: 2
+  name: classification
+  type: classification
+  description: Perform classification tasks using EEG features
+  default_parameters: {"target_var": "age_group", "age_threshold": 65...
+  created_at: 2025-06-29 17:08:40
+  updated_at: 2025-06-29 17:08:40
+
+Record 3:
+  id: 3
+  name: feature_selection
+  type: feature_selection
+  description: Select most important features using multiple m...
+  default_parameters: {"target_var": "age", "n_features": 20, "varian...
+  created_at: 2025-06-29 17:08:40
+  updated_at: 2025-06-29 17:08:40
+
+Record 4:
+  id: 4
+  name: feature_statistics
+  type: feature_statistics
+  description: Comprehensive statistical analysis of EEG features
+  default_parameters: {"outlier_method": "iqr", "outlier_threshold": ...
+  created_at: 2025-06-29 17:08:40
+  updated_at: 2025-06-29 17:08:40
+
+
+================================================================================
+Table: experiment_feature_results
+================================================================================
+Total Records: 344
+Columns: 15
+
+Column Names: id, experiment_result_id, fxdef_id, feature_name, target_variable, result_type, metric_name, metric_value, metric_unit, significance_level, rank_position, confidence_interval_lower, confidence_interval_upper, additional_data, created_at
+
+First 5 Records:
+--------------------------------------------------------------------------------
+Record 1:
+  id: 1
+  experiment_result_id: 1
+  fxdef_id: 20
+  feature_name: fx20_bp_alpha_O1_median
+  target_variable: age_all
+  result_type: correlation
+  metric_name: correlation_coefficient
+  metric_value: -0.384720246358873
+  metric_unit: correlation
+  significance_level: *
+  rank_position: 1
+  confidence_interval_lower: NULL
+  confidence_interval_upper: NULL
+  additional_data: NULL
+  created_at: 2025-06-29 17:13:45
+
+Record 2:
+  id: 2
+  experiment_result_id: 1
+  fxdef_id: 20
+  feature_name: fx20_bp_alpha_O1_median
+  target_variable: age_all
+  result_type: correlation
+  metric_name: p_value
+  metric_value: 0.0357970176276357
+  metric_unit: probability
+  significance_level: *
+  rank_position: 1
+  confidence_interval_lower: NULL
+  confidence_interval_upper: NULL
+  additional_data: NULL
+  created_at: 2025-06-29 17:13:45
+
+Record 3:
+  id: 3
+  experiment_result_id: 1
+  fxdef_id: 21
+  feature_name: fx21_bp_alpha_O2_median
+  target_variable: age_all
+  result_type: correlation
+  metric_name: correlation_coefficient
+  metric_value: -0.3804828503160833
+  metric_unit: correlation
+  significance_level: *
+  rank_position: 2
+  confidence_interval_lower: NULL
+  confidence_interval_upper: NULL
+  additional_data: NULL
+  created_at: 2025-06-29 17:13:45
+
+Record 4:
+  id: 4
+  experiment_result_id: 1
+  fxdef_id: 21
+  feature_name: fx21_bp_alpha_O2_median
+  target_variable: age_all
+  result_type: correlation
+  metric_name: p_value
+  metric_value: 0.0380626301387744
+  metric_unit: probability
+  significance_level: *
+  rank_position: 2
+  confidence_interval_lower: NULL
+  confidence_interval_upper: NULL
+  additional_data: NULL
+  created_at: 2025-06-29 17:13:45
+
+Record 5:
+  id: 5
+  experiment_result_id: 1
+  fxdef_id: 21
+  feature_name: fx21_bp_alpha_O2_min
+  target_variable: age_all
+  result_type: correlation
+  metric_name: correlation_coefficient
+  metric_value: -0.3073630750928791
+  metric_unit: correlation
+  significance_level: ns
+  rank_position: 3
+  confidence_interval_lower: NULL
+  confidence_interval_upper: NULL
+  additional_data: NULL
+  created_at: 2025-06-29 17:13:45
+
+
+================================================================================
+Table: experiment_results
+================================================================================
+Total Records: 25
+Columns: 12
+
+Column Names: id, experiment_type, experiment_name, dataset_id, feature_set_id, run_time, duration_seconds, parameters, output_dir, status, summary, notes
+
+First 5 Records:
+--------------------------------------------------------------------------------
+Record 1:
+  id: 1
+  experiment_type: correlation
+  experiment_name: correlation
+  dataset_id: 3
+  feature_set_id: 1
+  run_time: 2025-06-29 17:13:45
+  duration_seconds: 17.311782
+  parameters: {"target_vars": ["age"], "method": "pearson", "...
+  output_dir: data/experiments/demo_correlation
+  status: completed
+  summary: ===============================================...
+  notes: NULL
+
+Record 2:
+  id: 2
+  experiment_type: correlation
+  experiment_name: correlation
+  dataset_id: 3
+  feature_set_id: 1
+  run_time: 2025-06-29 17:17:05
+  duration_seconds: 17.84059
+  parameters: {"target_vars": ["age"], "method": "pearson", "...
+  output_dir: data/experiments/demo_correlation
+  status: completed
+  summary: ===============================================...
+  notes: NULL
+
+Record 3:
+  id: 3
+  experiment_type: correlation
+  experiment_name: correlation
+  dataset_id: 3
+  feature_set_id: 1
+  run_time: 2025-06-29 17:20:47
+  duration_seconds: 30.697903
+  parameters: {"target_vars": ["age", "sex"], "method": "pear...
+  output_dir: data/experiments/test_correlation
+  status: completed
+  summary: ===============================================...
+  notes: NULL
+
+Record 4:
+  id: 4
+  experiment_type: classification
+  experiment_name: classification
+  dataset_id: 3
+  feature_set_id: 1
+  run_time: 2025-06-29 17:21:31
+  duration_seconds: 43.67779
+  parameters: {"target_var": "age_group", "age_threshold": 50...
+  output_dir: data/experiments/test_classification
+  status: completed
+  summary: 
+Classification Experiment Summary
+============...
+  notes: NULL
+
+Record 5:
+  id: 5
+  experiment_type: feature_selection
+  experiment_name: feature_selection
+  dataset_id: 3
+  feature_set_id: 1
+  run_time: 2025-06-29 17:22:11
+  duration_seconds: 39.702694
+  parameters: {"target_var": "age", "n_features": 10, "varian...
+  output_dir: data/experiments/test_feature_selection
+  status: completed
+  summary: 
+Feature Selection Analysis Summary
+===========...
+  notes: NULL
+
+================================================================================
+Table: feature_set_items
+================================================================================
+Total Records: 366
+Columns: 2
+
+Column Names: feature_set_id, fxdef_id
+
+First 5 Records:
+--------------------------------------------------------------------------------
+Record 1:
+  feature_set_id: 1
+  fxdef_id: 12
+
+Record 2:
+  feature_set_id: 1
+  fxdef_id: 13
+
+Record 3:
+  feature_set_id: 1
+  fxdef_id: 14
+
+Record 4:
+  feature_set_id: 1
+  fxdef_id: 15
+
+Record 5:
+  feature_set_id: 1
+  fxdef_id: 16
+
+
+================================================================================
+Table: feature_sets
+================================================================================
+Total Records: 5
+Columns: 3
+
+Column Names: id, name, description
+
+First 5 Records:
+--------------------------------------------------------------------------------
+Record 1:
+  id: 1
+  name: age_correlation_features
+  description: Features for age correlation analysis - updated...
+
+Record 2:
+  id: 2
+  name: all_available_features
+  description: Feature set containing all available features f...
+
+Record 3:
+  id: 3
+  name: Entropy across multiple channels
+  description: Same pipeline & function, C3/C4/Pz
+
+Record 4:
+  id: 4
+  name: Entropy from different pipelines
+  description: Same function & channel, but pipeline differs (...
+
+Record 5:
+  id: 5
+  name: all_available_features
+  description: Feature set containing all available features f...
+
+
+================================================================================
+Table: feature_values
+================================================================================
+Total Records: 13538
+Columns: 6
+
+Column Names: fxdef_id, recording_id, value, dim, shape, notes
+
+First 5 Records:
+--------------------------------------------------------------------------------
+Record 1:
+  fxdef_id: 12
+  recording_id: 204
+  value: [{"epoch": 0, "start": 0.0, "end": 5.0, "value"...
+  dim: 1d
+  shape: [15912]
+  notes: 1D time series with 15912 epochs, each containi...
+
+Record 2:
+  fxdef_id: 13
+  recording_id: 204
+  value: [{"epoch": 0, "start": 0.0, "end": 5.0, "value"...
+  dim: 1d
+  shape: [15912]
+  notes: 1D time series with 15912 epochs, each containi...
+
+Record 3:
+  fxdef_id: 14
+  recording_id: 204
+  value: [{"epoch": 0, "start": 0.0, "end": 5.0, "value"...
+  dim: 1d
+  shape: [15912]
+  notes: 1D time series with 15912 epochs, each containi...
+
+Record 4:
+  fxdef_id: 15
+  recording_id: 204
+  value: [{"epoch": 0, "start": 0.0, "end": 5.0, "value"...
+  dim: 1d
+  shape: [15912]
+  notes: 1D time series with 15912 epochs, each containi...
+
+Record 5:
+  fxdef_id: 16
+  recording_id: 204
+  value: [{"epoch": 0, "start": 0.0, "end": 5.0, "value"...
+  dim: 1d
+  shape: [15912]
+  notes: 1D time series with 15912 epochs, each containi...
+
+
+================================================================================
+Table: fxdef
+================================================================================
+Total Records: 377
+Columns: 10
+
+Column Names: id, shortname, ver, dim, func, pipedef_id, chans, params, notes, feature_type
+
+First 5 Records:
+--------------------------------------------------------------------------------
+Record 1:
+  id: 1
+  shortname: entropy
+  ver: v1
+  dim: 1d
+  func: spectral_entropy
+  pipedef_id: 5
+  chans: C3
+  params: {}
+  notes: Spectral entropy for C3
+  feature_type: single_channel
+
+Record 2:
+  id: 2
+  shortname: entropy
+  ver: v1
+  dim: 1d
+  func: spectral_entropy
+  pipedef_id: 5
+  chans: C4
+  params: {}
+  notes: Spectral entropy for C4
+  feature_type: single_channel
+
+Record 3:
+  id: 3
+  shortname: entropy
+  ver: v1
+  dim: 1d
+  func: spectral_entropy
+  pipedef_id: 5
+  chans: Pz
+  params: {}
+  notes: Spectral entropy for Pz
+  feature_type: single_channel
+
+Record 4:
+  id: 4
+  shortname: bp_alpha
+  ver: v1
+  dim: 1d
+  func: bandpower
+  pipedef_id: 1
+  chans: C3
+  params: {"band": "alpha"}
+  notes: Alpha band power at C3
+  feature_type: single_channel
+
+Record 5:
+  id: 5
+  shortname: bp_alpha
+  ver: v1
+  dim: 1d
+  func: bandpower
+  pipedef_id: 1
+  chans: C4
+  params: {"band": "alpha"}
+  notes: Alpha band power at C4
+  feature_type: single_channel
+
+
+================================================================================
+Table: pipe_edges
+================================================================================
+Total Records: 23
+Columns: 3
+
+Column Names: pipedef_id, from_node, to_node
+
+First 5 Records:
+--------------------------------------------------------------------------------
+Record 1:
+  pipedef_id: 1
+  from_node: raw
+  to_node: filter_11f1ce89
+
+Record 2:
+  pipedef_id: 1
+  from_node: filter_11f1ce89
+  to_node: reref_97405fcd
+
+Record 3:
+  pipedef_id: 1
+  from_node: reref_97405fcd
+  to_node: epoch_76d1462d
+
+Record 4:
+  pipedef_id: 2
+  from_node: raw
+  to_node: filter_25619650
+
+Record 5:
+  pipedef_id: 2
+  from_node: filter_25619650
+  to_node: notch_filter_537173d2
+
+
+================================================================================
+Table: pipe_nodes
+================================================================================
+Total Records: 15
+Columns: 3
+
+Column Names: nodeid, func, params
+
+First 5 Records:
+--------------------------------------------------------------------------------
+Record 1:
+  nodeid: raw
+  func: raw
+  params: {}
+
+Record 2:
+  nodeid: filter_11f1ce89
+  func: filter
+  params: {"hp": 1.0, "lp": 40.0}
+
+Record 3:
+  nodeid: reref_97405fcd
+  func: reref
+  params: {}
+
+Record 4:
+  nodeid: epoch_76d1462d
+  func: epoch
+  params: {"duration": 5.0}
+
+Record 5:
+  nodeid: filter_25619650
+  func: filter
+  params: {"hp": 1.0, "lp": 30.0}
+
+
+================================================================================
+Table: pipedef
+================================================================================
+Total Records: 7
+Columns: 11
+
+Column Names: id, shortname, description, source, chanset, fs, hp, lp, epoch, steps, output_node
+
+First 5 Records:
+--------------------------------------------------------------------------------
+Record 1:
+  id: 1
+  shortname: classic_clean_5s
+  description: Standard EEG preprocessing: bandpass filter → r...
+  source: default
+  chanset: 10/20
+  fs: 250.0
+  hp: 1.0
+  lp: 40.0
+  epoch: 5.0
+  steps: [["flt", "filter", ["raw"], {"hp": 1.0, "lp": 4...
+  output_node: epoch_76d1462d
+
+Record 2:
+  id: 2
+  shortname: full_preprocessing_test
+  description: Covers all core preprocessing steps for functio...
+  source: test_suite
+  chanset: 10/20
+  fs: 256.0
+  hp: 1.0
+  lp: 30.0
+  epoch: 4.0
+  steps: [["flt", "filter", ["raw"], {"hp": 1.0, "lp": 3...
+  output_node: reject_high_amplitude_77eac2d4
+
+Record 3:
+  id: 3
+  shortname: filter_only_epoch
+  description: Minimal preprocessing: bandpass filter then epoch
+  source: default
+  chanset: 10/20
+  fs: 200.0
+  hp: 1.0
+  lp: 30.0
+  epoch: 3.0
+  steps: [["flt", "filter", ["raw"], {"hp": 1.0, "lp": 3...
+  output_node: epoch_4fc89daa
+
+Record 4:
+  id: 4
+  shortname: reref_only_epoch
+  description: Minimal preprocessing: rereferencing then epoch
+  source: default
+  chanset: 10/20
+  fs: 200.0
+  hp: 1.0
+  lp: 30.0
+  epoch: 3.0
+  steps: [["reref", "reref", ["raw"], {}], ["epoch", "ep...
+  output_node: epoch_4fc89daa
+
+Record 5:
+  id: 5
+  shortname: entropy_eval_base
+  description: Minimal pipeline ending with epochs (used for e...
+  source: test
+  chanset: minimal
+  fs: 250.0
+  hp: 1.0
+  lp: 35.0
+  epoch: 2.0
+  steps: [["flt", "filter", ["raw"], {"hp": 1.0, "lp": 3...
+  output_node: epoch_c7f91ab6
+
+
+================================================================================
+Table: recording_metadata
+================================================================================
+Total Records: 0
+Columns: 10
+Table is empty, no data
+
+================================================================================
+Table: recordings
+================================================================================
+Total Records: 233
+Columns: 8
+
+Column Names: id, dataset_id, subject_id, filename, path, duration, channels, sampling_rate
+
+First 5 Records:
+--------------------------------------------------------------------------------
+Record 1:
+  id: 1
+  dataset_id: 1
+  subject_id: sub-S0001111189188
+  filename: sub-S0001111189188_ses-10_task-cEEG_eeg.edf
+  path: D:\eeg2go\data\harvard_EEG\bids\S0001\sub-S0001...
+  duration: 85441.0
+  channels: 30
+  sampling_rate: 200.0
+
+Record 2:
+  id: 2
+  dataset_id: 1
+  subject_id: sub-S0001111189188
+  filename: sub-S0001111189188_ses-12_task-cEEG_eeg.edf
+  path: D:\eeg2go\data\harvard_EEG\bids\S0001\sub-S0001...
+  duration: 126589.0
+  channels: 30
+  sampling_rate: 200.0
+
+Record 3:
+  id: 3
+  dataset_id: 1
+  subject_id: sub-S0001111189188
+  filename: sub-S0001111189188_ses-2_task-cEEG_eeg.edf
+  path: D:\eeg2go\data\harvard_EEG\bids\S0001\sub-S0001...
+  duration: 66541.0
+  channels: 30
+  sampling_rate: 200.0
+
+Record 4:
+  id: 4
+  dataset_id: 1
+  subject_id: sub-S0001111189188
+  filename: sub-S0001111189188_ses-4_task-cEEG_eeg.edf
+  path: D:\eeg2go\data\harvard_EEG\bids\S0001\sub-S0001...
+  duration: 88733.0
+  channels: 30
+  sampling_rate: 200.0
+
+Record 5:
+  id: 5
+  dataset_id: 1
+  subject_id: sub-S0001111189188
+  filename: sub-S0001111189188_ses-7_task-cEEG_eeg.edf
+  path: D:\eeg2go\data\harvard_EEG\bids\S0001\sub-S0001...
+  duration: 70119.0
+  channels: 30
+  sampling_rate: 200.0
+
+
+================================================================================
+Table: subjects
+================================================================================
+Total Records: 100
+Columns: 10
+
+Column Names: subject_id, dataset_id, sex, age, race, ethnicity, visit_count, icd10_count, medication_count, notes
+
+First 5 Records:
+--------------------------------------------------------------------------------
+Record 1:
+  subject_id: sub-S0001111189188
+  dataset_id: 1
+  sex: F
+  age: 23
+  race: Black or African American
+  ethnicity: Black or African American, non-Hispanic
+  visit_count: 6
+  icd10_count: 48
+  medication_count: 113
+  notes: NULL
+
+Record 2:
+  subject_id: sub-S0001111189302
+  dataset_id: 1
+  sex: F
+  age: 78
+  race: White
+  ethnicity: White
+  visit_count: 3
+  icd10_count: 0
+  medication_count: 0
+  notes: NULL
+
+Record 3:
+  subject_id: sub-S0001111189591
+  dataset_id: 1
+  sex: F
+  age: 35
+  race: White
+  ethnicity: White, non-Hispanic
+  visit_count: 1
+  icd10_count: 0
+  medication_count: 0
+  notes: NULL
+
+Record 4:
+  subject_id: sub-S0001111189719
+  dataset_id: 1
+  sex: M
+  age: 52
+  race: White
+  ethnicity: White
+  visit_count: 2
+  icd10_count: 54
+  medication_count: 40
+  notes: NULL
+
+Record 5:
+  subject_id: sub-S0001111189925
+  dataset_id: 1
+  sex: F
+  age: 40
+  race: White
+  ethnicity: White, non-Hispanic
+  visit_count: 1
+  icd10_count: 182
+  medication_count: 149
+  notes: NULL
+
+
+Database view completed!

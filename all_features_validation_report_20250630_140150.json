@@ -1,0 +1,781 @@
+{
+  "start_time": "2025-06-30T13:38:47.799155",
+  "feature_validation": {
+    "mean_amplitude": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "mean_amplitude",
+        "module": "eeg2fx.feature.feature_time",
+        "signature": "(epochs, chans=None)"
+      }
+    },
+    "rms": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "rms",
+        "module": "eeg2fx.feature.feature_time",
+        "signature": "(epochs, chans=None)"
+      }
+    },
+    "zero_crossings": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "zero_crossings",
+        "module": "eeg2fx.feature.feature_time",
+        "signature": "(epochs, chans=None)"
+      }
+    },
+    "signal_variance": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "signal_variance",
+        "module": "eeg2fx.feature.feature_time",
+        "signature": "(epochs, chans=None)"
+      }
+    },
+    "signal_skewness": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "signal_skewness",
+        "module": "eeg2fx.feature.feature_nonlinear",
+        "signature": "(epochs, chans=None)"
+      }
+    },
+    "signal_kurtosis": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "signal_kurtosis",
+        "module": "eeg2fx.feature.feature_nonlinear",
+        "signature": "(epochs, chans=None)"
+      }
+    },
+    "peak_to_peak_amplitude": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "peak_to_peak_amplitude",
+        "module": "eeg2fx.feature.feature_time",
+        "signature": "(epochs, chans=None)"
+      }
+    },
+    "crest_factor": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "crest_factor",
+        "module": "eeg2fx.feature.feature_time",
+        "signature": "(epochs, chans=None)"
+      }
+    },
+    "shape_factor": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "shape_factor",
+        "module": "eeg2fx.feature.feature_time",
+        "signature": "(epochs, chans=None)"
+      }
+    },
+    "impulse_factor": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "impulse_factor",
+        "module": "eeg2fx.feature.feature_time",
+        "signature": "(epochs, chans=None)"
+      }
+    },
+    "margin_factor": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "margin_factor",
+        "module": "eeg2fx.feature.feature_time",
+        "signature": "(epochs, chans=None)"
+      }
+    },
+    "signal_entropy": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "signal_entropy",
+        "module": "eeg2fx.feature.feature_time",
+        "signature": "(epochs, chans=None, bins=50)"
+      }
+    },
+    "signal_complexity": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "signal_complexity",
+        "module": "eeg2fx.feature.feature_time",
+        "signature": "(epochs, chans=None)"
+      }
+    },
+    "signal_regularity": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "signal_regularity",
+        "module": "eeg2fx.feature.feature_time",
+        "signature": "(epochs, chans=None)"
+      }
+    },
+    "signal_stability": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "signal_stability",
+        "module": "eeg2fx.feature.feature_time",
+        "signature": "(epochs, chans=None)"
+      }
+    },
+    "bandpower": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "bandpower",
+        "module": "eeg2fx.feature.feature_freq",
+        "signature": "(epochs, chans=None, band='alpha')"
+      }
+    },
+    "relative_power": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "relative_power",
+        "module": "eeg2fx.feature.feature_freq",
+        "signature": "(epochs, chans=None, band='alpha')"
+      }
+    },
+    "spectral_entropy": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "spectral_entropy",
+        "module": "eeg2fx.feature.feature_freq",
+        "signature": "(epochs, chans=None)"
+      }
+    },
+    "alpha_peak_frequency": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "alpha_peak_frequency",
+        "module": "eeg2fx.feature.feature_freq",
+        "signature": "(epochs, chans=None, fmin=7, fmax=13)"
+      }
+    },
+    "theta_alpha_ratio": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "theta_alpha_ratio",
+        "module": "eeg2fx.feature.feature_freq",
+        "signature": "(epochs, chans=None)"
+      }
+    },
+    "spectral_edge_frequency": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "spectral_edge_frequency",
+        "module": "eeg2fx.feature.feature_freq",
+        "signature": "(epochs, chans=None, percentile=95)"
+      }
+    },
+    "alpha_asymmetry": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "alpha_asymmetry",
+        "module": "eeg2fx.feature.feature_freq",
+        "signature": "(epochs, chans=None)"
+      }
+    },
+    "spectral_centroid": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "spectral_centroid",
+        "module": "eeg2fx.feature.feature_freq",
+        "signature": "(epochs, chans=None, fmin=1, fmax=45)"
+      }
+    },
+    "spectral_bandwidth": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "spectral_bandwidth",
+        "module": "eeg2fx.feature.feature_freq",
+        "signature": "(epochs, chans=None, fmin=1, fmax=45)"
+      }
+    },
+    "spectral_rolloff": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "spectral_rolloff",
+        "module": "eeg2fx.feature.feature_freq",
+        "signature": "(epochs, chans=None, percentile=85, fmin=1, fmax=45)"
+      }
+    },
+    "spectral_flatness": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "spectral_flatness",
+        "module": "eeg2fx.feature.feature_freq",
+        "signature": "(epochs, chans=None, fmin=1, fmax=45)"
+      }
+    },
+    "spectral_skewness": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "spectral_skewness",
+        "module": "eeg2fx.feature.feature_freq",
+        "signature": "(epochs, chans=None, fmin=1, fmax=45)"
+      }
+    },
+    "spectral_kurtosis": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "spectral_kurtosis",
+        "module": "eeg2fx.feature.feature_freq",
+        "signature": "(epochs, chans=None, fmin=1, fmax=45)"
+      }
+    },
+    "band_energy_ratio": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "band_energy_ratio",
+        "module": "eeg2fx.feature.feature_freq",
+        "signature": "(epochs, chans=None, band1='theta', band2='alpha')"
+      }
+    },
+    "spectral_complexity": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "spectral_complexity",
+        "module": "eeg2fx.feature.feature_freq",
+        "signature": "(epochs, chans=None, fmin=1, fmax=45)"
+      }
+    },
+    "frequency_modulation_index": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "frequency_modulation_index",
+        "module": "eeg2fx.feature.feature_freq",
+        "signature": "(epochs, chans=None, fmin=1, fmax=45)"
+      }
+    },
+    "permutation_entropy": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "permutation_entropy",
+        "module": "eeg2fx.feature.feature_nonlinear",
+        "signature": "(epochs, chans=None, order=3, normalize=True)"
+      }
+    },
+    "approximate_entropy": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "approximate_entropy",
+        "module": "eeg2fx.feature.feature_nonlinear",
+        "signature": "(epochs, chans=None, order=2, metric='chebyshev')"
+      }
+    },
+    "wavelet_entropy": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "wavelet_entropy",
+        "module": "eeg2fx.feature.feature_tf",
+        "signature": "(epochs, chans=None, wavelet='db4', level=4)"
+      }
+    },
+    "stft_power": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "stft_power",
+        "module": "eeg2fx.feature.feature_tf",
+        "signature": "(epochs, chans=None, band=(8, 13))"
+      }
+    },
+    "coherence_band": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "coherence_band",
+        "module": "eeg2fx.feature.feature_connect",
+        "signature": "(epochs, chans=None, band=(8, 13))"
+      }
+    },
+    "plv": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "plv",
+        "module": "eeg2fx.feature.feature_connect",
+        "signature": "(epochs, chans=None)"
+      }
+    },
+    "mutual_information": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "mutual_information",
+        "module": "eeg2fx.feature.feature_connect",
+        "signature": "(epochs, chans=None, bins=20)"
+      }
+    },
+    "cross_correlation": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "cross_correlation",
+        "module": "eeg2fx.feature.feature_connect",
+        "signature": "(epochs, chans=None, max_lag=None)"
+      }
+    },
+    "phase_synchronization": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "phase_synchronization",
+        "module": "eeg2fx.feature.feature_connect",
+        "signature": "(epochs, chans=None)"
+      }
+    },
+    "amplitude_correlation": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "amplitude_correlation",
+        "module": "eeg2fx.feature.feature_connect",
+        "signature": "(epochs, chans=None)"
+      }
+    },
+    "granger_causality": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "granger_causality",
+        "module": "eeg2fx.feature.feature_connect",
+        "signature": "(epochs, chans=None, order=5)"
+      }
+    },
+    "directed_transfer_function": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "directed_transfer_function",
+        "module": "eeg2fx.feature.feature_connect",
+        "signature": "(epochs, chans=None, order=5)"
+      }
+    },
+    "synchronization_likelihood": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "synchronization_likelihood",
+        "module": "eeg2fx.feature.feature_connect",
+        "signature": "(epochs, chans=None, threshold=0.1)"
+      }
+    },
+    "mean": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "mean",
+        "module": "eeg2fx.feature.feature_stat",
+        "signature": "(epochs, chans=None)"
+      }
+    },
+    "std": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "std",
+        "module": "eeg2fx.feature.feature_stat",
+        "signature": "(epochs, chans=None)"
+      }
+    },
+    "skew": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "skew",
+        "module": "eeg2fx.feature.feature_stat",
+        "signature": "(epochs, chans=None)"
+      }
+    },
+    "kurt": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "kurt",
+        "module": "eeg2fx.feature.feature_stat",
+        "signature": "(epochs, chans=None)"
+      }
+    },
+    "zscore_stddev": {
+      "status": "valid",
+      "error": null,
+      "function_info": {
+        "name": "zscore_stddev",
+        "module": "eeg2fx.feature.feature_stat",
+        "signature": "(epochs, chans=None)"
+      }
+    }
+  },
+  "extraction_validation": {
+    "feature_set_id": 5,
+    "dataset_id": 1,
+    "recordings_processed": 1,
+    "recordings_successful": 1,
+    "recordings_failed": 0,
+    "total_features": 219,
+    "recording_results": [
+      {
+        "recording_id": 1,
+        "filename": "sub-S0001111189188_ses-10_task-cEEG_eeg.edf",
+        "status": "success",
+        "processing_time": 1238.1617641448975,
+        "successful_features": 219,
+        "failed_features": 0,
+        "error": null
+      }
+    ],
+    "feature_results": {
+      "mean_amplitude": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "rms": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "zero_crossings": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "signal_variance": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "signal_skewness": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "signal_kurtosis": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "peak_to_peak_amplitude": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "crest_factor": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "shape_factor": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "impulse_factor": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "margin_factor": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "signal_entropy": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "signal_complexity": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "signal_regularity": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "signal_stability": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "bandpower": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "relative_power": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "spectral_entropy": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "alpha_peak_frequency": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "theta_alpha_ratio": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "spectral_edge_frequency": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "alpha_asymmetry": {
+        "successful": 1,
+        "failed": 0,
+        "errors": []
+      },
+      "spectral_centroid": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "spectral_bandwidth": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "spectral_rolloff": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "spectral_flatness": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "spectral_skewness": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "spectral_kurtosis": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "band_energy_ratio": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "spectral_complexity": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "frequency_modulation_index": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "permutation_entropy": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "approximate_entropy": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "wavelet_entropy": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "stft_power": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "coherence_band": {
+        "successful": 3,
+        "failed": 0,
+        "errors": []
+      },
+      "plv": {
+        "successful": 3,
+        "failed": 0,
+        "errors": []
+      },
+      "mutual_information": {
+        "successful": 3,
+        "failed": 0,
+        "errors": []
+      },
+      "cross_correlation": {
+        "successful": 3,
+        "failed": 0,
+        "errors": []
+      },
+      "phase_synchronization": {
+        "successful": 3,
+        "failed": 0,
+        "errors": []
+      },
+      "amplitude_correlation": {
+        "successful": 3,
+        "failed": 0,
+        "errors": []
+      },
+      "granger_causality": {
+        "successful": 3,
+        "failed": 0,
+        "errors": []
+      },
+      "directed_transfer_function": {
+        "successful": 3,
+        "failed": 0,
+        "errors": []
+      },
+      "synchronization_likelihood": {
+        "successful": 3,
+        "failed": 0,
+        "errors": []
+      },
+      "mean": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "std": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "skew": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "kurt": {
+        "successful": 5,
+        "failed": 0,
+        "errors": []
+      },
+      "zscore_stddev": {
+        "successful": 1,
+        "failed": 0,
+        "errors": []
+      }
+    },
+    "summary": {
+      "total_successful_features": 219,
+      "total_failed_features": 0,
+      "success_rate": 1.0,
+      "feature_success_rate": 1.0
+    }
+  },
+  "summary": {},
+  "end_time": "2025-06-30T13:59:26.380299",
+  "failed_features_stats": {
+    "total_failed": 120,
+    "total_all_nan": 0,
+    "total_problematic": 120,
+    "failed_by_fxdef": {
+      "27": 6,
+      "12": 3,
+      "13": 3,
+      "14": 3,
+      "15": 3,
+      "16": 3,
+      "17": 3,
+      "18": 3,
+      "19": 3,
+      "20": 3,
+      "21": 3,
+      "22": 3,
+      "23": 3,
+      "24": 3,
+      "25": 3,
+      "26": 3,
+      "28": 3,
+      "29": 3,
+      "30": 3,
+      "31": 3,
+      "32": 3,
+      "33": 3,
+      "34": 3,
+      "35": 3,
+      "36": 3,
+      "37": 3,
+      "38": 3,
+      "39": 3,
+      "40": 3,
+      "41": 3,
+      "42": 3,
+      "43": 3,
+      "44": 3,
+      "45": 3,
+      "46": 3,
+      "47": 3,
+      "48": 3,
+      "49": 3,
+      "50": 3
+    },
+    "all_nan_by_fxdef": {},
+    "failed_by_recording": {
+      "218": 39,
+      "123": 39,
+      "96": 39,
+      "238": 1,
+      "223": 1,
+      "197": 1
+    },
+    "all_nan_by_recording": {},
+    "common_errors": {
+      "Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64": 78,
+      "Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64": 39,
+      "Feature generation failed: Channel C3 not found in available channels: ['O1', 'P4', 'T6', 'O2']": 3
+    }
+  }
+}

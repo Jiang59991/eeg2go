@@ -1,0 +1,95 @@
+[2025-06-29 17:34:58] [INFO] [eeg2go] [load_recording] Recording 206: 4879.0s, 30 channels, 200.0 Hz
+[2025-06-29 17:34:58] [INFO] [eeg2go] [load_recording] Estimated memory usage: 111.7 MB
+[2025-06-29 17:34:58] [INFO] [eeg2go] Saved 39 feature values for recording 206 (successful: 39, failed: 0)
+[2025-06-29 17:34:59] [INFO] [eeg2go] [load_recording] Recording 207: 46236.0s, 30 channels, 200.0 Hz
+[2025-06-29 17:34:59] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1058.3 MB
+[2025-06-29 17:34:59] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 17:35:03] [INFO] [eeg2go] Saved 39 feature values for recording 207 (successful: 39, failed: 0)
+[2025-06-29 17:35:03] [INFO] [eeg2go] [load_recording] Recording 211: 25730.0s, 50 channels, 512.0 Hz
+[2025-06-29 17:35:03] [INFO] [eeg2go] [load_recording] Estimated memory usage: 2512.7 MB
+[2025-06-29 17:35:03] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 17:35:12] [INFO] [eeg2go] Saved 39 feature values for recording 211 (successful: 39, failed: 0)
+[2025-06-29 17:35:12] [INFO] [eeg2go] [load_recording] Recording 212: 97725.0s, 22 channels, 200.0 Hz
+[2025-06-29 17:35:12] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1640.3 MB
+[2025-06-29 17:35:12] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 17:35:20] [INFO] [eeg2go] Saved 39 feature values for recording 212 (successful: 39, failed: 0)
+[2025-06-29 17:35:21] [INFO] [eeg2go] [load_recording] Recording 213: 2879.0s, 30 channels, 200.0 Hz
+[2025-06-29 17:35:21] [INFO] [eeg2go] [load_recording] Estimated memory usage: 65.9 MB
+[2025-06-29 17:35:21] [INFO] [eeg2go] Saved 39 feature values for recording 213 (successful: 39, failed: 0)
+[2025-06-29 17:35:21] [INFO] [eeg2go] [load_recording] Recording 214: 4179.0s, 30 channels, 200.0 Hz
+[2025-06-29 17:35:21] [INFO] [eeg2go] [load_recording] Estimated memory usage: 95.6 MB
+[2025-06-29 17:35:22] [INFO] [eeg2go] Saved 39 feature values for recording 214 (successful: 39, failed: 0)
+[2025-06-29 17:35:22] [INFO] [eeg2go] [load_recording] Recording 215: 118676.0s, 30 channels, 200.0 Hz
+[2025-06-29 17:35:22] [INFO] [eeg2go] [load_recording] Estimated memory usage: 2716.3 MB
+[2025-06-29 17:35:22] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 17:35:34] [INFO] [eeg2go] Saved 39 feature values for recording 215 (successful: 39, failed: 0)
+[2025-06-29 17:35:36] [INFO] [eeg2go] [load_recording] Recording 217: 2713.0s, 30 channels, 200.0 Hz
+[2025-06-29 17:35:36] [INFO] [eeg2go] [load_recording] Estimated memory usage: 62.1 MB
+[2025-06-29 17:35:36] [INFO] [eeg2go] Saved 39 feature values for recording 217 (successful: 39, failed: 0)
+[2025-06-29 17:35:36] [INFO] [eeg2go] [load_recording] Recording 218: 39970.0s, 50 channels, 512.0 Hz
+[2025-06-29 17:35:36] [INFO] [eeg2go] [load_recording] Estimated memory usage: 3903.3 MB
+[2025-06-29 17:35:36] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=12 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=13 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=14 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=15 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=16 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=17 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=18 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=19 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=20 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=21 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=22 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=23 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=24 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=25 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=26 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=27 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=28 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=29 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=30 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=31 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=32 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=33 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=34 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=35 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=36 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=37 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=38 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=39 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=40 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=41 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=42 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=43 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=44 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=45 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=46 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=47 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=48 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=49 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [WARNING] [eeg2go] [SKIP] fxdef_id=50 recording_id=218 - previously failed: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 17:35:57] [INFO] [eeg2go] Saved 39 feature values for recording 218 (successful: 0, failed: 39)
+[2025-06-29 17:35:59] [INFO] [eeg2go] [load_recording] Recording 219: 6742.0s, 30 channels, 200.0 Hz
+[2025-06-29 17:35:59] [INFO] [eeg2go] [load_recording] Estimated memory usage: 154.3 MB
+[2025-06-29 17:35:59] [INFO] [eeg2go] Saved 39 feature values for recording 219 (successful: 39, failed: 0)
+[2025-06-29 17:36:00] [INFO] [eeg2go] [load_recording] Recording 220: 7280.0s, 29 channels, 200.0 Hz
+[2025-06-29 17:36:00] [INFO] [eeg2go] [load_recording] Estimated memory usage: 161.1 MB
+[2025-06-29 17:36:00] [INFO] [eeg2go] Saved 39 feature values for recording 220 (successful: 39, failed: 0)
+[2025-06-29 17:36:00] [INFO] [eeg2go] [load_recording] Recording 221: 53383.0s, 30 channels, 200.0 Hz
+[2025-06-29 17:36:00] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1221.8 MB
+[2025-06-29 17:36:00] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 17:36:07] [INFO] [eeg2go] Saved 39 feature values for recording 221 (successful: 39, failed: 0)
+[2025-06-29 17:36:07] [INFO] [eeg2go] [load_recording] Recording 223: 9646.0s, 4 channels, 200.0 Hz
+[2025-06-29 17:36:07] [INFO] [eeg2go] [load_recording] Estimated memory usage: 29.4 MB
+[2025-06-29 17:36:08] [WARNING] [eeg2go] [SKIP] fxdef_id=27 recording_id=223 - previously failed: Feature generation failed: Channel C3 not found in available channels: ['O1', 'P4', 'T6', 'O2']
+[2025-06-29 17:36:08] [INFO] [eeg2go] Saved 39 feature values for recording 223 (successful: 38, failed: 1)
+[2025-06-29 17:36:08] [INFO] [eeg2go] [load_recording] Recording 226: 86270.0s, 30 channels, 200.0 Hz
+[2025-06-29 17:36:08] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1974.6 MB
+[2025-06-29 17:36:08] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 17:39:07] [INFO] [eeg2go] Saved 39 feature values for recording 226 (successful: 39, failed: 0)
+[2025-06-29 17:39:08] [INFO] [eeg2go] [load_recording] Recording 227: 2403.0s, 30 channels, 200.0 Hz
+[2025-06-29 17:39:08] [INFO] [eeg2go] [load_recording] Estimated memory usage: 55.0 MB
+[2025-06-29 17:39:15] [INFO] [eeg2go] Saved 39 feature values for recording 227 (successful: 39, failed: 0)
+[2025-06-29 17:39:16] [INFO] [eeg2go] [load_recording] Recording 228: 168039.0s, 30 channels, 200.0 Hz
+[2025-06-29 17:39:16] [INFO] [eeg2go] [load_recording] Estimated memory usage: 3846.1 MB
+[2025-06-29 17:39:16] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping

@@ -1,0 +1,152 @@
+[2025-06-30 13:34:39] [INFO] [eeg2go] Creating a feature set containing all available features...
+[2025-06-30 13:34:39] [INFO] [eeg2go] Found 49 available feature functions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Using pipeline ID: 1
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: mean_amplitude
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 mean_amplitude feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: rms
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 rms feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: zero_crossings
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 zero_crossings feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: signal_variance
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 signal_variance feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: signal_skewness
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 signal_skewness feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: signal_kurtosis
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 signal_kurtosis feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: peak_to_peak_amplitude
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 peak_to_peak_amplitude feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: crest_factor
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 crest_factor feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: shape_factor
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 shape_factor feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: impulse_factor
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 impulse_factor feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: margin_factor
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 margin_factor feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: signal_entropy
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 signal_entropy feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: signal_complexity
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 signal_complexity feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: signal_regularity
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 signal_regularity feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: signal_stability
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 signal_stability feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: bandpower
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 bandpower feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: relative_power
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 relative_power feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: spectral_entropy
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 spectral_entropy feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: alpha_peak_frequency
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 alpha_peak_frequency feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: theta_alpha_ratio
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 theta_alpha_ratio feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: spectral_edge_frequency
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 spectral_edge_frequency feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: alpha_asymmetry
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 1 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 1 alpha_asymmetry feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: spectral_centroid
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 spectral_centroid feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: spectral_bandwidth
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 spectral_bandwidth feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: spectral_rolloff
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 spectral_rolloff feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: spectral_flatness
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 spectral_flatness feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: spectral_skewness
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 spectral_skewness feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: spectral_kurtosis
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 spectral_kurtosis feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: band_energy_ratio
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 band_energy_ratio feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: spectral_complexity
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 spectral_complexity feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: frequency_modulation_index
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 frequency_modulation_index feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: permutation_entropy
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 permutation_entropy feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: approximate_entropy
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 approximate_entropy feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: wavelet_entropy
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 wavelet_entropy feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: stft_power
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 stft_power feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: coherence_band
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 3 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 3 coherence_band feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: plv
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 3 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 3 plv feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: mutual_information
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 3 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 3 mutual_information feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: cross_correlation
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 3 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 3 cross_correlation feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: phase_synchronization
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 3 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 3 phase_synchronization feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: amplitude_correlation
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 3 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 3 amplitude_correlation feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: granger_causality
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 3 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 3 granger_causality feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: directed_transfer_function
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 3 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 3 directed_transfer_function feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: synchronization_likelihood
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 3 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 3 synchronization_likelihood feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: mean
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 mean feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: std
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 std feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: skew
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 skew feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: kurt
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 5 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 5 kurt feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Processing feature: zscore_stddev
+[2025-06-30 13:34:39] [INFO] [eeg2go] Summary: 1 new fxdefs added.
+[2025-06-30 13:34:39] [INFO] [eeg2go]   ✓ Added 1 zscore_stddev feature definitions.
+[2025-06-30 13:34:39] [INFO] [eeg2go] Feature set 'all_available_features' (id=5) registered with 219 features.
+[2025-06-30 13:34:39] [INFO] [eeg2go] ✓ Successfully created feature set 'all_available_features' (ID: None), containing 219 feature definitions.

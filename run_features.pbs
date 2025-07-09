@@ -1,0 +1,20 @@
+#!/bin/bash
+#PBS -N eeg_features
+#PBS -l select=1:ncpus=4:mem=16gb
+#PBS -l walltime=02:00:00
+#PBS -j oe
+#PBS -o $PBS_O_WORKDIR/logs/tmp.log
+
+cd $PBS_O_WORKDIR
+mkdir -p logs
+
+exec > logs/eeg_features_${PBS_JOBID}.log 2>&1
+
+echo "Job ID: $PBS_JOBID"
+echo "Start time: $(date)"
+echo "Running in: $(pwd)"
+
+source ~/miniconda/etc/profile.d/conda.sh
+conda activate eeg2go_env
+
+python -m feature_mill.feature_matrix --dataset 1 --featureset 2 --num-workers 4

@@ -1,0 +1,218 @@
+"""
+TODO: 
+1. 传入参数异常检测（字段缺失/不符合规范）
+2. 判重 ： add之前先检测数据库中是否已经存在完全相同配置的pipeline
+
+"""
+import sqlite3
+import json
+import hashlib
+from logging_config import logger
+
+DB_PATH = "database/eeg2go.db"
+
+STEP_REGISTRY = {
+    "filter": {
+        "params": {
+            "hp": {"type": "float", "min": 0.1, "max": 100.0, "default": 1.0, "required": True},
+            "lp": {"type": "float", "min": 1.0, "max": 200.0, "default": 40.0, "required": True}
+        },
+        "input_type": "raw",
+        "output_type": "raw"
+    },
+    "resample": {
+        "params": {
+            "sfreq": {"type": "float", "min": 1.0, "max": 1000.0, "default": 128.0, "required": True}
+        },
+        "input_type": "raw",
+        "output_type": "raw"
+    },
+    "epoch": {
+        "params": {
+            "duration": {"type": "float", "min": 0.1, "max": 60.0, "default": 5.0, "required": True}
+        },
+        "input_type": "raw",
+        "output_type": "epochs"
+    },
+    # ... 其他步骤
+}
+
+def validate_pipeline(pipeline_steps, step_registry=STEP_REGISTRY):
+    """
+    pipeline_steps: List[Dict]，每个dict包含step_name, func, inputnames, params
+    step_registry: 步骤注册表
+    """
+    for step in pipeline_steps:
+        func = step["func"]
+        params = step["params"]
+        # 1. 检查func是否在注册表
+        if func not in step_registry:
+            raise ValueError(f"Unknown step: {func}")
+        # 2. 检查参数
+        for pname, pinfo in step_registry[func]["params"].items():
+            if pinfo.get("required") and pname not in params:
+                raise ValueError(f"Missing required param '{pname}' for step '{func}'")
+            if pname in params:
+                v = params[pname]
+                if pinfo["type"] == "float":
+                    v = float(v)
+                    if "min" in pinfo and v < pinfo["min"]:
+                        raise ValueError(f"Param '{pname}' for step '{func}' too small")
+                    if "max" in pinfo and v > pinfo["max"]:
+                        raise ValueError(f"Param '{pname}' for step '{func}' too large")
+        # 3. 结构合法性（可扩展：如输入输出类型检查、环路检测等）
+        # ...略
+    # 4. DAG合法性（可用拓扑排序检测环路）
+    # ...略
+    return True
+
+def make_nodeid(func, params):
+    key = f"{func}:{json.dumps(params, sort_keys=True)}"
+    return f"{func}_{hashlib.md5(key.encode()).hexdigest()[:8]}"
+
+def add_pipeline(pipeline_def):
+    # 检查必填字段
+    required_fields = ["shortname", "sample_rating"]
+    for field in required_fields:
+        if field not in pipeline_def or not pipeline_def[field]:
+            raise ValueError(f"Missing required field: {field}")
+
+    # 检查 sample_rating 范围
+    rating = float(pipeline_def["sample_rating"])
+    if not (1 <= rating <= 10):
+        raise ValueError("Sample rating must be between 1 and 10")
+
+    # 关键：校验 pipeline steps 合法性
+    steps = pipeline_def["steps"]
+    # 这里假设 steps 是 List[Dict]，如 [{"step_name": ..., "func": ..., "inputnames": ..., "params": {...}}, ...]
+    validate_pipeline(steps, STEP_REGISTRY)
+
+    # 其他校验...
+    conn = sqlite3.connect(DB_PATH)
+
+    """
+    将一个 pipeline 插入数据库（pipedef, pipe_nodes, pipe_edges）
+    
+    reference pipeline_def:
+    {
+        "shortname": "basic_clean_5s",
+        "description": "Filter → reref → epoch",
+        "source": "default",
+        "chanset": "10/20",
+        "fs": 250.0,
+        "hp": 1.0,
+        "lp": 40.0,
+        "epoch": 5.0,
+        "steps": [
+            ["flt", "filter", ["raw"], {"hp": 1.0, "lp": 40.0}],
+            ["reref", "reref", ["flt"], {}],
+            ["epoch", "epoch", ["reref"], {"duration": 5.0}]
+        ]
+    }
+    """
+    c = conn.cursor()
+
+    # Check if pipeline with same shortname already exists
+    c.execute("SELECT id FROM pipedef WHERE shortname = ?", (pipeline_def["shortname"],))
+    existing = c.fetchone()
+    if existing:
+        logger.info(f"Pipeline '{pipeline_def['shortname']}' already exists (id={existing[0]}) - skipping.")
+        conn.close()
+        return existing[0]
+
+    steps = pipeline_def["steps"]
+    node_map = {}  # step_name → nodeid
+
+    # create raw node（if not exists）
+    raw_nodeid = "raw"
+    c.execute("SELECT 1 FROM pipe_nodes WHERE nodeid = ?", (raw_nodeid,))
+    if not c.fetchone():
+        c.execute("INSERT INTO pipe_nodes (nodeid, func, params) VALUES (?, ?, ?)",
+                  (raw_nodeid, "raw", json.dumps({})))
+
+    node_map["raw"] = raw_nodeid
+
+    # insert nodes
+    for step_name, func, inputnames, params in steps:
+        nodeid = make_nodeid(func, params)
+        node_map[step_name] = nodeid
+
+        # check whether node exist
+        c.execute("SELECT 1 FROM pipe_nodes WHERE nodeid = ?", (nodeid,))
+        if not c.fetchone():
+            c.execute("INSERT INTO pipe_nodes (nodeid, func, params) VALUES (?, ?, ?)",
+                      (nodeid, func, json.dumps(params, sort_keys=True)))
+
+    # insert pipeline definition（pipedef）
+    output_node = node_map[steps[-1][0]]
+    c.execute("""
+        INSERT INTO pipedef (shortname, description, source, chanset, fs, hp, lp, epoch, steps, output_node)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        pipeline_def["shortname"], pipeline_def["description"], pipeline_def["source"],
+        pipeline_def["chanset"], pipeline_def["fs"], pipeline_def["hp"],
+        pipeline_def["lp"], pipeline_def["epoch"], json.dumps(steps), output_node
+    ))
+    pipedef_id = c.lastrowid
+
+    # insert edges
+    for step_name, func, inputnames, params in steps:
+        to_node = node_map[step_name]
+        for inputname in inputnames:
+            from_node = node_map[inputname]
+            c.execute("""
+                INSERT INTO pipe_edges (pipedef_id, from_node, to_node)
+                VALUES (?, ?, ?)
+            """, (pipedef_id, from_node, to_node))
+
+    conn.commit()
+    conn.close()
+    logger.info(f"Pipeline '{pipeline_def['shortname']}' inserted (id={pipedef_id}).")
+    return pipedef_id
+
+def validate_pipeline(pipeline_steps, step_registry):
+    # pipeline_steps: List[Dict]，每个dict包含step_name, func, inputnames, params
+    visited = set()
+    for step in pipeline_steps:
+        func = step["func"]
+        params = step["params"]
+        # 1. 检查func是否在注册表
+        if func not in step_registry:
+            raise ValueError(f"Unknown step: {func}")
+        # 2. 检查参数
+        for pname, pinfo in step_registry[func]["params"].items():
+            if pinfo.get("required") and pname not in params:
+                raise ValueError(f"Missing required param '{pname}' for step '{func}'")
+            if pname in params:
+                v = params[pname]
+                if pinfo["type"] == "float":
+                    v = float(v)
+                    if "min" in pinfo and v < pinfo["min"]:
+                        raise ValueError(f"Param '{pname}' for step '{func}' too small")
+                    if "max" in pinfo and v > pinfo["max"]:
+                        raise ValueError(f"Param '{pname}' for step '{func}' too large")
+        # 3. 结构合法性（可扩展：如输入输出类型检查、环路检测等）
+        # ...略
+    # 4. DAG合法性（可用拓扑排序检测环路）
+    # ...略
+    return True
+
+if __name__ == "__main__":
+
+    pipeline = {
+        "shortname": "basic_clean_5s",
+        "description": "Filter → reref → epoch",
+        "source": "TUH_demo",
+        "chanset": "10/20",
+        "fs": 250.0,
+        "hp": 1.0,
+        "lp": 40.0,
+        "epoch": 5.0,
+        "steps": [
+            ["flt", "filter", ["raw"], {"hp": 1.0, "lp": 40.0}],
+            ["reref", "reref", ["flt"], {}],
+            ["epoch", "epoch", ["reref"], {"duration": 5.0}]
+        ]
+    }
+
+    add_pipeline(pipeline)

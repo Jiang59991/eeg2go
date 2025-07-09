@@ -1,0 +1,1898 @@
+[2025-06-29 13:40:55] [INFO] [eeg2go] [load_recording] Recording 1: 85441.0s, 30 channels, 200.0 Hz
+[2025-06-29 13:40:55] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1955.6 MB
+[2025-06-29 13:40:55] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 13:42:54] [INFO] [eeg2go] Saved 39 feature values for recording 1 (successful: 39, failed: 0)
+[2025-06-29 13:42:57] [INFO] [eeg2go] [load_recording] Recording 2: 126589.0s, 30 channels, 200.0 Hz
+[2025-06-29 13:42:57] [INFO] [eeg2go] [load_recording] Estimated memory usage: 2897.4 MB
+[2025-06-29 13:42:57] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 13:47:27] [INFO] [eeg2go] Saved 39 feature values for recording 2 (successful: 39, failed: 0)
+[2025-06-29 13:47:28] [INFO] [eeg2go] [load_recording] Recording 3: 66541.0s, 30 channels, 200.0 Hz
+[2025-06-29 13:47:28] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1523.0 MB
+[2025-06-29 13:47:28] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 13:48:16] [INFO] [eeg2go] Saved 39 feature values for recording 3 (successful: 39, failed: 0)
+[2025-06-29 13:48:17] [INFO] [eeg2go] [load_recording] Recording 4: 88733.0s, 30 channels, 200.0 Hz
+[2025-06-29 13:48:17] [INFO] [eeg2go] [load_recording] Estimated memory usage: 2030.9 MB
+[2025-06-29 13:48:17] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 13:50:26] [INFO] [eeg2go] Saved 39 feature values for recording 4 (successful: 39, failed: 0)
+[2025-06-29 13:50:27] [INFO] [eeg2go] [load_recording] Recording 5: 70119.0s, 30 channels, 200.0 Hz
+[2025-06-29 13:50:27] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1604.9 MB
+[2025-06-29 13:50:27] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 13:51:27] [INFO] [eeg2go] Saved 39 feature values for recording 5 (successful: 39, failed: 0)
+[2025-06-29 13:51:28] [INFO] [eeg2go] [load_recording] Recording 6: 6742.0s, 30 channels, 200.0 Hz
+[2025-06-29 13:51:28] [INFO] [eeg2go] [load_recording] Estimated memory usage: 154.3 MB
+[2025-06-29 13:51:33] [INFO] [eeg2go] Saved 39 feature values for recording 6 (successful: 39, failed: 0)
+[2025-06-29 13:51:33] [INFO] [eeg2go] [load_recording] Recording 7: 3146.0s, 30 channels, 200.0 Hz
+[2025-06-29 13:51:33] [INFO] [eeg2go] [load_recording] Estimated memory usage: 72.0 MB
+[2025-06-29 13:51:35] [INFO] [eeg2go] Saved 39 feature values for recording 7 (successful: 39, failed: 0)
+[2025-06-29 13:51:35] [INFO] [eeg2go] [load_recording] Recording 8: 53383.0s, 30 channels, 200.0 Hz
+[2025-06-29 13:51:35] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1221.8 MB
+[2025-06-29 13:51:35] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 13:52:08] [INFO] [eeg2go] Saved 39 feature values for recording 8 (successful: 39, failed: 0)
+[2025-06-29 13:52:08] [INFO] [eeg2go] [load_recording] Recording 9: 84052.0s, 30 channels, 200.0 Hz
+[2025-06-29 13:52:08] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1923.8 MB
+[2025-06-29 13:52:08] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 13:53:09] [INFO] [eeg2go] Saved 39 feature values for recording 9 (successful: 39, failed: 0)
+[2025-06-29 13:53:10] [INFO] [eeg2go] [load_recording] Recording 10: 5558.0s, 30 channels, 200.0 Hz
+[2025-06-29 13:53:10] [INFO] [eeg2go] [load_recording] Estimated memory usage: 127.2 MB
+[2025-06-29 13:53:13] [INFO] [eeg2go] Saved 39 feature values for recording 10 (successful: 39, failed: 0)
+[2025-06-29 13:53:13] [INFO] [eeg2go] [load_recording] Recording 11: 4130.0s, 50 channels, 512.0 Hz
+[2025-06-29 13:53:13] [INFO] [eeg2go] [load_recording] Estimated memory usage: 403.3 MB
+[2025-06-29 13:53:20] [INFO] [eeg2go] Saved 39 feature values for recording 11 (successful: 39, failed: 0)
+[2025-06-29 13:53:20] [INFO] [eeg2go] [load_recording] Recording 12: 15209.0s, 50 channels, 512.0 Hz
+[2025-06-29 13:53:20] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1485.3 MB
+[2025-06-29 13:53:20] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 13:53:50] [INFO] [eeg2go] Saved 39 feature values for recording 12 (successful: 39, failed: 0)
+[2025-06-29 13:53:51] [INFO] [eeg2go] [load_recording] Recording 13: 6476.0s, 50 channels, 256.0 Hz
+[2025-06-29 13:53:51] [INFO] [eeg2go] [load_recording] Estimated memory usage: 316.2 MB
+[2025-06-29 13:53:57] [INFO] [eeg2go] Saved 39 feature values for recording 13 (successful: 39, failed: 0)
+[2025-06-29 13:53:57] [INFO] [eeg2go] [load_recording] Recording 14: 3853.0s, 30 channels, 200.0 Hz
+[2025-06-29 13:53:57] [INFO] [eeg2go] [load_recording] Estimated memory usage: 88.2 MB
+[2025-06-29 13:54:00] [INFO] [eeg2go] Saved 39 feature values for recording 14 (successful: 39, failed: 0)
+[2025-06-29 13:54:00] [INFO] [eeg2go] [load_recording] Recording 15: 3862.0s, 30 channels, 200.0 Hz
+[2025-06-29 13:54:00] [INFO] [eeg2go] [load_recording] Estimated memory usage: 88.4 MB
+[2025-06-29 13:54:02] [INFO] [eeg2go] Saved 39 feature values for recording 15 (successful: 39, failed: 0)
+[2025-06-29 13:54:02] [INFO] [eeg2go] [load_recording] Recording 16: 2376.0s, 30 channels, 200.0 Hz
+[2025-06-29 13:54:02] [INFO] [eeg2go] [load_recording] Estimated memory usage: 54.4 MB
+[2025-06-29 13:54:04] [INFO] [eeg2go] Saved 39 feature values for recording 16 (successful: 39, failed: 0)
+[2025-06-29 13:54:04] [INFO] [eeg2go] [load_recording] Recording 17: 12908.0s, 30 channels, 200.0 Hz
+[2025-06-29 13:54:04] [INFO] [eeg2go] [load_recording] Estimated memory usage: 295.4 MB
+[2025-06-29 13:54:11] [INFO] [eeg2go] Saved 39 feature values for recording 17 (successful: 39, failed: 0)
+[2025-06-29 13:54:11] [INFO] [eeg2go] [load_recording] Recording 18: 1491.0s, 30 channels, 200.0 Hz
+[2025-06-29 13:54:11] [INFO] [eeg2go] [load_recording] Estimated memory usage: 34.1 MB
+[2025-06-29 13:54:12] [INFO] [eeg2go] Saved 39 feature values for recording 18 (successful: 39, failed: 0)
+[2025-06-29 13:54:12] [INFO] [eeg2go] [load_recording] Recording 19: 2673.0s, 30 channels, 200.0 Hz
+[2025-06-29 13:54:12] [INFO] [eeg2go] [load_recording] Estimated memory usage: 61.2 MB
+[2025-06-29 13:54:14] [INFO] [eeg2go] Saved 39 feature values for recording 19 (successful: 39, failed: 0)
+[2025-06-29 13:54:14] [INFO] [eeg2go] [load_recording] Recording 20: 1711.0s, 30 channels, 200.0 Hz
+[2025-06-29 13:54:14] [INFO] [eeg2go] [load_recording] Estimated memory usage: 39.2 MB
+[2025-06-29 13:54:16] [INFO] [eeg2go] Saved 39 feature values for recording 20 (successful: 39, failed: 0)
+[2025-06-29 13:54:16] [INFO] [eeg2go] [load_recording] Recording 21: 46236.0s, 30 channels, 200.0 Hz
+[2025-06-29 13:54:16] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1058.3 MB
+[2025-06-29 13:54:16] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 13:54:43] [INFO] [eeg2go] Saved 39 feature values for recording 21 (successful: 39, failed: 0)
+[2025-06-29 13:54:44] [INFO] [eeg2go] [load_recording] Recording 22: 2446.0s, 30 channels, 200.0 Hz
+[2025-06-29 13:54:44] [INFO] [eeg2go] [load_recording] Estimated memory usage: 56.0 MB
+[2025-06-29 13:54:46] [INFO] [eeg2go] Saved 39 feature values for recording 22 (successful: 39, failed: 0)
+[2025-06-29 13:54:46] [INFO] [eeg2go] [load_recording] Recording 23: 3990.0s, 30 channels, 200.0 Hz
+[2025-06-29 13:54:46] [INFO] [eeg2go] [load_recording] Estimated memory usage: 91.3 MB
+[2025-06-29 13:54:48] [INFO] [eeg2go] Saved 39 feature values for recording 23 (successful: 39, failed: 0)
+[2025-06-29 13:54:48] [INFO] [eeg2go] [load_recording] Recording 24: 3799.0s, 30 channels, 200.0 Hz
+[2025-06-29 13:54:48] [INFO] [eeg2go] [load_recording] Estimated memory usage: 87.0 MB
+[2025-06-29 13:54:50] [INFO] [eeg2go] Saved 39 feature values for recording 24 (successful: 39, failed: 0)
+[2025-06-29 13:54:50] [INFO] [eeg2go] [load_recording] Recording 25: 3285.0s, 30 channels, 200.0 Hz
+[2025-06-29 13:54:50] [INFO] [eeg2go] [load_recording] Estimated memory usage: 75.2 MB
+[2025-06-29 13:54:52] [INFO] [eeg2go] Saved 39 feature values for recording 25 (successful: 39, failed: 0)
+[2025-06-29 13:54:52] [INFO] [eeg2go] [load_recording] Recording 26: 4520.0s, 30 channels, 200.0 Hz
+[2025-06-29 13:54:52] [INFO] [eeg2go] [load_recording] Estimated memory usage: 103.5 MB
+[2025-06-29 13:54:55] [INFO] [eeg2go] Saved 39 feature values for recording 26 (successful: 39, failed: 0)
+[2025-06-29 13:54:55] [INFO] [eeg2go] [load_recording] Recording 27: 4069.0s, 30 channels, 200.0 Hz
+[2025-06-29 13:54:55] [INFO] [eeg2go] [load_recording] Estimated memory usage: 93.1 MB
+[2025-06-29 13:54:57] [INFO] [eeg2go] Saved 39 feature values for recording 27 (successful: 39, failed: 0)
+[2025-06-29 13:54:57] [INFO] [eeg2go] [load_recording] Recording 28: 5989.0s, 30 channels, 200.0 Hz
+[2025-06-29 13:54:57] [INFO] [eeg2go] [load_recording] Estimated memory usage: 137.1 MB
+[2025-06-29 13:55:00] [INFO] [eeg2go] Saved 39 feature values for recording 28 (successful: 39, failed: 0)
+[2025-06-29 13:55:00] [INFO] [eeg2go] [load_recording] Recording 29: 80967.0s, 22 channels, 200.0 Hz
+[2025-06-29 13:55:00] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1359.0 MB
+[2025-06-29 13:55:00] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 13:55:40] [INFO] [eeg2go] Saved 39 feature values for recording 29 (successful: 39, failed: 0)
+[2025-06-29 13:55:41] [INFO] [eeg2go] [load_recording] Recording 30: 29133.0s, 22 channels, 200.0 Hz
+[2025-06-29 13:55:41] [INFO] [eeg2go] [load_recording] Estimated memory usage: 489.0 MB
+[2025-06-29 13:55:52] [INFO] [eeg2go] Saved 39 feature values for recording 30 (successful: 39, failed: 0)
+[2025-06-29 13:55:53] [INFO] [eeg2go] [load_recording] Recording 31: 2699.0s, 22 channels, 200.0 Hz
+[2025-06-29 13:55:53] [INFO] [eeg2go] [load_recording] Estimated memory usage: 45.3 MB
+[2025-06-29 13:55:54] [INFO] [eeg2go] Saved 39 feature values for recording 31 (successful: 39, failed: 0)
+[2025-06-29 13:55:54] [INFO] [eeg2go] [load_recording] Recording 32: 55432.0s, 22 channels, 200.0 Hz
+[2025-06-29 13:55:54] [INFO] [eeg2go] [load_recording] Estimated memory usage: 930.4 MB
+[2025-06-29 13:55:54] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 13:56:20] [INFO] [eeg2go] Saved 39 feature values for recording 32 (successful: 39, failed: 0)
+[2025-06-29 13:56:20] [INFO] [eeg2go] [load_recording] Recording 33: 79977.0s, 22 channels, 200.0 Hz
+[2025-06-29 13:56:20] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1342.4 MB
+[2025-06-29 13:56:20] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 13:57:02] [INFO] [eeg2go] Saved 39 feature values for recording 33 (successful: 39, failed: 0)
+[2025-06-29 13:57:03] [INFO] [eeg2go] [load_recording] Recording 34: 97725.0s, 22 channels, 200.0 Hz
+[2025-06-29 13:57:03] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1640.3 MB
+[2025-06-29 13:57:03] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 13:58:01] [INFO] [eeg2go] Saved 39 feature values for recording 34 (successful: 39, failed: 0)
+[2025-06-29 13:58:02] [INFO] [eeg2go] [load_recording] Recording 35: 2321.0s, 30 channels, 200.0 Hz
+[2025-06-29 13:58:02] [INFO] [eeg2go] [load_recording] Estimated memory usage: 53.1 MB
+[2025-06-29 13:58:04] [INFO] [eeg2go] Saved 39 feature values for recording 35 (successful: 39, failed: 0)
+[2025-06-29 13:58:04] [INFO] [eeg2go] [load_recording] Recording 36: 100225.0s, 30 channels, 200.0 Hz
+[2025-06-29 13:58:04] [INFO] [eeg2go] [load_recording] Estimated memory usage: 2294.0 MB
+[2025-06-29 13:58:04] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:01:22] [INFO] [eeg2go] Saved 39 feature values for recording 36 (successful: 39, failed: 0)
+[2025-06-29 14:01:23] [INFO] [eeg2go] [load_recording] Recording 37: 2367.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:01:23] [INFO] [eeg2go] [load_recording] Estimated memory usage: 54.2 MB
+[2025-06-29 14:01:25] [INFO] [eeg2go] Saved 39 feature values for recording 37 (successful: 39, failed: 0)
+[2025-06-29 14:01:25] [INFO] [eeg2go] [load_recording] Recording 38: 61375.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:01:25] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1404.8 MB
+[2025-06-29 14:01:25] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:02:07] [INFO] [eeg2go] Saved 39 feature values for recording 38 (successful: 39, failed: 0)
+[2025-06-29 14:02:08] [INFO] [eeg2go] [load_recording] Recording 39: 84232.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:02:08] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1927.9 MB
+[2025-06-29 14:02:08] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:03:11] [INFO] [eeg2go] Saved 39 feature values for recording 39 (successful: 39, failed: 0)
+[2025-06-29 14:03:12] [INFO] [eeg2go] [load_recording] Recording 40: 7971.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:03:12] [INFO] [eeg2go] [load_recording] Estimated memory usage: 182.4 MB
+[2025-06-29 14:03:17] [INFO] [eeg2go] Saved 39 feature values for recording 40 (successful: 39, failed: 0)
+[2025-06-29 14:03:18] [INFO] [eeg2go] [load_recording] Recording 41: 1445.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:03:18] [INFO] [eeg2go] [load_recording] Estimated memory usage: 33.1 MB
+[2025-06-29 14:03:19] [INFO] [eeg2go] Saved 39 feature values for recording 41 (successful: 39, failed: 0)
+[2025-06-29 14:03:19] [INFO] [eeg2go] [load_recording] Recording 42: 50870.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:03:19] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1164.3 MB
+[2025-06-29 14:03:19] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:03:49] [INFO] [eeg2go] Saved 39 feature values for recording 42 (successful: 39, failed: 0)
+[2025-06-29 14:03:50] [INFO] [eeg2go] [load_recording] Recording 43: 483.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:03:50] [INFO] [eeg2go] [load_recording] Estimated memory usage: 11.1 MB
+[2025-06-29 14:03:51] [INFO] [eeg2go] Saved 39 feature values for recording 43 (successful: 39, failed: 0)
+[2025-06-29 14:03:51] [INFO] [eeg2go] [load_recording] Recording 44: 26801.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:03:51] [INFO] [eeg2go] [load_recording] Estimated memory usage: 613.4 MB
+[2025-06-29 14:03:51] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:04:05] [INFO] [eeg2go] Saved 39 feature values for recording 44 (successful: 39, failed: 0)
+[2025-06-29 14:04:05] [INFO] [eeg2go] [load_recording] Recording 45: 2957.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:04:05] [INFO] [eeg2go] [load_recording] Estimated memory usage: 67.7 MB
+[2025-06-29 14:04:07] [INFO] [eeg2go] Saved 39 feature values for recording 45 (successful: 39, failed: 0)
+[2025-06-29 14:04:07] [INFO] [eeg2go] [load_recording] Recording 46: 6230.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:04:07] [INFO] [eeg2go] [load_recording] Estimated memory usage: 142.6 MB
+[2025-06-29 14:04:10] [INFO] [eeg2go] Saved 39 feature values for recording 46 (successful: 39, failed: 0)
+[2025-06-29 14:04:10] [INFO] [eeg2go] [load_recording] Recording 47: 2821.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:04:10] [INFO] [eeg2go] [load_recording] Estimated memory usage: 64.6 MB
+[2025-06-29 14:04:12] [INFO] [eeg2go] Saved 39 feature values for recording 47 (successful: 39, failed: 0)
+[2025-06-29 14:04:12] [INFO] [eeg2go] [load_recording] Recording 48: 3999.0s, 23 channels, 200.0 Hz
+[2025-06-29 14:04:12] [INFO] [eeg2go] [load_recording] Estimated memory usage: 70.2 MB
+[2025-06-29 14:04:14] [INFO] [eeg2go] Saved 39 feature values for recording 48 (successful: 39, failed: 0)
+[2025-06-29 14:04:14] [INFO] [eeg2go] [load_recording] Recording 49: 2947.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:04:14] [INFO] [eeg2go] [load_recording] Estimated memory usage: 67.5 MB
+[2025-06-29 14:04:16] [INFO] [eeg2go] Saved 39 feature values for recording 49 (successful: 39, failed: 0)
+[2025-06-29 14:04:16] [INFO] [eeg2go] [load_recording] Recording 50: 15041.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:04:16] [INFO] [eeg2go] [load_recording] Estimated memory usage: 344.3 MB
+[2025-06-29 14:04:24] [INFO] [eeg2go] Saved 39 feature values for recording 50 (successful: 39, failed: 0)
+[2025-06-29 14:04:24] [INFO] [eeg2go] [load_recording] Recording 51: 81090.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:04:24] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1856.0 MB
+[2025-06-29 14:04:24] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:06:53] [INFO] [eeg2go] Saved 39 feature values for recording 51 (successful: 39, failed: 0)
+[2025-06-29 14:06:54] [INFO] [eeg2go] [load_recording] Recording 52: 21066.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:06:54] [INFO] [eeg2go] [load_recording] Estimated memory usage: 482.2 MB
+[2025-06-29 14:07:05] [INFO] [eeg2go] Saved 39 feature values for recording 52 (successful: 39, failed: 0)
+[2025-06-29 14:07:06] [INFO] [eeg2go] [load_recording] Recording 53: 3761.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:07:06] [INFO] [eeg2go] [load_recording] Estimated memory usage: 86.1 MB
+[2025-06-29 14:07:08] [INFO] [eeg2go] Saved 39 feature values for recording 53 (successful: 39, failed: 0)
+[2025-06-29 14:07:08] [INFO] [eeg2go] [load_recording] Recording 54: 67705.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:07:08] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1549.6 MB
+[2025-06-29 14:07:08] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:07:55] [INFO] [eeg2go] Saved 39 feature values for recording 54 (successful: 39, failed: 0)
+[2025-06-29 14:07:55] [INFO] [eeg2go] [load_recording] Recording 55: 8450.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:07:55] [INFO] [eeg2go] [load_recording] Estimated memory usage: 193.4 MB
+[2025-06-29 14:08:00] [INFO] [eeg2go] Saved 39 feature values for recording 55 (successful: 39, failed: 0)
+[2025-06-29 14:08:01] [INFO] [eeg2go] [load_recording] Recording 56: 3269.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:08:01] [INFO] [eeg2go] [load_recording] Estimated memory usage: 74.8 MB
+[2025-06-29 14:08:03] [INFO] [eeg2go] Saved 39 feature values for recording 56 (successful: 39, failed: 0)
+[2025-06-29 14:08:03] [INFO] [eeg2go] [load_recording] Recording 57: 6937.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:08:03] [INFO] [eeg2go] [load_recording] Estimated memory usage: 158.8 MB
+[2025-06-29 14:08:07] [INFO] [eeg2go] Saved 39 feature values for recording 57 (successful: 39, failed: 0)
+[2025-06-29 14:08:07] [INFO] [eeg2go] [load_recording] Recording 58: 2775.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:08:07] [INFO] [eeg2go] [load_recording] Estimated memory usage: 63.5 MB
+[2025-06-29 14:08:09] [INFO] [eeg2go] Saved 39 feature values for recording 58 (successful: 39, failed: 0)
+[2025-06-29 14:08:09] [INFO] [eeg2go] [load_recording] Recording 59: 48412.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:08:09] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1108.1 MB
+[2025-06-29 14:08:09] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:08:37] [INFO] [eeg2go] Saved 39 feature values for recording 59 (successful: 39, failed: 0)
+[2025-06-29 14:08:37] [INFO] [eeg2go] [load_recording] Recording 60: 17657.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:08:37] [INFO] [eeg2go] [load_recording] Estimated memory usage: 404.1 MB
+[2025-06-29 14:08:47] [INFO] [eeg2go] Saved 39 feature values for recording 60 (successful: 39, failed: 0)
+[2025-06-29 14:08:47] [INFO] [eeg2go] [load_recording] Recording 61: 2464.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:08:47] [INFO] [eeg2go] [load_recording] Estimated memory usage: 56.4 MB
+[2025-06-29 14:08:49] [INFO] [eeg2go] Saved 39 feature values for recording 61 (successful: 39, failed: 0)
+[2025-06-29 14:08:49] [INFO] [eeg2go] [load_recording] Recording 62: 5276.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:08:49] [INFO] [eeg2go] [load_recording] Estimated memory usage: 120.8 MB
+[2025-06-29 14:08:51] [INFO] [eeg2go] Saved 39 feature values for recording 62 (successful: 39, failed: 0)
+[2025-06-29 14:08:52] [INFO] [eeg2go] [load_recording] Recording 63: 1345.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:08:52] [INFO] [eeg2go] [load_recording] Estimated memory usage: 30.8 MB
+[2025-06-29 14:08:53] [INFO] [eeg2go] Saved 39 feature values for recording 63 (successful: 39, failed: 0)
+[2025-06-29 14:08:53] [INFO] [eeg2go] [load_recording] Recording 64: 2879.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:08:53] [INFO] [eeg2go] [load_recording] Estimated memory usage: 65.9 MB
+[2025-06-29 14:08:55] [INFO] [eeg2go] Saved 39 feature values for recording 64 (successful: 39, failed: 0)
+[2025-06-29 14:08:55] [INFO] [eeg2go] [load_recording] Recording 65: 6355.0s, 50 channels, 512.0 Hz
+[2025-06-29 14:08:55] [INFO] [eeg2go] [load_recording] Estimated memory usage: 620.6 MB
+[2025-06-29 14:08:55] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:09:05] [INFO] [eeg2go] Saved 39 feature values for recording 65 (successful: 39, failed: 0)
+[2025-06-29 14:09:05] [INFO] [eeg2go] [load_recording] Recording 66: 3426.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:09:05] [INFO] [eeg2go] [load_recording] Estimated memory usage: 78.4 MB
+[2025-06-29 14:09:07] [INFO] [eeg2go] Saved 39 feature values for recording 66 (successful: 39, failed: 0)
+[2025-06-29 14:09:07] [INFO] [eeg2go] [load_recording] Recording 67: 40315.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:09:07] [INFO] [eeg2go] [load_recording] Estimated memory usage: 922.7 MB
+[2025-06-29 14:09:07] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:09:29] [INFO] [eeg2go] Saved 39 feature values for recording 67 (successful: 39, failed: 0)
+[2025-06-29 14:09:30] [INFO] [eeg2go] [load_recording] Recording 68: 4139.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:09:30] [INFO] [eeg2go] [load_recording] Estimated memory usage: 94.7 MB
+[2025-06-29 14:09:32] [INFO] [eeg2go] Saved 39 feature values for recording 68 (successful: 39, failed: 0)
+[2025-06-29 14:09:32] [INFO] [eeg2go] [load_recording] Recording 69: 2713.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:09:32] [INFO] [eeg2go] [load_recording] Estimated memory usage: 62.1 MB
+[2025-06-29 14:09:34] [INFO] [eeg2go] Saved 39 feature values for recording 69 (successful: 39, failed: 0)
+[2025-06-29 14:09:34] [INFO] [eeg2go] [load_recording] Recording 70: 5595.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:09:34] [INFO] [eeg2go] [load_recording] Estimated memory usage: 128.1 MB
+[2025-06-29 14:09:37] [INFO] [eeg2go] Saved 39 feature values for recording 70 (successful: 39, failed: 0)
+[2025-06-29 14:09:37] [INFO] [eeg2go] [load_recording] Recording 71: 4751.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:09:37] [INFO] [eeg2go] [load_recording] Estimated memory usage: 108.7 MB
+[2025-06-29 14:09:40] [INFO] [eeg2go] Saved 39 feature values for recording 71 (successful: 39, failed: 0)
+[2025-06-29 14:09:40] [INFO] [eeg2go] [load_recording] Recording 72: 3969.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:09:40] [INFO] [eeg2go] [load_recording] Estimated memory usage: 90.8 MB
+[2025-06-29 14:09:42] [INFO] [eeg2go] Saved 39 feature values for recording 72 (successful: 39, failed: 0)
+[2025-06-29 14:09:42] [INFO] [eeg2go] [load_recording] Recording 73: 4668.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:09:42] [INFO] [eeg2go] [load_recording] Estimated memory usage: 106.8 MB
+[2025-06-29 14:09:45] [INFO] [eeg2go] Saved 39 feature values for recording 73 (successful: 39, failed: 0)
+[2025-06-29 14:09:45] [INFO] [eeg2go] [load_recording] Recording 74: 5880.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:09:45] [INFO] [eeg2go] [load_recording] Estimated memory usage: 134.6 MB
+[2025-06-29 14:09:48] [INFO] [eeg2go] Saved 39 feature values for recording 74 (successful: 39, failed: 0)
+[2025-06-29 14:09:48] [INFO] [eeg2go] [load_recording] Recording 75: 4323.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:09:48] [INFO] [eeg2go] [load_recording] Estimated memory usage: 98.9 MB
+[2025-06-29 14:09:50] [INFO] [eeg2go] Saved 39 feature values for recording 75 (successful: 39, failed: 0)
+[2025-06-29 14:09:50] [INFO] [eeg2go] [load_recording] Recording 76: 5466.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:09:50] [INFO] [eeg2go] [load_recording] Estimated memory usage: 125.1 MB
+[2025-06-29 14:09:53] [INFO] [eeg2go] Saved 39 feature values for recording 76 (successful: 39, failed: 0)
+[2025-06-29 14:09:53] [INFO] [eeg2go] [load_recording] Recording 77: 5705.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:09:53] [INFO] [eeg2go] [load_recording] Estimated memory usage: 130.6 MB
+[2025-06-29 14:09:56] [INFO] [eeg2go] Saved 39 feature values for recording 77 (successful: 39, failed: 0)
+[2025-06-29 14:09:56] [INFO] [eeg2go] [load_recording] Recording 78: 6789.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:09:56] [INFO] [eeg2go] [load_recording] Estimated memory usage: 155.4 MB
+[2025-06-29 14:10:00] [INFO] [eeg2go] Saved 39 feature values for recording 78 (successful: 39, failed: 0)
+[2025-06-29 14:10:00] [INFO] [eeg2go] [load_recording] Recording 79: 3783.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:10:00] [INFO] [eeg2go] [load_recording] Estimated memory usage: 86.6 MB
+[2025-06-29 14:10:02] [INFO] [eeg2go] Saved 39 feature values for recording 79 (successful: 39, failed: 0)
+[2025-06-29 14:10:02] [INFO] [eeg2go] [load_recording] Recording 80: 98234.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:10:02] [INFO] [eeg2go] [load_recording] Estimated memory usage: 2248.4 MB
+[2025-06-29 14:10:02] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:13:32] [INFO] [eeg2go] Saved 39 feature values for recording 80 (successful: 39, failed: 0)
+[2025-06-29 14:13:33] [INFO] [eeg2go] [load_recording] Recording 81: 4853.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:13:33] [INFO] [eeg2go] [load_recording] Estimated memory usage: 111.1 MB
+[2025-06-29 14:13:35] [INFO] [eeg2go] Saved 39 feature values for recording 81 (successful: 39, failed: 0)
+[2025-06-29 14:13:36] [INFO] [eeg2go] [load_recording] Recording 82: 3120.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:13:36] [INFO] [eeg2go] [load_recording] Estimated memory usage: 71.4 MB
+[2025-06-29 14:13:38] [INFO] [eeg2go] Saved 39 feature values for recording 82 (successful: 39, failed: 0)
+[2025-06-29 14:13:38] [INFO] [eeg2go] [load_recording] Recording 83: 3693.0s, 29 channels, 200.0 Hz
+[2025-06-29 14:13:38] [INFO] [eeg2go] [load_recording] Estimated memory usage: 81.7 MB
+[2025-06-29 14:13:40] [INFO] [eeg2go] Saved 39 feature values for recording 83 (successful: 39, failed: 0)
+[2025-06-29 14:13:40] [INFO] [eeg2go] [load_recording] Recording 84: 2615.0s, 29 channels, 200.0 Hz
+[2025-06-29 14:13:40] [INFO] [eeg2go] [load_recording] Estimated memory usage: 57.9 MB
+[2025-06-29 14:13:42] [INFO] [eeg2go] Saved 39 feature values for recording 84 (successful: 39, failed: 0)
+[2025-06-29 14:13:42] [INFO] [eeg2go] [load_recording] Recording 85: 4495.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:13:42] [INFO] [eeg2go] [load_recording] Estimated memory usage: 102.9 MB
+[2025-06-29 14:13:44] [INFO] [eeg2go] Saved 39 feature values for recording 85 (successful: 39, failed: 0)
+[2025-06-29 14:13:44] [INFO] [eeg2go] [load_recording] Recording 86: 2772.0s, 29 channels, 200.0 Hz
+[2025-06-29 14:13:44] [INFO] [eeg2go] [load_recording] Estimated memory usage: 61.3 MB
+[2025-06-29 14:13:46] [INFO] [eeg2go] Saved 39 feature values for recording 86 (successful: 39, failed: 0)
+[2025-06-29 14:13:46] [INFO] [eeg2go] [load_recording] Recording 87: 4400.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:13:46] [INFO] [eeg2go] [load_recording] Estimated memory usage: 100.7 MB
+[2025-06-29 14:13:48] [INFO] [eeg2go] Saved 39 feature values for recording 87 (successful: 39, failed: 0)
+[2025-06-29 14:13:48] [INFO] [eeg2go] [load_recording] Recording 88: 87237.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:13:48] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1996.7 MB
+[2025-06-29 14:13:48] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:15:56] [INFO] [eeg2go] Saved 39 feature values for recording 88 (successful: 39, failed: 0)
+[2025-06-29 14:15:57] [INFO] [eeg2go] [load_recording] Recording 89: 86673.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:15:57] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1983.8 MB
+[2025-06-29 14:15:57] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:17:41] [INFO] [eeg2go] Saved 39 feature values for recording 89 (successful: 39, failed: 0)
+[2025-06-29 14:17:42] [INFO] [eeg2go] [load_recording] Recording 90: 86287.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:17:42] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1975.0 MB
+[2025-06-29 14:17:42] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:19:19] [INFO] [eeg2go] Saved 39 feature values for recording 90 (successful: 39, failed: 0)
+[2025-06-29 14:19:20] [INFO] [eeg2go] [load_recording] Recording 91: 95715.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:19:20] [INFO] [eeg2go] [load_recording] Estimated memory usage: 2190.7 MB
+[2025-06-29 14:19:20] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:21:59] [INFO] [eeg2go] Saved 39 feature values for recording 91 (successful: 39, failed: 0)
+[2025-06-29 14:22:00] [INFO] [eeg2go] [load_recording] Recording 92: 77573.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:22:00] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1775.5 MB
+[2025-06-29 14:22:00] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:22:59] [INFO] [eeg2go] Saved 39 feature values for recording 92 (successful: 39, failed: 0)
+[2025-06-29 14:23:00] [INFO] [eeg2go] [load_recording] Recording 93: 79561.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:23:00] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1821.0 MB
+[2025-06-29 14:23:00] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:24:00] [INFO] [eeg2go] Saved 39 feature values for recording 93 (successful: 39, failed: 0)
+[2025-06-29 14:24:01] [INFO] [eeg2go] [load_recording] Recording 94: 117798.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:24:01] [INFO] [eeg2go] [load_recording] Estimated memory usage: 2696.2 MB
+[2025-06-29 14:24:01] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:28:50] [INFO] [eeg2go] Saved 39 feature values for recording 94 (successful: 39, failed: 0)
+[2025-06-29 14:28:51] [INFO] [eeg2go] [load_recording] Recording 95: 3668.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:28:51] [INFO] [eeg2go] [load_recording] Estimated memory usage: 84.0 MB
+[2025-06-29 14:28:53] [INFO] [eeg2go] Saved 39 feature values for recording 95 (successful: 39, failed: 0)
+[2025-06-29 14:28:53] [INFO] [eeg2go] [load_recording] Recording 96: 168039.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:28:53] [INFO] [eeg2go] [load_recording] Estimated memory usage: 3846.1 MB
+[2025-06-29 14:28:53] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:37:31] [ERROR] [eeg2go] [ERROR] fxdef_id=12 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:31] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 124, in spectral_entropy
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:31] [ERROR] [eeg2go] [ERROR] fxdef_id=13 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:31] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 124, in spectral_entropy
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:31] [ERROR] [eeg2go] [ERROR] fxdef_id=14 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:31] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 124, in spectral_entropy
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:31] [ERROR] [eeg2go] [ERROR] fxdef_id=15 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:31] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 124, in spectral_entropy
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:32] [ERROR] [eeg2go] [ERROR] fxdef_id=16 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:32] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 124, in spectral_entropy
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:32] [ERROR] [eeg2go] [ERROR] fxdef_id=17 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:32] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:32] [ERROR] [eeg2go] [ERROR] fxdef_id=18 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:32] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:32] [ERROR] [eeg2go] [ERROR] fxdef_id=19 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:32] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:32] [ERROR] [eeg2go] [ERROR] fxdef_id=20 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:32] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:32] [ERROR] [eeg2go] [ERROR] fxdef_id=21 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:32] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:32] [ERROR] [eeg2go] [ERROR] fxdef_id=22 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:32] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 173, in alpha_peak_frequency
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:33] [ERROR] [eeg2go] [ERROR] fxdef_id=23 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:33] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 173, in alpha_peak_frequency
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:33] [ERROR] [eeg2go] [ERROR] fxdef_id=24 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:33] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 173, in alpha_peak_frequency
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:33] [ERROR] [eeg2go] [ERROR] fxdef_id=25 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:33] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 173, in alpha_peak_frequency
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:33] [ERROR] [eeg2go] [ERROR] fxdef_id=26 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:33] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 173, in alpha_peak_frequency
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:33] [ERROR] [eeg2go] [ERROR] fxdef_id=27 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:33] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 330, in alpha_asymmetry
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:33] [ERROR] [eeg2go] [ERROR] fxdef_id=28 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:33] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 219, in theta_alpha_ratio
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:34] [ERROR] [eeg2go] [ERROR] fxdef_id=29 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:34] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 219, in theta_alpha_ratio
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:34] [ERROR] [eeg2go] [ERROR] fxdef_id=30 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:34] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 219, in theta_alpha_ratio
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:34] [ERROR] [eeg2go] [ERROR] fxdef_id=31 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:34] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 266, in spectral_edge_frequency
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:34] [ERROR] [eeg2go] [ERROR] fxdef_id=32 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:34] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 266, in spectral_edge_frequency
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:34] [ERROR] [eeg2go] [ERROR] fxdef_id=33 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:34] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 266, in spectral_edge_frequency
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:34] [ERROR] [eeg2go] [ERROR] fxdef_id=34 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:34] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:34] [ERROR] [eeg2go] [ERROR] fxdef_id=35 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:34] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:35] [ERROR] [eeg2go] [ERROR] fxdef_id=36 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:35] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:35] [ERROR] [eeg2go] [ERROR] fxdef_id=37 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:35] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:35] [ERROR] [eeg2go] [ERROR] fxdef_id=38 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:35] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:35] [ERROR] [eeg2go] [ERROR] fxdef_id=39 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:35] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:35] [ERROR] [eeg2go] [ERROR] fxdef_id=40 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:35] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:35] [ERROR] [eeg2go] [ERROR] fxdef_id=41 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:35] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:35] [ERROR] [eeg2go] [ERROR] fxdef_id=42 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:35] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:36] [ERROR] [eeg2go] [ERROR] fxdef_id=43 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:36] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:36] [ERROR] [eeg2go] [ERROR] fxdef_id=44 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:36] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:36] [ERROR] [eeg2go] [ERROR] fxdef_id=45 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:36] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:36] [ERROR] [eeg2go] [ERROR] fxdef_id=46 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:36] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 73, in relative_power
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:36] [ERROR] [eeg2go] [ERROR] fxdef_id=47 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:36] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 73, in relative_power
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:36] [ERROR] [eeg2go] [ERROR] fxdef_id=48 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:36] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 73, in relative_power
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:36] [ERROR] [eeg2go] [ERROR] fxdef_id=49 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:36] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 73, in relative_power
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:37] [ERROR] [eeg2go] [ERROR] fxdef_id=50 recording_id=96: Feature generation failed: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+[2025-06-29 14:37:37] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 73, in relative_power
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.52 GiB for an array with shape (33607, 30, 1001) and data type float64
+
+[2025-06-29 14:37:37] [INFO] [eeg2go] Saved 39 feature values for recording 96 (successful: 0, failed: 39)
+[2025-06-29 14:37:38] [INFO] [eeg2go] [load_recording] Recording 97: 3524.0s, 29 channels, 200.0 Hz
+[2025-06-29 14:37:38] [INFO] [eeg2go] [load_recording] Estimated memory usage: 78.0 MB
+[2025-06-29 14:37:40] [INFO] [eeg2go] Saved 39 feature values for recording 97 (successful: 39, failed: 0)
+[2025-06-29 14:37:40] [INFO] [eeg2go] [load_recording] Recording 98: 102151.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:37:40] [INFO] [eeg2go] [load_recording] Estimated memory usage: 2338.1 MB
+[2025-06-29 14:37:40] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:41:18] [INFO] [eeg2go] Saved 39 feature values for recording 98 (successful: 39, failed: 0)
+[2025-06-29 14:41:19] [INFO] [eeg2go] [load_recording] Recording 99: 64708.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:41:19] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1481.0 MB
+[2025-06-29 14:41:19] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:42:06] [INFO] [eeg2go] Saved 39 feature values for recording 99 (successful: 39, failed: 0)
+[2025-06-29 14:42:07] [INFO] [eeg2go] [load_recording] Recording 100: 86270.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:42:07] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1974.6 MB
+[2025-06-29 14:42:07] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:44:04] [INFO] [eeg2go] Saved 39 feature values for recording 100 (successful: 39, failed: 0)
+[2025-06-29 14:44:05] [INFO] [eeg2go] [load_recording] Recording 101: 5770.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:44:05] [INFO] [eeg2go] [load_recording] Estimated memory usage: 132.1 MB
+[2025-06-29 14:44:08] [INFO] [eeg2go] Saved 39 feature values for recording 101 (successful: 39, failed: 0)
+[2025-06-29 14:44:08] [INFO] [eeg2go] [load_recording] Recording 102: 4429.0s, 29 channels, 200.0 Hz
+[2025-06-29 14:44:08] [INFO] [eeg2go] [load_recording] Estimated memory usage: 98.0 MB
+[2025-06-29 14:44:10] [INFO] [eeg2go] Saved 39 feature values for recording 102 (successful: 39, failed: 0)
+[2025-06-29 14:44:11] [INFO] [eeg2go] [load_recording] Recording 103: 7280.0s, 29 channels, 200.0 Hz
+[2025-06-29 14:44:11] [INFO] [eeg2go] [load_recording] Estimated memory usage: 161.1 MB
+[2025-06-29 14:44:15] [INFO] [eeg2go] Saved 39 feature values for recording 103 (successful: 39, failed: 0)
+[2025-06-29 14:44:15] [INFO] [eeg2go] [load_recording] Recording 104: 4331.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:44:15] [INFO] [eeg2go] [load_recording] Estimated memory usage: 99.1 MB
+[2025-06-29 14:44:17] [INFO] [eeg2go] Saved 39 feature values for recording 104 (successful: 39, failed: 0)
+[2025-06-29 14:44:17] [INFO] [eeg2go] [load_recording] Recording 105: 2964.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:44:17] [INFO] [eeg2go] [load_recording] Estimated memory usage: 67.8 MB
+[2025-06-29 14:44:19] [INFO] [eeg2go] Saved 39 feature values for recording 105 (successful: 39, failed: 0)
+[2025-06-29 14:44:19] [INFO] [eeg2go] [load_recording] Recording 106: 1527.0s, 29 channels, 200.0 Hz
+[2025-06-29 14:44:19] [INFO] [eeg2go] [load_recording] Estimated memory usage: 33.8 MB
+[2025-06-29 14:44:21] [INFO] [eeg2go] Saved 39 feature values for recording 106 (successful: 39, failed: 0)
+[2025-06-29 14:44:21] [INFO] [eeg2go] [load_recording] Recording 107: 36366.0s, 35 channels, 200.0 Hz
+[2025-06-29 14:44:21] [INFO] [eeg2go] [load_recording] Estimated memory usage: 971.1 MB
+[2025-06-29 14:44:21] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:44:44] [INFO] [eeg2go] Saved 39 feature values for recording 107 (successful: 39, failed: 0)
+[2025-06-29 14:44:45] [INFO] [eeg2go] [load_recording] Recording 108: 43206.0s, 22 channels, 200.0 Hz
+[2025-06-29 14:44:45] [INFO] [eeg2go] [load_recording] Estimated memory usage: 725.2 MB
+[2025-06-29 14:44:45] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:45:05] [INFO] [eeg2go] Saved 39 feature values for recording 108 (successful: 39, failed: 0)
+[2025-06-29 14:45:06] [INFO] [eeg2go] [load_recording] Recording 109: 64860.0s, 22 channels, 200.0 Hz
+[2025-06-29 14:45:06] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1088.7 MB
+[2025-06-29 14:45:06] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:45:37] [INFO] [eeg2go] Saved 39 feature values for recording 109 (successful: 39, failed: 0)
+[2025-06-29 14:45:38] [INFO] [eeg2go] [load_recording] Recording 110: 47485.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:45:38] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1086.8 MB
+[2025-06-29 14:45:38] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:46:06] [INFO] [eeg2go] Saved 39 feature values for recording 110 (successful: 39, failed: 0)
+[2025-06-29 14:46:07] [INFO] [eeg2go] [load_recording] Recording 111: 4217.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:46:07] [INFO] [eeg2go] [load_recording] Estimated memory usage: 96.5 MB
+[2025-06-29 14:46:09] [INFO] [eeg2go] Saved 39 feature values for recording 111 (successful: 39, failed: 0)
+[2025-06-29 14:46:09] [INFO] [eeg2go] [load_recording] Recording 112: 2753.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:46:09] [INFO] [eeg2go] [load_recording] Estimated memory usage: 63.0 MB
+[2025-06-29 14:46:11] [INFO] [eeg2go] Saved 39 feature values for recording 112 (successful: 39, failed: 0)
+[2025-06-29 14:46:11] [INFO] [eeg2go] [load_recording] Recording 113: 4050.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:46:11] [INFO] [eeg2go] [load_recording] Estimated memory usage: 92.7 MB
+[2025-06-29 14:46:14] [INFO] [eeg2go] Saved 39 feature values for recording 113 (successful: 39, failed: 0)
+[2025-06-29 14:46:14] [INFO] [eeg2go] [load_recording] Recording 114: 2403.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:46:14] [INFO] [eeg2go] [load_recording] Estimated memory usage: 55.0 MB
+[2025-06-29 14:46:15] [INFO] [eeg2go] Saved 39 feature values for recording 114 (successful: 39, failed: 0)
+[2025-06-29 14:46:15] [INFO] [eeg2go] [load_recording] Recording 115: 72052.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:46:15] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1649.1 MB
+[2025-06-29 14:46:15] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:47:03] [INFO] [eeg2go] Saved 39 feature values for recording 115 (successful: 39, failed: 0)
+[2025-06-29 14:47:03] [INFO] [eeg2go] [load_recording] Recording 116: 19289.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:47:03] [INFO] [eeg2go] [load_recording] Estimated memory usage: 441.5 MB
+[2025-06-29 14:47:13] [INFO] [eeg2go] Saved 39 feature values for recording 116 (successful: 39, failed: 0)
+[2025-06-29 14:47:14] [INFO] [eeg2go] [load_recording] Recording 117: 16816.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:47:14] [INFO] [eeg2go] [load_recording] Estimated memory usage: 384.9 MB
+[2025-06-29 14:47:23] [INFO] [eeg2go] Saved 39 feature values for recording 117 (successful: 39, failed: 0)
+[2025-06-29 14:47:23] [INFO] [eeg2go] [load_recording] Recording 118: 3242.0s, 30 channels, 200.0 Hz
+[2025-06-29 14:47:23] [INFO] [eeg2go] [load_recording] Estimated memory usage: 74.2 MB
+[2025-06-29 14:47:25] [INFO] [eeg2go] Saved 39 feature values for recording 118 (successful: 39, failed: 0)
+[2025-06-29 14:47:25] [INFO] [eeg2go] [load_recording] Recording 119: 15219.0s, 50 channels, 512.0 Hz
+[2025-06-29 14:47:25] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1486.2 MB
+[2025-06-29 14:47:25] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:48:14] [INFO] [eeg2go] Saved 39 feature values for recording 119 (successful: 39, failed: 0)
+[2025-06-29 14:48:14] [INFO] [eeg2go] [load_recording] Recording 120: 16026.0s, 50 channels, 512.0 Hz
+[2025-06-29 14:48:14] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1565.0 MB
+[2025-06-29 14:48:14] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:49:36] [INFO] [eeg2go] Saved 39 feature values for recording 120 (successful: 39, failed: 0)
+[2025-06-29 14:49:36] [INFO] [eeg2go] [load_recording] Recording 121: 24771.0s, 50 channels, 512.0 Hz
+[2025-06-29 14:49:36] [INFO] [eeg2go] [load_recording] Estimated memory usage: 2419.0 MB
+[2025-06-29 14:49:36] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:52:36] [INFO] [eeg2go] Saved 39 feature values for recording 121 (successful: 39, failed: 0)
+[2025-06-29 14:52:37] [INFO] [eeg2go] [load_recording] Recording 122: 2133.0s, 50 channels, 512.0 Hz
+[2025-06-29 14:52:37] [INFO] [eeg2go] [load_recording] Estimated memory usage: 208.3 MB
+[2025-06-29 14:52:41] [INFO] [eeg2go] Saved 39 feature values for recording 122 (successful: 39, failed: 0)
+[2025-06-29 14:52:41] [INFO] [eeg2go] [load_recording] Recording 123: 39970.0s, 50 channels, 512.0 Hz
+[2025-06-29 14:52:41] [INFO] [eeg2go] [load_recording] Estimated memory usage: 3903.3 MB
+[2025-06-29 14:52:41] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-06-29 14:58:05] [ERROR] [eeg2go] [ERROR] fxdef_id=12 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:05] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 124, in spectral_entropy
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:06] [ERROR] [eeg2go] [ERROR] fxdef_id=13 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:06] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 124, in spectral_entropy
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:06] [ERROR] [eeg2go] [ERROR] fxdef_id=14 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:06] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 124, in spectral_entropy
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:06] [ERROR] [eeg2go] [ERROR] fxdef_id=15 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:06] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 124, in spectral_entropy
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:06] [ERROR] [eeg2go] [ERROR] fxdef_id=16 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:06] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 124, in spectral_entropy
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:06] [ERROR] [eeg2go] [ERROR] fxdef_id=17 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:06] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:06] [ERROR] [eeg2go] [ERROR] fxdef_id=18 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:06] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:06] [ERROR] [eeg2go] [ERROR] fxdef_id=19 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:06] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:07] [ERROR] [eeg2go] [ERROR] fxdef_id=20 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:07] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:07] [ERROR] [eeg2go] [ERROR] fxdef_id=21 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:07] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:07] [ERROR] [eeg2go] [ERROR] fxdef_id=22 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:07] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 173, in alpha_peak_frequency
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:07] [ERROR] [eeg2go] [ERROR] fxdef_id=23 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:07] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 173, in alpha_peak_frequency
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:07] [ERROR] [eeg2go] [ERROR] fxdef_id=24 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:07] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 173, in alpha_peak_frequency
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:07] [ERROR] [eeg2go] [ERROR] fxdef_id=25 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:07] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 173, in alpha_peak_frequency
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:07] [ERROR] [eeg2go] [ERROR] fxdef_id=26 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:07] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 173, in alpha_peak_frequency
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:08] [ERROR] [eeg2go] [ERROR] fxdef_id=27 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:08] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 330, in alpha_asymmetry
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:08] [ERROR] [eeg2go] [ERROR] fxdef_id=28 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:08] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 219, in theta_alpha_ratio
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:08] [ERROR] [eeg2go] [ERROR] fxdef_id=29 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:08] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 219, in theta_alpha_ratio
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:08] [ERROR] [eeg2go] [ERROR] fxdef_id=30 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:08] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 219, in theta_alpha_ratio
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:08] [ERROR] [eeg2go] [ERROR] fxdef_id=31 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:08] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 266, in spectral_edge_frequency
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:08] [ERROR] [eeg2go] [ERROR] fxdef_id=32 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:08] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 266, in spectral_edge_frequency
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:08] [ERROR] [eeg2go] [ERROR] fxdef_id=33 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:08] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 266, in spectral_edge_frequency
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:08] [ERROR] [eeg2go] [ERROR] fxdef_id=34 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:08] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:09] [ERROR] [eeg2go] [ERROR] fxdef_id=35 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:09] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:09] [ERROR] [eeg2go] [ERROR] fxdef_id=36 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:09] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:09] [ERROR] [eeg2go] [ERROR] fxdef_id=37 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:09] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:09] [ERROR] [eeg2go] [ERROR] fxdef_id=38 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:09] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:09] [ERROR] [eeg2go] [ERROR] fxdef_id=39 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:09] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:09] [ERROR] [eeg2go] [ERROR] fxdef_id=40 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:09] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:09] [ERROR] [eeg2go] [ERROR] fxdef_id=41 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:09] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:10] [ERROR] [eeg2go] [ERROR] fxdef_id=42 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:10] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:10] [ERROR] [eeg2go] [ERROR] fxdef_id=43 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:10] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:10] [ERROR] [eeg2go] [ERROR] fxdef_id=44 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:10] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:10] [ERROR] [eeg2go] [ERROR] fxdef_id=45 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:10] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 24, in bandpower
+    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:10] [ERROR] [eeg2go] [ERROR] fxdef_id=46 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:10] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 73, in relative_power
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:10] [ERROR] [eeg2go] [ERROR] fxdef_id=47 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:10] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 73, in relative_power
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:10] [ERROR] [eeg2go] [ERROR] fxdef_id=48 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:10] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 73, in relative_power
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:11] [ERROR] [eeg2go] [ERROR] fxdef_id=49 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:11] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 73, in relative_power
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:11] [ERROR] [eeg2go] [ERROR] fxdef_id=50 recording_id=123: Feature generation failed: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+[2025-06-29 14:58:11] [ERROR] [eeg2go] [ERROR] Full traceback:
+Traceback (most recent call last):
+  File "D:\eeg2go\eeg2fx\featureset_fetcher.py", line 183, in run_feature_set
+    fx_output = fx_func(fx_input, chans=chans_for_func, **params)
+  File "D:\eeg2go\eeg2fx\feature\common.py", line 16, in wrapper
+    result = fn(*args, **kwargs)
+  File "D:\eeg2go\eeg2fx\feature\feature_freq.py", line 73, in relative_power
+    data = epochs.get_data()
+  File "<decorator-gen-240>", line 12, in get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1921, in get_data
+    return self._get_data(
+  File "<decorator-gen-239>", line 12, in _get_data
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1700, in _get_data
+    return self._data_sel_copy_scale(
+  File "D:\ProgramFiles\Anaconda\envs\eeg2go\lib\site-packages\mne\epochs.py", line 1849, in _data_sel_copy_scale
+    data = data.copy()
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.63 GiB for an array with shape (7993, 50, 2561) and data type float64
+
+[2025-06-29 14:58:11] [INFO] [eeg2go] Saved 39 feature values for recording 123 (successful: 0, failed: 39)
+[2025-06-29 14:58:12] [INFO] [eeg2go] [load_recording] Recording 124: 25730.0s, 50 channels, 512.0 Hz
+[2025-06-29 14:58:12] [INFO] [eeg2go] [load_recording] Estimated memory usage: 2512.7 MB
+[2025-06-29 14:58:12] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping

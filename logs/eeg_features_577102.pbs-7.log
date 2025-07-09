@@ -1,0 +1,98 @@
+Job ID: 577102.pbs-7
+Start time: Sat 21 Jun 17:41:58 BST 2025
+Running in: /rds/general/user/zj724/home/eeg2go
+Launching with 4 parallel processes...
+[HIT] fxdef_id=10 loaded from feature_values table
+[HIT] fxdef_id=11 loaded from feature_values table
+Saved 2 feature values for recording 1
+[HIT] fxdef_id=10 loaded from feature_values table
+[HIT] fxdef_id=11 loaded from feature_values table
+Saved 2 feature values for recording 7
+{'filter_36485993': {'func': 'filter', 'params': {'hp': 1.0, 'lp': 35.0}, 'inputnodes': ['raw']}, 'raw': {'func': 'raw', 'params': {}, 'inputnodes': []}, 'epoch_c7f91ab6': {'func': 'epoch', 'params': {'duration': 2.0}, 'inputnodes': ['filter_36485993']}}
+[EXECUTE] func=raw | input_nodes=[] | params={}
+[RESULT] node=raw → output_type=<class 'mne.io.edf.edf.RawEDF'> | shape=N/A
+[EXECUTE] func=filter | input_nodes=['raw'] | params={'hp': 1.0, 'lp': 35.0}
+[RESULT] node=filter_36485993 → output_type=<class 'mne.io.edf.edf.RawEDF'> | shape=N/A
+[EXECUTE] func=epoch | input_nodes=['filter_36485993'] | params={'duration': 2.0}
+[RESULT] node=epoch_c7f91ab6 → output_type=<class 'mne.epochs.Epochs'> | shape=N/A
+{'filter_36485993': {'func': 'filter', 'params': {'hp': 1.0, 'lp': 35.0}, 'inputnodes': ['raw']}, 'raw': {'func': 'raw', 'params': {}, 'inputnodes': []}, 'notch_filter_537173d2': {'func': 'notch_filter', 'params': {'freq': 50}, 'inputnodes': ['filter_36485993']}, 'epoch_c7f91ab6': {'func': 'epoch', 'params': {'duration': 2.0}, 'inputnodes': ['notch_filter_537173d2']}}
+[CACHE HIT] func=raw | key=('raw', '{}', ())
+[CACHE HIT] func=filter | key=('filter', '{"hp": 1.0, "lp": 35.0}', ('raw',))
+[EXECUTE] func=notch_filter | input_nodes=['filter_36485993'] | params={'freq': 50}
+Filtering raw data in 1 contiguous segment
+Setting up band-stop filter from 49 - 51 Hz
+
+FIR filter parameters
+---------------------
+Designing a one-pass, zero-phase, non-causal bandstop filter:
+- Windowed time-domain design (firwin) method
+- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
+- Lower passband edge: 49.38
+- Lower transition bandwidth: 0.50 Hz (-6 dB cutoff frequency: 49.12 Hz)
+- Upper passband edge: 50.62 Hz
+- Upper transition bandwidth: 0.50 Hz (-6 dB cutoff frequency: 50.88 Hz)
+- Filter length: 3381 samples (6.604 s)
+
+[Parallel(n_jobs=1)]: Done  17 tasks      | elapsed:    0.7s
+[Parallel(n_jobs=1)]: Done  50 out of  50 | elapsed:    2.1s finished
+{'filter_36485993': {'func': 'filter', 'params': {'hp': 1.0, 'lp': 35.0}, 'inputnodes': ['raw']}, 'raw': {'func': 'raw', 'params': {}, 'inputnodes': []}, 'epoch_c7f91ab6': {'func': 'epoch', 'params': {'duration': 2.0}, 'inputnodes': ['filter_36485993']}}
+[EXECUTE] func=raw | input_nodes=[] | params={}
+[RESULT] node=raw → output_type=<class 'mne.io.edf.edf.RawEDF'> | shape=N/A
+[EXECUTE] func=filter | input_nodes=['raw'] | params={'hp': 1.0, 'lp': 35.0}
+[RESULT] node=filter_36485993 → output_type=<class 'mne.io.edf.edf.RawEDF'> | shape=N/A
+[EXECUTE] func=epoch | input_nodes=['filter_36485993'] | params={'duration': 2.0}
+[RESULT] node=epoch_c7f91ab6 → output_type=<class 'mne.epochs.Epochs'> | shape=N/A
+{'filter_36485993': {'func': 'filter', 'params': {'hp': 1.0, 'lp': 35.0}, 'inputnodes': ['raw']}, 'raw': {'func': 'raw', 'params': {}, 'inputnodes': []}, 'notch_filter_537173d2': {'func': 'notch_filter', 'params': {'freq': 50}, 'inputnodes': ['filter_36485993']}, 'epoch_c7f91ab6': {'func': 'epoch', 'params': {'duration': 2.0}, 'inputnodes': ['notch_filter_537173d2']}}
+[CACHE HIT] func=raw | key=('raw', '{}', ())
+[CACHE HIT] func=filter | key=('filter', '{"hp": 1.0, "lp": 35.0}', ('raw',))
+[EXECUTE] func=notch_filter | input_nodes=['filter_36485993'] | params={'freq': 50}
+Filtering raw data in 1 contiguous segment
+Setting up band-stop filter from 49 - 51 Hz
+
+FIR filter parameters
+---------------------
+Designing a one-pass, zero-phase, non-causal bandstop filter:
+- Windowed time-domain design (firwin) method
+- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
+- Lower passband edge: 49.38
+- Lower transition bandwidth: 0.50 Hz (-6 dB cutoff frequency: 49.12 Hz)
+- Upper passband edge: 50.62 Hz
+- Upper transition bandwidth: 0.50 Hz (-6 dB cutoff frequency: 50.88 Hz)
+- Filter length: 3381 samples (6.604 s)
+
+[Parallel(n_jobs=1)]: Done  17 tasks      | elapsed:    0.5s
+[Parallel(n_jobs=1)]: Done  71 tasks      | elapsed:    2.1s
+[Parallel(n_jobs=1)]: Done  93 out of  93 | elapsed:    2.7s finished
+[HIT] fxdef_id=10 loaded from feature_values table
+[HIT] fxdef_id=11 loaded from feature_values table
+Saved 2 feature values for recording 101
+[HIT] fxdef_id=10 loaded from feature_values table
+[HIT] fxdef_id=11 loaded from feature_values table
+Saved 2 feature values for recording 103
+{'filter_36485993': {'func': 'filter', 'params': {'hp': 1.0, 'lp': 35.0}, 'inputnodes': ['raw']}, 'raw': {'func': 'raw', 'params': {}, 'inputnodes': []}, 'epoch_c7f91ab6': {'func': 'epoch', 'params': {'duration': 2.0}, 'inputnodes': ['filter_36485993']}}
+[EXECUTE] func=raw | input_nodes=[] | params={}
+[RESULT] node=raw → output_type=<class 'mne.io.edf.edf.RawEDF'> | shape=N/A
+[EXECUTE] func=filter | input_nodes=['raw'] | params={'hp': 1.0, 'lp': 35.0}
+[RESULT] node=filter_36485993 → output_type=<class 'mne.io.edf.edf.RawEDF'> | shape=N/A
+[EXECUTE] func=epoch | input_nodes=['filter_36485993'] | params={'duration': 2.0}
+[RESULT] node=epoch_c7f91ab6 → output_type=<class 'mne.epochs.Epochs'> | shape=N/A
+{'filter_36485993': {'func': 'filter', 'params': {'hp': 1.0, 'lp': 35.0}, 'inputnodes': ['raw']}, 'raw': {'func': 'raw', 'params': {}, 'inputnodes': []}, 'notch_filter_537173d2': {'func': 'notch_filter', 'params': {'freq': 50}, 'inputnodes': ['filter_36485993']}, 'epoch_c7f91ab6': {'func': 'epoch', 'params': {'duration': 2.0}, 'inputnodes': ['notch_filter_537173d2']}}
+[CACHE HIT] func=raw | key=('raw', '{}', ())
+[CACHE HIT] func=filter | key=('filter', '{"hp": 1.0, "lp": 35.0}', ('raw',))
+[EXECUTE] func=notch_filter | input_nodes=['filter_36485993'] | params={'freq': 50}
+Filtering raw data in 1 contiguous segment
+Setting up band-stop filter from 49 - 51 Hz
+
+FIR filter parameters
+---------------------
+Designing a one-pass, zero-phase, non-causal bandstop filter:
+- Windowed time-domain design (firwin) method
+- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
+- Lower passband edge: 49.38
+- Lower transition bandwidth: 0.50 Hz (-6 dB cutoff frequency: 49.12 Hz)
+- Upper passband edge: 50.62 Hz
+- Upper transition bandwidth: 0.50 Hz (-6 dB cutoff frequency: 50.88 Hz)
+- Filter length: 6759 samples (6.601 s)
+
+[Parallel(n_jobs=1)]: Done  17 tasks      | elapsed:    1.3s
+[Parallel(n_jobs=1)]: Done  46 out of  46 | elapsed:    3.8s finished

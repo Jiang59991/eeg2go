@@ -1,0 +1,91 @@
+[2025-06-29 18:49:36] [INFO] [eeg2go] [load_recording] Recording 236: 483.0s, 30 channels, 200.0 Hz
+[2025-06-29 18:49:36] [INFO] [eeg2go] [load_recording] Estimated memory usage: 11.1 MB
+[2025-06-29 18:49:36] [INFO] [eeg2go] Saved 39 feature values for recording 236 (successful: 39, failed: 0)
+[2025-06-29 18:49:37] [INFO] [eeg2go] [load_recording] Recording 237: 1237.0s, 30 channels, 200.0 Hz
+[2025-06-29 18:49:37] [INFO] [eeg2go] [load_recording] Estimated memory usage: 28.3 MB
+[2025-06-29 18:49:37] [INFO] [eeg2go] Saved 39 feature values for recording 237 (successful: 39, failed: 0)
+[2025-06-29 18:49:37] [INFO] [eeg2go] [load_recording] Recording 238: 9646.0s, 4 channels, 200.0 Hz
+[2025-06-29 18:49:37] [INFO] [eeg2go] [load_recording] Estimated memory usage: 29.4 MB
+[2025-06-29 18:49:37] [WARNING] [eeg2go] [SKIP] fxdef_id=27 recording_id=238 - previously failed: Feature generation failed: Channel C3 not found in available channels: ['O1', 'P4', 'T6', 'O2']
+[2025-06-29 18:49:38] [INFO] [eeg2go] Saved 39 feature values for recording 238 (successful: 38, failed: 1)
+[2025-06-29 18:49:38] [INFO] [eeg2go] [load_recording] Recording 239: 1345.0s, 30 channels, 200.0 Hz
+[2025-06-29 18:49:38] [INFO] [eeg2go] [load_recording] Estimated memory usage: 30.8 MB
+[2025-06-29 18:49:38] [INFO] [eeg2go] Saved 39 feature values for recording 239 (successful: 39, failed: 0)
+[2025-06-29 18:49:39] [INFO] [eeg2go] [load_recording] Recording 240: 1445.0s, 30 channels, 200.0 Hz
+[2025-06-29 18:49:39] [INFO] [eeg2go] [load_recording] Estimated memory usage: 33.1 MB
+[2025-06-29 18:49:39] [INFO] [eeg2go] Saved 39 feature values for recording 240 (successful: 39, failed: 0)
+[2025-06-29 18:49:39] [INFO] [eeg2go] [load_recording] Recording 241: 1527.0s, 29 channels, 200.0 Hz
+[2025-06-29 18:49:39] [INFO] [eeg2go] [load_recording] Estimated memory usage: 33.8 MB
+[2025-06-29 18:49:39] [INFO] [eeg2go] Saved 39 feature values for recording 241 (successful: 39, failed: 0)
+[2025-06-29 18:49:40] [INFO] [eeg2go] [load_recording] Recording 242: 1482.0s, 30 channels, 200.0 Hz
+[2025-06-29 18:49:40] [INFO] [eeg2go] [load_recording] Estimated memory usage: 33.9 MB
+[2025-06-29 18:49:40] [INFO] [eeg2go] Saved 39 feature values for recording 242 (successful: 39, failed: 0)
+[2025-06-29 18:49:40] [INFO] [eeg2go] [load_recording] Recording 243: 1491.0s, 30 channels, 200.0 Hz
+[2025-06-29 18:49:40] [INFO] [eeg2go] [load_recording] Estimated memory usage: 34.1 MB
+[2025-06-29 18:49:40] [INFO] [eeg2go] Saved 39 feature values for recording 243 (successful: 39, failed: 0)
+[2025-06-29 18:49:41] [INFO] [eeg2go] [load_recording] Recording 244: 1501.0s, 30 channels, 200.0 Hz
+[2025-06-29 18:49:41] [INFO] [eeg2go] [load_recording] Estimated memory usage: 34.4 MB
+[2025-06-29 18:49:41] [INFO] [eeg2go] Saved 39 feature values for recording 244 (successful: 39, failed: 0)
+[2025-06-29 18:49:41] [INFO] [eeg2go] [load_recording] Recording 245: 1583.0s, 30 channels, 200.0 Hz
+[2025-06-29 18:49:41] [INFO] [eeg2go] [load_recording] Estimated memory usage: 36.2 MB
+[2025-06-29 18:49:41] [INFO] [eeg2go] Saved 39 feature values for recording 245 (successful: 39, failed: 0)
+[2025-06-29 18:49:42] [INFO] [eeg2go] [load_recording] Recording 246: 1622.0s, 30 channels, 200.0 Hz
+[2025-06-29 18:49:42] [INFO] [eeg2go] [load_recording] Estimated memory usage: 37.1 MB
+[2025-06-29 18:49:42] [INFO] [eeg2go] Saved 39 feature values for recording 246 (successful: 39, failed: 0)
+[2025-06-29 18:49:42] [INFO] [eeg2go] [load_recording] Recording 247: 1679.0s, 30 channels, 200.0 Hz
+[2025-06-29 18:49:42] [INFO] [eeg2go] [load_recording] Estimated memory usage: 38.4 MB
+[2025-06-29 18:49:42] [INFO] [eeg2go] Saved 39 feature values for recording 247 (successful: 39, failed: 0)
+[2025-06-29 18:49:43] [INFO] [eeg2go] [load_recording] Recording 248: 1711.0s, 30 channels, 200.0 Hz
+[2025-06-29 18:49:43] [INFO] [eeg2go] [load_recording] Estimated memory usage: 39.2 MB
+[2025-06-29 18:49:43] [INFO] [eeg2go] Saved 39 feature values for recording 248 (successful: 39, failed: 0)
+[2025-06-29 18:49:43] [INFO] [eeg2go] [load_recording] Recording 249: 1716.0s, 30 channels, 200.0 Hz
+[2025-06-29 18:49:43] [INFO] [eeg2go] [load_recording] Estimated memory usage: 39.3 MB
+[2025-06-29 18:49:43] [INFO] [eeg2go] Saved 39 feature values for recording 249 (successful: 39, failed: 0)
+[2025-06-29 18:49:44] [INFO] [eeg2go] [load_recording] Recording 250: 1754.0s, 30 channels, 200.0 Hz
+[2025-06-29 18:49:44] [INFO] [eeg2go] [load_recording] Estimated memory usage: 40.1 MB
+[2025-06-29 18:49:44] [INFO] [eeg2go] Saved 39 feature values for recording 250 (successful: 39, failed: 0)
+[2025-06-29 18:49:44] [INFO] [eeg2go] [load_recording] Recording 251: 2314.0s, 23 channels, 200.0 Hz
+[2025-06-29 18:49:44] [INFO] [eeg2go] [load_recording] Estimated memory usage: 40.6 MB
+[2025-06-29 18:49:44] [INFO] [eeg2go] Saved 39 feature values for recording 251 (successful: 39, failed: 0)
+[2025-06-29 18:49:44] [INFO] [eeg2go] [load_recording] Recording 252: 1877.0s, 29 channels, 200.0 Hz
+[2025-06-29 18:49:44] [INFO] [eeg2go] [load_recording] Estimated memory usage: 41.5 MB
+[2025-06-29 18:49:45] [INFO] [eeg2go] Saved 39 feature values for recording 252 (successful: 39, failed: 0)
+[2025-06-29 18:49:45] [INFO] [eeg2go] [load_recording] Recording 253: 1868.0s, 30 channels, 200.0 Hz
+[2025-06-29 18:49:45] [INFO] [eeg2go] [load_recording] Estimated memory usage: 42.8 MB
+[2025-06-29 18:49:45] [INFO] [eeg2go] Saved 39 feature values for recording 253 (successful: 39, failed: 0)
+[2025-06-29 18:49:45] [INFO] [eeg2go] [load_recording] Recording 254: 1885.0s, 30 channels, 200.0 Hz
+[2025-06-29 18:49:45] [INFO] [eeg2go] [load_recording] Estimated memory usage: 43.1 MB
+[2025-06-29 18:49:45] [INFO] [eeg2go] Saved 39 feature values for recording 254 (successful: 39, failed: 0)
+[2025-06-29 18:49:45] [INFO] [eeg2go] [load_recording] Recording 255: 2699.0s, 22 channels, 200.0 Hz
+[2025-06-29 18:49:45] [INFO] [eeg2go] [load_recording] Estimated memory usage: 45.3 MB
+[2025-06-29 18:49:46] [INFO] [eeg2go] Saved 39 feature values for recording 255 (successful: 39, failed: 0)
+[2025-06-29 18:49:46] [INFO] [eeg2go] [load_recording] Recording 256: 1986.0s, 30 channels, 200.0 Hz
+[2025-06-29 18:49:46] [INFO] [eeg2go] [load_recording] Estimated memory usage: 45.5 MB
+[2025-06-29 18:49:46] [INFO] [eeg2go] Saved 39 feature values for recording 256 (successful: 39, failed: 0)
+[2025-06-29 18:49:46] [INFO] [eeg2go] [load_recording] Recording 257: 2045.0s, 30 channels, 200.0 Hz
+[2025-06-29 18:49:46] [INFO] [eeg2go] [load_recording] Estimated memory usage: 46.8 MB
+[2025-06-29 18:49:46] [INFO] [eeg2go] Saved 39 feature values for recording 257 (successful: 39, failed: 0)
+[2025-06-29 18:49:46] [INFO] [eeg2go] [load_recording] Recording 258: 2358.0s, 29 channels, 200.0 Hz
+[2025-06-29 18:49:46] [INFO] [eeg2go] [load_recording] Estimated memory usage: 52.2 MB
+[2025-06-29 18:49:47] [INFO] [eeg2go] Saved 39 feature values for recording 258 (successful: 39, failed: 0)
+[2025-06-29 18:49:47] [INFO] [eeg2go] [load_recording] Recording 259: 2321.0s, 30 channels, 200.0 Hz
+[2025-06-29 18:49:47] [INFO] [eeg2go] [load_recording] Estimated memory usage: 53.1 MB
+[2025-06-29 18:49:47] [INFO] [eeg2go] Saved 39 feature values for recording 259 (successful: 39, failed: 0)
+[2025-06-29 18:49:47] [INFO] [eeg2go] [load_recording] Recording 260: 2365.0s, 30 channels, 200.0 Hz
+[2025-06-29 18:49:47] [INFO] [eeg2go] [load_recording] Estimated memory usage: 54.1 MB
+[2025-06-29 18:49:48] [INFO] [eeg2go] Saved 39 feature values for recording 260 (successful: 39, failed: 0)
+[2025-06-29 18:49:48] [INFO] [eeg2go] [load_recording] Recording 261: 2367.0s, 30 channels, 200.0 Hz
+[2025-06-29 18:49:48] [INFO] [eeg2go] [load_recording] Estimated memory usage: 54.2 MB
+[2025-06-29 18:49:48] [INFO] [eeg2go] Saved 39 feature values for recording 261 (successful: 39, failed: 0)
+[2025-06-29 18:49:48] [INFO] [eeg2go] [load_recording] Recording 262: 2376.0s, 30 channels, 200.0 Hz
+[2025-06-29 18:49:48] [INFO] [eeg2go] [load_recording] Estimated memory usage: 54.4 MB
+[2025-06-29 18:49:48] [INFO] [eeg2go] Saved 39 feature values for recording 262 (successful: 39, failed: 0)
+[2025-06-29 18:49:48] [INFO] [eeg2go] [load_recording] Recording 263: 2403.0s, 30 channels, 200.0 Hz
+[2025-06-29 18:49:48] [INFO] [eeg2go] [load_recording] Estimated memory usage: 55.0 MB
+[2025-06-29 18:49:49] [INFO] [eeg2go] Saved 39 feature values for recording 263 (successful: 39, failed: 0)
+[2025-06-29 18:49:49] [INFO] [eeg2go] [load_recording] Recording 264: 2529.0s, 29 channels, 200.0 Hz
+[2025-06-29 18:49:49] [INFO] [eeg2go] [load_recording] Estimated memory usage: 56.0 MB
+[2025-06-29 18:49:49] [INFO] [eeg2go] Saved 39 feature values for recording 264 (successful: 39, failed: 0)
+[2025-06-29 18:49:49] [INFO] [eeg2go] [load_recording] Recording 265: 2446.0s, 30 channels, 200.0 Hz
+[2025-06-29 18:49:49] [INFO] [eeg2go] [load_recording] Estimated memory usage: 56.0 MB
+[2025-06-29 18:49:49] [INFO] [eeg2go] Saved 39 feature values for recording 265 (successful: 39, failed: 0)

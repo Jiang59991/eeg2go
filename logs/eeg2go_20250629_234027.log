@@ -1,0 +1,52 @@
+[2025-06-29 23:40:39] [INFO] [eeg2go] 实验管理数据库表已存在，视图检查完成
+[2025-06-29 23:40:39] [INFO] [eeg2go] ============================================================
+[2025-06-29 23:40:39] [INFO] [eeg2go] EEG2Go 年龄相关性分析实验示例 (Recording-Level)
+[2025-06-29 23:40:39] [INFO] [eeg2go] ============================================================
+[2025-06-29 23:40:39] [INFO] [eeg2go] 
+实验信息:
+[2025-06-29 23:40:39] [INFO] [eeg2go]   名称: Correlation Analysis
+[2025-06-29 23:40:39] [INFO] [eeg2go]   模块: feature_mill.experiments.correlation
+[2025-06-29 23:40:39] [INFO] [eeg2go]   有run函数: False
+[2025-06-29 23:40:39] [INFO] [eeg2go] 
+实验参数:
+[2025-06-29 23:40:39] [INFO] [eeg2go]   数据集ID: 1
+[2025-06-29 23:40:39] [INFO] [eeg2go]   特征集ID: 2
+[2025-06-29 23:40:39] [INFO] [eeg2go]   输出目录: data/experiments/age_correlation_analysis
+[2025-06-29 23:40:39] [INFO] [eeg2go]   目标变量: ['age']
+[2025-06-29 23:40:39] [INFO] [eeg2go]   分析方法: pearson
+[2025-06-29 23:40:39] [INFO] [eeg2go]   最小相关系数: 0.1
+[2025-06-29 23:40:39] [INFO] [eeg2go]   显示前N个特征: 20
+[2025-06-29 23:40:39] [INFO] [eeg2go] 
+预期结果 (Recording-Level):
+[2025-06-29 23:40:39] [INFO] [eeg2go]   1. Alpha峰值频率_mean - 应与年龄呈负相关
+[2025-06-29 23:40:39] [INFO] [eeg2go]   2. Alpha功率_mean - 应与年龄呈负相关
+[2025-06-29 23:40:39] [INFO] [eeg2go]   3. Theta/Alpha比值_mean - 应与年龄呈正相关
+[2025-06-29 23:40:39] [INFO] [eeg2go]   4. Beta功率_mean - 应与年龄呈负相关
+[2025-06-29 23:40:39] [INFO] [eeg2go]   5. 频谱边缘频率_mean - 应与年龄呈负相关
+[2025-06-29 23:40:39] [INFO] [eeg2go]   6. Alpha不对称性_mean - 可能与年龄相关
+[2025-06-29 23:40:39] [INFO] [eeg2go]   7. 各种统计量 (std, min, max, median, count) 也可能与年龄相关
+[2025-06-29 23:40:39] [INFO] [eeg2go] 
+Recording级别统计说明:
+[2025-06-29 23:40:39] [INFO] [eeg2go]   - _mean: 所有epoch的平均值
+[2025-06-29 23:40:39] [INFO] [eeg2go]   - _std: 所有epoch的标准差
+[2025-06-29 23:40:39] [INFO] [eeg2go]   - _min: 所有epoch的最小值
+[2025-06-29 23:40:39] [INFO] [eeg2go]   - _max: 所有epoch的最大值
+[2025-06-29 23:40:39] [INFO] [eeg2go]   - _median: 所有epoch的中位数
+[2025-06-29 23:40:39] [INFO] [eeg2go]   - _count: 有效epoch的数量
+[2025-06-29 23:40:39] [INFO] [eeg2go] 
+开始运行实验...
+[2025-06-29 23:40:39] [INFO] [eeg2go] Starting experiment: correlation
+[2025-06-29 23:40:39] [INFO] [eeg2go] Dataset ID: 1, Feature Set ID: 2
+[2025-06-29 23:40:39] [INFO] [eeg2go] Output directory: data/experiments/age_correlation_analysis
+[2025-06-29 23:40:39] [INFO] [eeg2go] Extracting feature matrix...
+[2025-06-29 23:40:39] [INFO] [eeg2go] Extracting feature matrix directly from database: dataset_id=1, feature_set_id=2
+[2025-06-29 23:40:39] [INFO] [eeg2go] Found 203 recordings
+[2025-06-29 23:40:39] [INFO] [eeg2go] Feature set 2 contains 103 feature definitions
+[2025-06-29 23:40:39] [INFO] [eeg2go] Feature definition IDs: [51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153]
+[2025-06-29 23:40:39] [INFO] [eeg2go] Processing recording 1/203: recording_id=1
+[2025-06-29 23:40:42] [INFO] [eeg2go] [CACHE HIT] All features for feature_set_id=2, recording_id=1 are already cached
+[2025-06-29 23:40:42] [INFO] [eeg2go] Recording 1: got 103 feature values
+[2025-06-29 23:40:42] [INFO] [eeg2go] Processing recording 2/203: recording_id=2
+[2025-06-29 23:40:42] [INFO] [eeg2go] [load_recording] Recording 2: 126589.0s, 30 channels, 200.0 Hz
+[2025-06-29 23:40:42] [INFO] [eeg2go] [load_recording] Estimated memory usage: 2897.4 MB
+[2025-06-29 23:40:42] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
