@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/rds/general/user/zj724/home/eeg2go/feature_mill/feature_matrix.py", line 7, in <module>
+    from eeg2fx.featureset_fetcher import run_feature_set
+ModuleNotFoundError: No module named 'eeg2fx'
+
+====================================
+CPU Time used: 00:00:01
+CPU Percent: 4%
+Memory usage: 68892kb
+Approx Power usage: 0.0
+Walltime usage: 00:00:24
+
+====================================

@@ -1,0 +1,23 @@
+// Feature DAG
+digraph {
+	filter_36485993 [label="filter
+{\"hp\":1.0,\"lp\":35.0}"]
+	raw [label="raw
+{}"]
+	epoch_c7f91ab6 [label="epoch
+{\"duration\":2.0}"]
+	spectral_entropy_e3c4e4d6 [label="feature - spectral_entropy
+{}"]
+	spectral_entropy_e3c4e4d6__C3 [label="split_channel
+{\"chan\":\"C3\"}"]
+	spectral_entropy_e3c4e4d6__C4 [label="split_channel
+{\"chan\":\"C4\"}"]
+	spectral_entropy_e3c4e4d6__Pz [label="split_channel
+{\"chan\":\"Pz\"}"]
+	raw -> filter_36485993
+	filter_36485993 -> epoch_c7f91ab6
+	epoch_c7f91ab6 -> spectral_entropy_e3c4e4d6
+	spectral_entropy_e3c4e4d6 -> spectral_entropy_e3c4e4d6__C3
+	spectral_entropy_e3c4e4d6 -> spectral_entropy_e3c4e4d6__C4
+	spectral_entropy_e3c4e4d6 -> spectral_entropy_e3c4e4d6__Pz
+}
