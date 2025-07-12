@@ -8,6 +8,11 @@ from eeg2fx.feature.common import auto_gc
 from logging_config import logger
 
 DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "database", "eeg2go.db"))
+MAX_MEMORY_GB = 1  # 统一内存限制常量
+
+class RecordingTooLargeError(Exception):
+    """当录音文件过大时抛出的异常"""
+    pass
 
 def load_recording(recording_id):
     conn = sqlite3.connect(DB_PATH)
@@ -23,13 +28,23 @@ def load_recording(recording_id):
     if not os.path.exists(filepath):
         raise FileNotFoundError(f"EEG file not found at path: {filepath}")
 
-    # Calculate estimated memory usage
+    # 计算预估内存使用量
     if duration and channels and sampling_rate:
         estimated_memory_mb = (duration * sampling_rate * channels * 4) / (1024 * 1024)  # 4 bytes per float32
         logger.info(f"[load_recording] Recording {recording_id}: {duration:.1f}s, {channels} channels, {sampling_rate} Hz")
         logger.info(f"[load_recording] Estimated memory usage: {estimated_memory_mb:.1f} MB")
-        # Use preload=False for large files (>1000MB estimated)
-        if estimated_memory_mb > 1000:
+        
+        # 检查是否超过内存限制
+        if estimated_memory_mb > MAX_MEMORY_GB * 1024:
+            logger.warning(f"[load_recording] Recording {recording_id} is too large ({estimated_memory_mb:.2f} MB), exceeding limit of {MAX_MEMORY_GB*1024:.2f} MB. Skipping.")
+            raise RecordingTooLargeError(f"Recording too large to process ({estimated_memory_mb:.2f} MB)")
+        
+
+        # raw = mne.io.read_raw_edf(filepath, preload=True, verbose='ERROR')
+
+
+        # 根据文件大小决定是否使用内存映射
+        if estimated_memory_mb > 900:
             logger.info(f"[load_recording] Large file detected, using memory mapping")
             raw = mne.io.read_raw_edf(filepath, preload='auto', verbose='ERROR')
         else:

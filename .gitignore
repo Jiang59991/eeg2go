@@ -2,3 +2,4 @@ data/
 database/eeg2go.db
 eeg2go_env/
 miniconda.sh
+logs/

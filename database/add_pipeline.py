@@ -20,10 +20,39 @@ STEP_REGISTRY = {
         "input_type": "raw",
         "output_type": "raw"
     },
+    "reref": {
+        "params": {},
+        "input_type": "raw",
+        "output_type": "raw"
+    },
+    "notch_filter": {
+        "params": {
+            "freq": {"type": "float", "min": 1.0, "max": 1000.0, "default": 50.0, "required": True}
+        },
+        "input_type": "raw",
+        "output_type": "raw"
+    },
     "resample": {
         "params": {
             "sfreq": {"type": "float", "min": 1.0, "max": 1000.0, "default": 128.0, "required": True}
         },
+        "input_type": "raw",
+        "output_type": "raw"
+    },
+    "pick_channels": {
+        "params": {
+            "include": {"type": "list", "required": True}
+        },
+        "input_type": "raw",
+        "output_type": "raw"
+    },
+    "ica": {
+        "params": {},
+        "input_type": "raw",
+        "output_type": "raw"
+    },
+    "zscore": {
+        "params": {},
         "input_type": "raw",
         "output_type": "raw"
     },
@@ -34,20 +63,30 @@ STEP_REGISTRY = {
         "input_type": "raw",
         "output_type": "epochs"
     },
-    # ... 其他步骤
+    "reject_high_amplitude": {
+        "params": {
+            "threshold": {"type": "float", "min": 1e-9, "max": 1e-3, "default": 150e-6, "required": True}
+        },
+        "input_type": "epochs",
+        "output_type": "epochs"
+    }
 }
 
 def validate_pipeline(pipeline_steps, step_registry=STEP_REGISTRY):
     """
-    pipeline_steps: List[Dict]，每个dict包含step_name, func, inputnames, params
+    pipeline_steps: List[List]，每个内部列表包含 [step_name, func, inputnames, params]
     step_registry: 步骤注册表
     """
     for step in pipeline_steps:
-        func = step["func"]
-        params = step["params"]
+        if len(step) != 4:
+            raise ValueError(f"Invalid step format: {step}")
+        
+        step_name, func, inputnames, params = step
+        
         # 1. 检查func是否在注册表
         if func not in step_registry:
             raise ValueError(f"Unknown step: {func}")
+        
         # 2. 检查参数
         for pname, pinfo in step_registry[func]["params"].items():
             if pinfo.get("required") and pname not in params:
@@ -60,10 +99,7 @@ def validate_pipeline(pipeline_steps, step_registry=STEP_REGISTRY):
                         raise ValueError(f"Param '{pname}' for step '{func}' too small")
                     if "max" in pinfo and v > pinfo["max"]:
                         raise ValueError(f"Param '{pname}' for step '{func}' too large")
-        # 3. 结构合法性（可扩展：如输入输出类型检查、环路检测等）
-        # ...略
-    # 4. DAG合法性（可用拓扑排序检测环路）
-    # ...略
+    
     return True
 
 def make_nodeid(func, params):
@@ -84,7 +120,6 @@ def add_pipeline(pipeline_def):
 
     # 关键：校验 pipeline steps 合法性
     steps = pipeline_def["steps"]
-    # 这里假设 steps 是 List[Dict]，如 [{"step_name": ..., "func": ..., "inputnames": ..., "params": {...}}, ...]
     validate_pipeline(steps, STEP_REGISTRY)
 
     # 其他校验...
@@ -170,33 +205,6 @@ def add_pipeline(pipeline_def):
     logger.info(f"Pipeline '{pipeline_def['shortname']}' inserted (id={pipedef_id}).")
     return pipedef_id
 
-def validate_pipeline(pipeline_steps, step_registry):
-    # pipeline_steps: List[Dict]，每个dict包含step_name, func, inputnames, params
-    visited = set()
-    for step in pipeline_steps:
-        func = step["func"]
-        params = step["params"]
-        # 1. 检查func是否在注册表
-        if func not in step_registry:
-            raise ValueError(f"Unknown step: {func}")
-        # 2. 检查参数
-        for pname, pinfo in step_registry[func]["params"].items():
-            if pinfo.get("required") and pname not in params:
-                raise ValueError(f"Missing required param '{pname}' for step '{func}'")
-            if pname in params:
-                v = params[pname]
-                if pinfo["type"] == "float":
-                    v = float(v)
-                    if "min" in pinfo and v < pinfo["min"]:
-                        raise ValueError(f"Param '{pname}' for step '{func}' too small")
-                    if "max" in pinfo and v > pinfo["max"]:
-                        raise ValueError(f"Param '{pname}' for step '{func}' too large")
-        # 3. 结构合法性（可扩展：如输入输出类型检查、环路检测等）
-        # ...略
-    # 4. DAG合法性（可用拓扑排序检测环路）
-    # ...略
-    return True
-
 if __name__ == "__main__":
 
     pipeline = {
@@ -208,6 +216,7 @@ if __name__ == "__main__":
         "hp": 1.0,
         "lp": 40.0,
         "epoch": 5.0,
+        "sample_rating": 8.0,
         "steps": [
             ["flt", "filter", ["raw"], {"hp": 1.0, "lp": 40.0}],
             ["reref", "reref", ["flt"], {}],

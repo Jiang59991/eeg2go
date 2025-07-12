@@ -14,6 +14,7 @@ def create_default_pipelines():
             "hp": 1.0,
             "lp": 40.0,
             "epoch": 5.0,
+            "sample_rating": 8.0,
             "steps": [
                 ["flt", "filter", ["raw"], {"hp": 1.0, "lp": 40.0}],
                 ["reref", "reref", ["flt"], {}],
@@ -31,6 +32,7 @@ def create_default_pipelines():
             "hp": 1.0,
             "lp": 30.0,
             "epoch": 4.0,
+            "sample_rating": 9.0,
             "steps": [
                 ["flt", "filter", ["raw"], {"hp": 1.0, "lp": 30.0}],
                 ["notch", "notch_filter", ["flt"], {"freq": 50}],
@@ -54,6 +56,7 @@ def create_default_pipelines():
             "hp": 1.0,
             "lp": 30.0,
             "epoch": 3.0,
+            "sample_rating": 6.0,
             "steps": [
                 ["flt", "filter", ["raw"], {"hp": 1.0, "lp": 30.0}],
                 ["epoch", "epoch", ["flt"], {"duration": 3.0}]
@@ -70,6 +73,7 @@ def create_default_pipelines():
             "hp": 1.0,
             "lp": 30.0,
             "epoch": 3.0,
+            "sample_rating": 5.0,
             "steps": [
                 ["reref", "reref", ["raw"], {}],
                 ["epoch", "epoch", ["reref"], {"duration": 3.0}]
@@ -86,6 +90,7 @@ def create_default_pipelines():
             "hp": 1.0,
             "lp": 35.0,
             "epoch": 2.0,
+            "sample_rating": 7.0,
             "steps": [
                 ["flt", "filter", ["raw"], {"hp": 1.0, "lp": 35.0}],
                 ["epoch", "epoch", ["flt"], {"duration": 2.0}]

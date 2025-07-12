@@ -9,13 +9,13 @@ from eeg2fx.pipeline_executor import resolve_function, load_recording
 from eeg2fx.pipeline_executor import toposort
 from eeg2fx.featureset_grouping import load_pipeline_structure
 from eeg2fx.feature_saver import save_feature_values
-from eeg2fx.steps import filter, reref, zscore, epoch, notch_filter, resample, ica
+from eeg2fx.steps import filter, reref, zscore, epoch, notch_filter, resample, ica, RecordingTooLargeError
 from eeg2fx.feature.common import standardize_channel_name
 import numpy as np
 from logging_config import logger
 
 DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "database", "eeg2go.db"))
-MAX_MEMORY_GB = 10  # Set the memory usage limit for a single recording file (GB)
+MAX_MEMORY_GB = 3  # Set the memory usage limit for a single recording file (GB)
 
 def load_cached_feature_value(fxid, recording_id):
     conn = sqlite3.connect(DB_PATH)
@@ -131,19 +131,16 @@ def run_feature_set(feature_set_id: str, recording_id: int):
         logger.info(f"[CACHE HIT] All features for feature_set_id={feature_set_id}, recording_id={recording_id} are already cached")
         return cached_results
     
-    # --- Memory usage pre-check ---
-    raw = load_recording(recording_id)
-    n_channels = len(raw.ch_names)
-    n_samples = raw.n_times
-    # MNE typically uses float64 (8 bytes) when loading data into memory
-    estimated_mb = (n_channels * n_samples * 8) / (1024**2)
-    
-    if estimated_mb > MAX_MEMORY_GB * 1024:
-        logger.warning(f"Recording {recording_id} is too large ({estimated_mb:.2f} MB), exceeding limit of {MAX_MEMORY_GB*1024:.2f} MB. Skipping.")
+    # --- Memory usage pre-check and data loading ---
+    try:
+        raw = load_recording(recording_id)
+    except RecordingTooLargeError as e:
+        logger.warning(f"[SKIP] Recording {recording_id}: {str(e)}")
         
+        # 为所有特征创建失败记录
         fxdefs = load_fxdefs_for_set(feature_set_id)
         results = {}
-        error_msg = f"Recording too large to process ({estimated_mb:.2f} MB)"
+        error_msg = str(e)
         
         for fx in fxdefs:
             fxid = fx["id"]
@@ -154,7 +151,7 @@ def run_feature_set(feature_set_id: str, recording_id: int):
                 "notes": error_msg
             }
         
-        # Save the failed records and return early
+        # 保存失败记录并提前返回
         save_feature_values(recording_id, results)
         return results
 

@@ -4,36 +4,51 @@ import mne
 import pandas as pd
 from logging_config import logger
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "harvard_EEG"))
+# Base directory for metadata (original location)
+# BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "harvard_EEG"))
+METADATA_BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "harvard_EEG"))
 DB_PATH = os.path.join(os.path.dirname(__file__), "eeg2go.db")
 
-BIDS_DIR = os.path.join(BASE_DIR, "bids")
-METADATA_DIR = os.path.join(BASE_DIR, "HEEDB_Metadata")
+BIDS_DIR = "/rds/general/user/zj724/ephemeral"
+# BIDS_DIR = os.path.join(BASE_DIR, "bids")
+METADATA_DIR = os.path.join(METADATA_BASE_DIR, "HEEDB_Metadata")
 PATIENT_CSV = os.path.join(METADATA_DIR, "HEEDB_patients.csv")
 
 MAX_MEMORY_GB = 8  # Set the memory usage limit for a single recording file (GB)
-mne.set_log_level('WARNING')
+mne.utils.set_log_level('WARNING')
 
 def make_subject_id(hospital_id, bdsp_id):
     return f"sub-{hospital_id}{bdsp_id}"
 
-def import_harvard_edf_for_hospital(conn, hospital_id, dataset_name):
+def import_harvard_edf_for_hospital(conn, hospital_id, dataset_name, max_import_count=None):
     """
     Import EDF files for a specified hospital ID into a specified dataset
+    
+    Args:
+        conn: Database connection
+        hospital_id: Hospital ID (e.g., 'S0001')
+        dataset_name: Name of the dataset
+        max_import_count: Maximum number of recordings to import. If None, import all available.
     """
     c = conn.cursor()
-    logger.info(f"Importing EDF recordings for {hospital_id} to dataset '{dataset_name}'...")
+    
+    if max_import_count is not None:
+        logger.info(f"Importing EDF recordings for {hospital_id} to dataset '{dataset_name}'... (max: {max_import_count})")
+    else:
+        logger.info(f"Importing EDF recordings for {hospital_id} to dataset '{dataset_name}'... (no limit)")
 
     # Create or get the dataset
     c.execute("SELECT id FROM datasets WHERE name = ?", (dataset_name,))
     row = c.fetchone()
     if row is None:
         c.execute("INSERT INTO datasets (name, description, source_type, path) VALUES (?, ?, ?, ?)",
-                  (dataset_name, f"Harvard EEG demo data - {hospital_id}", "edf", BASE_DIR))
+                  (dataset_name, f"Harvard EEG demo data - {hospital_id}", "edf", BIDS_DIR))
         dataset_id = c.lastrowid
     else:
         dataset_id = row[0]
 
+    # BIDS_DIR now points to /rds/general/user/zj724/ephemeral
+    # We need to look for hospital-specific subdirectories (e.g., S0001)
     hospital_path = os.path.join(BIDS_DIR, hospital_id)
     if not os.path.exists(hospital_path):
         logger.warning(f"Hospital directory {hospital_path} does not exist, skipping.")
@@ -43,6 +58,11 @@ def import_harvard_edf_for_hospital(conn, hospital_id, dataset_name):
     for subj_folder in os.listdir(hospital_path):
         if not subj_folder.startswith("sub-"):
             continue
+        
+        # Check if we've reached the import limit (only if max_import_count is set)
+        if max_import_count is not None and imported_count >= max_import_count:
+            logger.info(f"Reached import limit of {max_import_count}, stopping import.")
+            break
         
         subject_id = subj_folder
         subject_path = os.path.join(hospital_path, subj_folder)
@@ -69,8 +89,23 @@ def import_harvard_edf_for_hospital(conn, hospital_id, dataset_name):
                     eeg_paths.append(ses_path)
 
         for eeg_path in eeg_paths:
-            logger.info(f"Processing {subject_id} - {eeg_path} ...")
+            # Check if we've reached the import limit (only if max_import_count is set)
+            if max_import_count is not None and imported_count >= max_import_count:
+                logger.info(f"Reached import limit of {max_import_count}, stopping import.")
+                break
+                
+            # Show progress differently based on whether limit is set
+            if max_import_count is not None:
+                logger.info(f"Processing {subject_id} - {eeg_path} ... (imported: {imported_count}/{max_import_count})")
+            else:
+                logger.info(f"Processing {subject_id} - {eeg_path} ... (imported: {imported_count})")
+                
             for fname in os.listdir(eeg_path):
+                # Check if we've reached the import limit (only if max_import_count is set)
+                if max_import_count is not None and imported_count >= max_import_count:
+                    logger.info(f"Reached import limit of {max_import_count}, stopping import.")
+                    break
+                    
                 if not fname.endswith("_eeg.edf"):
                     continue
                 fpath = os.path.join(eeg_path, fname)
@@ -102,10 +137,18 @@ def import_harvard_edf_for_hospital(conn, hospital_id, dataset_name):
                     (dataset_id, subject_id, fname, fpath, duration, channels, sfreq))
                 
                 imported_count += 1
-                logger.info(f"Imported: {fname}")
+                # Show progress differently based on whether limit is set
+                if max_import_count is not None:
+                    logger.info(f"Imported: {fname} ({imported_count}/{max_import_count})")
+                else:
+                    logger.info(f"Imported: {fname} (total: {imported_count})")
 
     conn.commit()
-    logger.info(f"EDF import complete for {hospital_id}: {imported_count} recordings imported.")
+    # Show final message differently based on whether limit was set
+    if max_import_count is not None:
+        logger.info(f"EDF import complete for {hospital_id}: {imported_count} recordings imported (limit: {max_import_count}).")
+    else:
+        logger.info(f"EDF import complete for {hospital_id}: {imported_count} recordings imported (no limit).")
     return dataset_id
 
 def import_recording_metadata_for_hospital(conn, hospital_id):
@@ -235,18 +278,21 @@ def main():
     """
     conn = sqlite3.connect(DB_PATH)
     
+    # Set import limit (set to None for unlimited import, or a number like 2000 for limited import)
+    IMPORT_LIMIT = 2000  # Change this to None for unlimited import
+    
     # Import the S0001 dataset
     logger.info("============================================================")
     logger.info("Importing Harvard_S0001_demo dataset")
     logger.info("============================================================")
-    import_harvard_edf_for_hospital(conn, "S0001", "Harvard_S0001_demo")
+    import_harvard_edf_for_hospital(conn, "S0001", "Harvard_S0001_demo", max_import_count=IMPORT_LIMIT)
     import_patient_metadata_for_hospital(conn, "S0001")
     
     # # Import the I0003 dataset
     # print("=" * 60)
     # print("Importing Harvard_I0003_demo dataset")
     # print("=" * 60)
-    # import_harvard_edf_for_hospital(conn, "I0003", "Harvard_I0003_demo")
+    # import_harvard_edf_for_hospital(conn, "I0003", "Harvard_I0003_demo", max_import_count=IMPORT_LIMIT)
     # # import_recording_metadata_for_hospital(conn, "I0003")
     # import_patient_metadata_for_hospital(conn, "I0003")
     

@@ -2,6 +2,9 @@ from logging_config import logger
 import subprocess
 import os
 
+from logging_config import create_new_log_file
+create_new_log_file('init_db')
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 module_scripts = [
