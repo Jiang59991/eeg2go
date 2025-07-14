@@ -42,18 +42,16 @@
                         <button id="navFeaturesetsBtn" class="btn btn-outline-secondary btn-sm w-100 mb-2">
                             <i class="bi bi-collection"></i> Feature Sets
                         </button>
+                                        <button id="navFeatureExtractionBtn" class="btn btn-outline-secondary btn-sm w-100 mb-2">
+                    <i class="bi bi-cpu"></i> Feature Extraction
+                </button>
+                <button id="navExperimentsBtn" class="btn btn-outline-secondary btn-sm w-100 mb-2">
+                    <i class="bi bi-graph-up"></i> Experiments
+                </button>
                     </div>
                 </div>
                 
-                <div class="sidebar-section">
-                    <h6><i class="bi bi-play-circle"></i> Actions</h6>
-                    <button id="extractBtn" class="btn btn-primary btn-sm w-100" disabled>
-                        <i class="bi bi-lightning"></i> Extract Features
-                    </button>
-                    <button id="exportBtn" class="btn btn-success btn-sm w-100 mt-2" disabled>
-                        <i class="bi bi-download"></i> Export Data
-                    </button>
-                </div>
+
             </div>
             
             <!-- Main Content -->
@@ -76,6 +74,12 @@
                         <li class="breadcrumb-item" id="breadcrumb-featuresets" style="display: none;">
                             <a href="#" onclick="showFeaturesets()">Feature Sets</a>
                         </li>
+                                        <li class="breadcrumb-item" id="breadcrumb-feature-extraction" style="display: none;">
+                    <a href="#" onclick="showFeatureExtraction()">Feature Extraction</a>
+                </li>
+                <li class="breadcrumb-item" id="breadcrumb-experiments" style="display: none;">
+                    <a href="#" onclick="showExperiments()">Experiments</a>
+                </li>
                     </ol>
                 </nav>
                 
@@ -198,6 +202,113 @@
                     </div>
                 </div>
                 
+                <!-- Feature Extraction View -->
+                <div id="featureExtractionView" style="display: none;">
+                    <div class="content-header">
+                        <h3>Feature Extraction</h3>
+                        <div class="page-desc text-muted">Extract features from recordings using feature sets</div>
+                    </div>
+                    
+                    <!-- 新建提取任务 -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">New Extraction Task</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label for="extractionDatasetSelect" class="form-label">Dataset</label>
+                                    <select id="extractionDatasetSelect" class="form-select">
+                                        <option value="">Choose dataset...</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="extractionFeatureSetSelect" class="form-label">Feature Set</label>
+                                    <select id="extractionFeatureSetSelect" class="form-select">
+                                        <option value="">Choose feature set...</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <button class="btn btn-primary" onclick="startFeatureExtraction()">
+                                        <i class="bi bi-play-circle"></i> Start Extraction
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 提取任务列表 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Extraction History</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Dataset</th>
+                                            <th>Feature Set</th>
+                                            <th>Status</th>
+                                            <th>Progress</th>
+                                            <th>Start Time</th>
+                                            <th>Duration</th>
+                                            <th>Download</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="extractionTableBody">
+                                        <tr>
+                                            <td colspan="8" class="text-center text-muted">
+                                                Loading extractions...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Experiments View -->
+                <div id="experimentsView" style="display: none;">
+                    <div class="content-header">
+                        <h3>Experiments</h3>
+                        <div class="page-desc text-muted">View and analyze experiment results from feature_mill</div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end mb-3">
+                        <button class="btn btn-primary" onclick="showAddExperimentModal()">
+                            <i class="bi bi-plus-circle"></i> Add Experiment
+                        </button>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Experiment Name</th>
+                                    <th>Type</th>
+                                    <th>Dataset</th>
+                                    <th>Feature Set</th>
+                                    <th>Status</th>
+                                    <th>Run Time</th>
+                                    <th>Duration</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="experimentsTableBody">
+                                <tr>
+                                    <td colspan="9" class="text-center text-muted">
+                                        Loading experiments...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
                 <!-- Status Info -->
                 <div id="statusInfo" class="status-info" style="display: none;">
                     <div class="alert alert-info">
@@ -219,15 +330,41 @@
     
     <!-- Feature Set Details Modal -->
     <div class="modal fade" id="featureSetModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Feature Set Details</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div id="featureSetInfo"></div>
-                    <div id="featuresList"></div>
+                    <div class="row gx-3">
+                        <!-- Left Information -->
+                        <div class="col-md-5 col-12">
+                            <div class="card mb-3 h-100">
+                                <div class="card-header"><h6 class="mb-0">Feature Set Information</h6></div>
+                                <div class="card-body" id="featureSetInfo"></div>
+                            </div>
+                        </div>
+                        <!-- Right DAG Visualization -->
+                        <div class="col-md-7 col-12">
+                            <div class="card mb-3 h-100">
+                                <div class="card-header"><h6 class="mb-0">Merged Pipeline DAG</h6></div>
+                                <div class="card-body position-relative" style="min-height:400px;">
+                                    <div id="featureset-cytoscape" style="width: 100%; height: 400px;"></div>
+                                    <div class="cy-zoom-controls">
+                                        <button id="cy-zoom-in-fs" class="btn btn-light btn-sm">+</button>
+                                        <button id="cy-zoom-out-fs" class="btn btn-light btn-sm">−</button>
+                                        <button id="cy-zoom-fit-fs" class="btn btn-light btn-sm"><i class="bi bi-arrows-fullscreen"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Features list below -->
+                    <div class="card">
+                        <div class="card-header" id="featureSetFeaturesHeader"></div>
+                        <div class="card-body" id="featuresList"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -332,6 +469,61 @@
         </div>
     </div>
 
+    <!-- Add Feature Definition Modal -->
+    <div class="modal fade" id="addFxdefModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Feature Definition</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- 错误提示 -->
+                    <div id="fxdefErrorAlert" class="alert alert-danger" style="display:none"></div>
+                    <form id="addFxdefForm">
+                        <div class="mb-3">
+                            <label class="form-label"><span style="color:red">*</span> Feature Function</label>
+                            <select name="func" class="form-select" required></select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><span style="color:red">*</span> Pipeline</label>
+                            <div class="input-group">
+                                <select name="pipeid" class="form-select" id="fxdefPipelineSelect" required></select>
+                                <button type="button" class="btn btn-outline-primary" id="openAddPipelineBtn">New Pipeline</button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><span style="color:red">*</span> Short Name</label>
+                            <input name="shortname" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><span style="color:red">*</span> Channels</label>
+                            <input name="channels" class="form-control" placeholder="如 C3,C4,Pz" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Params (JSON)</label>
+                            <input name="params" class="form-control" placeholder='如 {"method": "spectral"}'>
+                        </div>
+                        <!-- dimension字段已移除，不再让用户手动填写 -->
+                        <div class="mb-3">
+                            <label class="form-label">Version</label>
+                            <input name="ver" class="form-control" value="v1">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Notes</label>
+                            <input name="notes" class="form-control">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="submitAddFxdefBtn">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <!-- Add Pipeline Modal -->
     <div class="modal fade" id="addPipelineModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
@@ -341,6 +533,12 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
+                    <!-- 错误提示 -->
+                    <div id="pipelineErrorAlert" class="alert alert-danger alert-dismissible fade show" style="display:none;" role="alert">
+                        <span id="pipelineErrorText"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <!-- 表单内容 -->
                     <form id="addPipelineForm">
                         <div class="mb-3">
                             <label class="form-label"><span style="color:red">*</span> Pipeline Name</label>
@@ -351,43 +549,186 @@
                             <textarea name="description" class="form-control"></textarea>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label"><span style="color:red">*</span> Sample Rating (1-10)</label>
-                            <input name="sample_rating" type="number" class="form-control" min="1" max="10" required>
+                            <label class="form-label"><span style="color:red">*</span> Chanset</label>
+                            <input name="chanset" class="form-control" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Source</label>
                             <input name="source" class="form-control">
                         </div>
+                        <!-- 步骤编辑区 -->
                         <div class="mb-3">
-                            <label class="form-label">Channel Set</label>
-                            <input name="chanset" class="form-control">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Sampling Rate (Hz)</label>
-                            <input name="fs" type="number" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Highpass (Hz)</label>
-                            <input name="hp" type="number" class="form-control">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Lowpass (Hz)</label>
-                            <input name="lp" type="number" class="form-control">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Epoch Length (s)</label>
-                            <input name="epoch" type="number" class="form-control">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Steps (JSON array)</label>
-                            <textarea name="steps" class="form-control" rows="4" placeholder='[["flt", "filter", ["raw"], {"hp": 1.0, "lp": 40.0}], ...]'></textarea>
-                            <div class="form-text">For now, please enter steps as a valid JSON array.</div>
+                            <label class="form-label">Pipeline Steps</label>
+                            <div id="pipelineStepsList"></div>
+                            <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="addStepBtn">
+                                <i class="bi bi-plus-circle"></i> Add Step
+                            </button>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-primary" id="submitAddPipelineBtn">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Feature Set Modal -->
+    <div class="modal fade" id="addFeaturesetModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Feature Set</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- 错误提示 -->
+                    <div id="featuresetErrorAlert" class="alert alert-danger alert-dismissible fade show" style="display:none;" role="alert">
+                        <span id="featuresetErrorText"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <!-- 表单内容 -->
+                    <form id="addFeaturesetForm">
+                        <div class="mb-3">
+                            <label class="form-label"><span style="color:red">*</span> Feature Set Name</label>
+                            <input name="name" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" class="form-control"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><span style="color:red">*</span> Select Feature Definitions</label>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="text-muted">Select one or more feature definitions to include in this feature set.</small>
+                                <button type="button" class="btn btn-outline-primary btn-sm" id="openAddFxdefFromFeaturesetBtn">
+                                    <i class="bi bi-plus-circle"></i> New Feature Definition
+                                </button>
+                            </div>
+                            <div class="border rounded p-3" style="max-height: 300px; overflow-y: auto;">
+                                <div id="fxdefCheckboxes">
+                                    <!-- 动态加载的复选框 -->
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="submitAddFeaturesetBtn">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Experiment Details Modal -->
+    <div class="modal fade" id="experimentModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Experiment Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row gx-3">
+                        <!-- Left Information -->
+                        <div class="col-md-4 col-12">
+                            <div class="card mb-3 h-100">
+                                <div class="card-header"><h6 class="mb-0">Experiment Information</h6></div>
+                                <div class="card-body" id="experimentInfo"></div>
+                            </div>
+                        </div>
+                        <!-- Right Statistics -->
+                        <div class="col-md-8 col-12">
+                            <div class="card mb-3 h-100">
+                                <div class="card-header"><h6 class="mb-0">Summary Statistics</h6></div>
+                                <div class="card-body" id="experimentStats"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Feature Results Table -->
+                    <div class="card">
+                        <div class="card-header" id="experimentResultsHeader"></div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Rank</th>
+                                            <th>Feature</th>
+                                            <th>Channels</th>
+                                            <th>Target</th>
+                                            <th>Metric</th>
+                                            <th>Value</th>
+                                            <th>Significance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="experimentResultsBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Experiment Modal -->
+    <div class="modal fade" id="addExperimentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Experiment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- 错误提示 -->
+                    <div id="experimentErrorAlert" class="alert alert-danger alert-dismissible fade show" style="display:none;" role="alert">
+                        <span id="experimentErrorText"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <!-- 表单内容 -->
+                    <form id="addExperimentForm">
+                        <div class="mb-3">
+                            <label class="form-label"><span style="color:red">*</span> Experiment Type</label>
+                            <select name="experiment_type" class="form-select" required>
+                                <option value="">Select experiment type...</option>
+                                <option value="correlation">Correlation Analysis</option>
+                                <option value="classification">Classification</option>
+                                <option value="feature_selection">Feature Selection</option>
+                                <option value="feature_statistics">Feature Statistics</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><span style="color:red">*</span> Dataset</label>
+                            <select name="dataset_id" class="form-select" required>
+                                <option value="">Select dataset...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><span style="color:red">*</span> Feature Set</label>
+                            <select name="feature_set_id" class="form-select" required>
+                                <option value="">Select feature set...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Experiment Name (Optional)</label>
+                            <input name="experiment_name" class="form-control" placeholder="Enter experiment name...">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Notes (Optional)</label>
+                            <textarea name="notes" class="form-control" rows="3" placeholder="Enter experiment notes..."></textarea>
+                        </div>
+                        <!-- 动态参数配置区域 -->
+                        <div id="experimentParamsContainer">
+                            <!-- 根据实验类型动态加载参数 -->
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="submitAddExperimentBtn">Run Experiment</button>
                 </div>
             </div>
         </div>
@@ -401,5 +742,19 @@
     }
     </style>
 
+    <script>
+        const STEP_REGISTRY = {{ STEP_REGISTRY | tojson }};
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 绑定modal事件
+            const modal = document.getElementById('addPipelineModal');
+            if (modal) {
+                modal.addEventListener('show.bs.modal', function () {
+                    hidePipelineError();
+                });
+            }
+        });
+    </script>
 </body>
 </html> 

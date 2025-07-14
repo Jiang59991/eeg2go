@@ -108,9 +108,11 @@ def get_pipeline_cytoscape_data(pipeline_id):
             
             # 创建节点标签
             if params:
-                params_str = json.dumps(params, sort_keys=True, separators=(",", ":"))
-                if len(params_str) > 50:
-                    params_str = params_str[:47] + "..."
+                # 格式化参数显示为 (param=value) 格式
+                param_pairs = []
+                for key, value in params.items():
+                    param_pairs.append(f"{key}={value}")
+                params_str = "(" + ", ".join(param_pairs) + ")"
                 label = f"{func_name}\n{params_str}"
             else:
                 label = func_name

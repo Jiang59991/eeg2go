@@ -409,7 +409,6 @@ def run_experiment(
                     if os.path.exists(result_file):
                         try:
                             correlation_df = pd.read_csv(result_file)
-                            # 转换为结果管理器期望的格式
                             correlation_results = {
                                 target_var: {
                                     'top_results': correlation_df,
@@ -422,29 +421,118 @@ def run_experiment(
                             )
                         except Exception as e:
                             logger.warning(f"保存相关性结果失败 {file}: {e}")
-        
+
         elif experiment_type == 'classification':
             # 读取分类分析结果文件
             classification_file = os.path.join(output_dir, 'classification_results.csv')
             if os.path.exists(classification_file):
                 try:
                     classification_df = pd.read_csv(classification_file)
-                    # 这里需要根据实际的分类结果文件格式来解析
-                    # 暂时跳过特征级别的保存，因为分类结果通常不直接对应到单个特征
-                    logger.info("分类分析结果已保存到数据库")
+                    # 假设有列: feature, importance_score, target_variable
+                    for _, row in classification_df.iterrows():
+                        feature_name = row.get('feature')
+                        importance_score = row.get('importance_score')
+                        target_var = row.get('target_variable', 'N/A')
+                        rank_position = row.get('rank_position', None)
+                        fxdef_id = result_manager._extract_fxdef_id(feature_name)
+                        conn = sqlite3.connect(db_path)
+                        c = conn.cursor()
+                        c.execute("""
+                            INSERT INTO experiment_feature_results (
+                                experiment_result_id, fxdef_id, feature_name, target_variable,
+                                result_type, metric_name, metric_value, metric_unit, rank_position
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """, (
+                            experiment_result_id, fxdef_id, feature_name, target_var,
+                            'classification_importance', 'importance_score', importance_score, 'score', rank_position
+                        ))
+                        conn.commit()
+                        conn.close()
+                    logger.info("分类特征重要性结果已保存到数据库")
                 except Exception as e:
                     logger.warning(f"保存分类结果失败: {e}")
-        
+
         elif experiment_type == 'feature_selection':
             # 读取特征选择结果文件
             selection_file = os.path.join(output_dir, 'feature_selection_results.csv')
             if os.path.exists(selection_file):
                 try:
                     selection_df = pd.read_csv(selection_file)
-                    # 这里需要根据实际的特征选择结果文件格式来解析
+                    # 假设有列: feature, selection_score, method, target_variable
+                    for _, row in selection_df.iterrows():
+                        feature_name = row.get('feature')
+                        selection_score = row.get('selection_score')
+                        method = row.get('method', 'N/A')
+                        target_var = row.get('target_variable', 'N/A')
+                        rank_position = row.get('rank_position', None)
+                        fxdef_id = result_manager._extract_fxdef_id(feature_name)
+                        conn = sqlite3.connect(db_path)
+                        c = conn.cursor()
+                        c.execute("""
+                            INSERT INTO experiment_feature_results (
+                                experiment_result_id, fxdef_id, feature_name, target_variable,
+                                result_type, metric_name, metric_value, metric_unit, rank_position, additional_data
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """, (
+                            experiment_result_id, fxdef_id, feature_name, target_var,
+                            'selection_score', 'selection_score', selection_score, 'score', rank_position,
+                            json.dumps({'method': method})
+                        ))
+                        conn.commit()
+                        conn.close()
                     logger.info("特征选择结果已保存到数据库")
                 except Exception as e:
                     logger.warning(f"保存特征选择结果失败: {e}")
+
+        elif experiment_type == 'feature_statistics':
+            # 读取特征统计结果文件
+            try:
+                # 读取特征重要性排名
+                importance_file = os.path.join(output_dir, 'feature_importance_ranking.csv')
+                if os.path.exists(importance_file):
+                    importance_df = pd.read_csv(importance_file)
+                    for _, row in importance_df.iterrows():
+                        feature_name = row['feature']
+                        importance_score = row['importance_score']
+                        rank_position = row.name + 1
+                        fxdef_id = result_manager._extract_fxdef_id(feature_name)
+                        conn = sqlite3.connect(db_path)
+                        c = conn.cursor()
+                        c.execute("""
+                            INSERT INTO experiment_feature_results (
+                                experiment_result_id, fxdef_id, feature_name, target_variable,
+                                result_type, metric_name, metric_value, metric_unit, rank_position
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """, (
+                            experiment_result_id, fxdef_id, feature_name, 'feature_importance',
+                            'statistics', 'importance_score', importance_score, 'score', rank_position
+                        ))
+                        conn.commit()
+                        conn.close()
+                    logger.info(f"特征统计结果已保存到数据库，共{len(importance_df)}个特征")
+                # 读取基本统计信息
+                basic_stats_file = os.path.join(output_dir, 'feature_basic_statistics.csv')
+                if os.path.exists(basic_stats_file):
+                    basic_stats_df = pd.read_csv(basic_stats_file, index_col=0)
+                    for feature_name, stats in basic_stats_df.iterrows():
+                        fxdef_id = result_manager._extract_fxdef_id(feature_name)
+                        if 'std' in stats:
+                            conn = sqlite3.connect(db_path)
+                            c = conn.cursor()
+                            c.execute("""
+                                INSERT INTO experiment_feature_results (
+                                    experiment_result_id, fxdef_id, feature_name, target_variable,
+                                    result_type, metric_name, metric_value, metric_unit
+                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                            """, (
+                                experiment_result_id, fxdef_id, feature_name, 'feature_variability',
+                                'statistics', 'standard_deviation', stats['std'], 'value'
+                            ))
+                            conn.commit()
+                            conn.close()
+                    logger.info("特征基本统计信息已保存到数据库")
+            except Exception as e:
+                logger.warning(f"保存特征统计结果失败: {e}")
         
         logger.info(f"Experiment completed! Results saved to: {output_dir}")
         logger.info(f"Total duration: {duration:.2f} seconds")
