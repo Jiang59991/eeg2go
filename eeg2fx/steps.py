@@ -6,6 +6,7 @@ import os
 import gc
 from eeg2fx.feature.common import auto_gc
 from logging_config import logger
+import csv
 
 DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "database", "eeg2go.db"))
 MAX_MEMORY_GB = 1  # 统一内存限制常量
@@ -13,6 +14,24 @@ MAX_MEMORY_GB = 1  # 统一内存限制常量
 class RecordingTooLargeError(Exception):
     """当录音文件过大时抛出的异常"""
     pass
+
+def build_channel_rename_dict(lookup_csv_path):
+    rename_dict = {}
+    with open(lookup_csv_path, newline='', encoding='utf-8') as csvfile:
+        reader = csv.reader(csvfile)
+        next(reader)  # 跳过表头
+        for row in reader:
+            dest = row[0].strip()
+            for src in row[1:]:
+                src = src.strip()
+                if src:
+                    rename_dict[src] = dest
+    return rename_dict
+
+# ====== 只在模块加载时读取一次csv，生成全局变量 ======
+LOOKUP_CSV_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "chanlookup.csv"))
+RENAME_DICT = build_channel_rename_dict(LOOKUP_CSV_PATH)
+# =====================================================
 
 def load_recording(recording_id):
     conn = sqlite3.connect(DB_PATH)
@@ -52,7 +71,18 @@ def load_recording(recording_id):
     else:
         logger.info(f"[load_recording] Missing metadata, using memory mapping")
         raw = mne.io.read_raw_edf(filepath, preload='auto', verbose='ERROR')
-    
+
+    # 1. 只重命名raw中存在的通道
+    channel_rename_map = {}
+    for ch in raw.ch_names:
+        if ch in RENAME_DICT:
+            channel_rename_map[ch] = RENAME_DICT[ch]
+    if channel_rename_map:
+        logger.info(f"[load_recording] Renaming channels: {channel_rename_map}")
+        raw.rename_channels(channel_rename_map)
+    else:
+        logger.info(f"[load_recording] No channels to rename according to lookup table.")
+
     return raw
 
 @auto_gc

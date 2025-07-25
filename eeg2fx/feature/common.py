@@ -19,16 +19,6 @@ def auto_gc(fn):
         return result
     return wrapper
 
-def standardize_channel_name(raw_ch_name):
-    if raw_ch_name.startswith("EEG "):
-        ch = raw_ch_name[4:]
-        if "-LE" in ch:
-            ch = ch.replace("-LE", "")
-        if "-REF" in ch:
-            ch = ch.replace("-REF", "")
-        return ch.strip().upper()
-    return raw_ch_name.strip().upper()
-
 def wrap_structured_result(values, epochs, chans):
     """
     Wrap a multi-channel (n_epochs, n_chans) result matrix into structured format per channel.

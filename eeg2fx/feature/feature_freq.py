@@ -1,6 +1,6 @@
 from logging_config import logger
 import numpy as np
-from eeg2fx.feature.common import standardize_channel_name, wrap_structured_result
+from eeg2fx.feature.common import wrap_structured_result
 from mne.time_frequency import psd_array_welch
 from scipy.stats import entropy as scipy_entropy
 from eeg2fx.feature.common import auto_gc
@@ -23,25 +23,22 @@ def bandpower(epochs, chans=None, band="alpha"):
 
     data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
     sfreq = epochs.info["sfreq"]
-    raw_ch_names = epochs.info["ch_names"]
-    std_ch_names = [standardize_channel_name(ch) for ch in raw_ch_names]
     n_epochs = data.shape[0]
+    raw_ch_names = epochs.info["ch_names"]
 
     if chans is None:
-        chans = std_ch_names
+        chans = raw_ch_names
     else:
         # Ensure chans is in list format
         if isinstance(chans, str):
             chans = [chans]
-        # Standardize input channel names
-        chans = [standardize_channel_name(ch) for ch in chans]
 
     values = []
     valid_chans = []
 
     for ch in chans:
-        if ch in std_ch_names:
-            idx = std_ch_names.index(ch)
+        if ch in raw_ch_names:
+            idx = raw_ch_names.index(ch)
             psds, freqs = psd_array_welch(data[:, idx, :], sfreq=sfreq, fmin=fmin, fmax=fmax, verbose='ERROR')
             bp = np.sum(psds, axis=1)
             values.append(bp)
@@ -73,24 +70,21 @@ def relative_power(epochs, chans=None, band="alpha"):
     data = epochs.get_data()
     sfreq = epochs.info["sfreq"]
     raw_ch_names = epochs.info["ch_names"]
-    std_ch_names = [standardize_channel_name(ch) for ch in raw_ch_names]
     n_epochs = data.shape[0]
 
     if chans is None:
-        chans = std_ch_names
+        chans = raw_ch_names
     else:
         # Ensure chans is in list format
         if isinstance(chans, str):
             chans = [chans]
-        # Standardize input channel names
-        chans = [standardize_channel_name(ch) for ch in chans]
 
     values = []
     valid_chans = []
 
     for ch in chans:
-        if ch in std_ch_names:
-            idx = std_ch_names.index(ch)
+        if ch in raw_ch_names:
+            idx = raw_ch_names.index(ch)
             
             # Calculate PSD
             psds, _ = psd_array_welch(data[:, idx, :], sfreq=sfreq, fmin=fmin_band, fmax=fmax_band, verbose='ERROR')
@@ -124,24 +118,21 @@ def spectral_entropy(epochs, chans=None):
     data = epochs.get_data()
     sfreq = epochs.info["sfreq"]
     raw_ch_names = epochs.info["ch_names"]
-    std_ch_names = [standardize_channel_name(ch) for ch in raw_ch_names]
     n_epochs = data.shape[0]
 
     if chans is None:
-        chans = std_ch_names
+        chans = raw_ch_names
     else:
         # Ensure chans is in list format
         if isinstance(chans, str):
             chans = [chans]
-        # Standardize input channel names
-        chans = [standardize_channel_name(ch) for ch in chans]
 
     values = []
     valid_chans = []
 
     for ch in chans:
-        if ch in std_ch_names:
-            idx = std_ch_names.index(ch)
+        if ch in raw_ch_names:
+            idx = raw_ch_names.index(ch)
             psds, _ = psd_array_welch(data[:, idx, :], sfreq=sfreq, fmin=fmin, fmax=fmax, verbose='ERROR')
             
             # Calculate normalized PSD
@@ -173,23 +164,22 @@ def alpha_peak_frequency(epochs, chans=None, fmin=7, fmax=13):
     data = epochs.get_data()
     sfreq = epochs.info["sfreq"]
     raw_ch_names = epochs.info["ch_names"]
-    std_ch_names = [standardize_channel_name(ch) for ch in raw_ch_names]
     n_epochs = data.shape[0]
 
     if chans is None:
-        chans = std_ch_names
+        chans = raw_ch_names
     elif isinstance(chans, str):
         chans = [chans]
     
     # Standardize input channel names
-    chans = [standardize_channel_name(ch) for ch in chans]
+    chans = [ch for ch in chans]
 
     values = []
     valid_chans = []
 
     for ch in chans:
-        if ch in std_ch_names:
-            idx = std_ch_names.index(ch)
+        if ch in raw_ch_names:
+            idx = raw_ch_names.index(ch)
             psds, freqs = psd_array_welch(data[:, idx, :], sfreq=sfreq, fmin=fmin, fmax=fmax, verbose='ERROR')
             
             # Find frequency with maximum power for each epoch
@@ -219,23 +209,22 @@ def theta_alpha_ratio(epochs, chans=None):
     data = epochs.get_data()
     sfreq = epochs.info["sfreq"]
     raw_ch_names = epochs.info["ch_names"]
-    std_ch_names = [standardize_channel_name(ch) for ch in raw_ch_names]
     n_epochs = data.shape[0]
 
     if chans is None:
-        chans = std_ch_names
+        chans = raw_ch_names
     elif isinstance(chans, str):
         chans = [chans]
     
     # Standardize input channel names
-    chans = [standardize_channel_name(ch) for ch in chans]
+    chans = [ch for ch in chans]
 
     values = []
     valid_chans = []
 
     for ch in chans:
-        if ch in std_ch_names:
-            idx = std_ch_names.index(ch)
+        if ch in raw_ch_names:
+            idx = raw_ch_names.index(ch)
             
             # Compute theta power (4-8 Hz)
             psds_theta, _ = psd_array_welch(data[:, idx, :], sfreq=sfreq, fmin=4, fmax=8, verbose='ERROR')
@@ -266,23 +255,22 @@ def spectral_edge_frequency(epochs, chans=None, percentile=95):
     data = epochs.get_data()
     sfreq = epochs.info["sfreq"]
     raw_ch_names = epochs.info["ch_names"]
-    std_ch_names = [standardize_channel_name(ch) for ch in raw_ch_names]
     n_epochs = data.shape[0]
 
     if chans is None:
-        chans = std_ch_names
+        chans = raw_ch_names
     elif isinstance(chans, str):
         chans = [chans]
     
     # Standardize input channel names
-    chans = [standardize_channel_name(ch) for ch in chans]
+    chans = [ch for ch in chans]
 
     values = []
     valid_chans = []
 
     for ch in chans:
-        if ch in std_ch_names:
-            idx = std_ch_names.index(ch)
+        if ch in raw_ch_names:
+            idx = raw_ch_names.index(ch)
             psds, freqs = psd_array_welch(data[:, idx, :], sfreq=sfreq, fmin=fmin, fmax=fmax, verbose='ERROR')
             
             edge_freqs = []
@@ -330,7 +318,6 @@ def alpha_asymmetry(epochs, chans=None):
     data = epochs.get_data()
     sfreq = epochs.info["sfreq"]
     raw_ch_names = epochs.info["ch_names"]
-    std_ch_names = [standardize_channel_name(ch) for ch in raw_ch_names]
     n_epochs = data.shape[0]
 
     # Process channel parameters
@@ -342,8 +329,8 @@ def alpha_asymmetry(epochs, chans=None):
         if "-" in chans:
             # Hyphen format: "C3-C4"
             ch1, ch2 = chans.split("-", 1)
-            ch1 = standardize_channel_name(ch1.strip())
-            ch2 = standardize_channel_name(ch2.strip())
+            ch1 = ch1.strip()
+            ch2 = ch2.strip()
             chans = [ch1, ch2]
         else:
             raise ValueError(f"Invalid channel format: {chans}. Use 'C3-C4' format for channel pairs")
@@ -352,14 +339,14 @@ def alpha_asymmetry(epochs, chans=None):
 
     # Validate channel existence
     ch1, ch2 = chans
-    if ch1 not in std_ch_names:
-        raise ValueError(f"Channel {ch1} not found in available channels: {std_ch_names}")
-    if ch2 not in std_ch_names:
-        raise ValueError(f"Channel {ch2} not found in available channels: {std_ch_names}")
+    if ch1 not in raw_ch_names:
+        raise ValueError(f"Channel {ch1} not found in available channels: {raw_ch_names}")
+    if ch2 not in raw_ch_names:
+        raise ValueError(f"Channel {ch2} not found in available channels: {raw_ch_names}")
 
     # Get channel indices
-    idx1 = std_ch_names.index(ch1)
-    idx2 = std_ch_names.index(ch2)
+    idx1 = raw_ch_names.index(ch1)
+    idx2 = raw_ch_names.index(ch2)
 
     # Calculate alpha power for both channels
     alpha_powers = []
@@ -388,22 +375,21 @@ def spectral_centroid(epochs, chans=None, fmin=1, fmax=45):
     data = epochs.get_data()
     sfreq = epochs.info["sfreq"]
     raw_ch_names = epochs.info["ch_names"]
-    std_ch_names = [standardize_channel_name(ch) for ch in raw_ch_names]
     n_epochs = data.shape[0]
 
     if chans is None:
-        chans = std_ch_names
+        chans = raw_ch_names
     elif isinstance(chans, str):
         chans = [chans]
     
-    chans = [standardize_channel_name(ch) for ch in chans]
+    chans = [ch for ch in chans]
 
     values = []
     valid_chans = []
 
     for ch in chans:
-        if ch in std_ch_names:
-            idx = std_ch_names.index(ch)
+        if ch in raw_ch_names:
+            idx = raw_ch_names.index(ch)
             psds, freqs = psd_array_welch(data[:, idx, :], sfreq=sfreq, fmin=fmin, fmax=fmax, verbose='ERROR')
             
             centroids = []
@@ -432,22 +418,21 @@ def spectral_bandwidth(epochs, chans=None, fmin=1, fmax=45):
     data = epochs.get_data()
     sfreq = epochs.info["sfreq"]
     raw_ch_names = epochs.info["ch_names"]
-    std_ch_names = [standardize_channel_name(ch) for ch in raw_ch_names]
     n_epochs = data.shape[0]
 
     if chans is None:
-        chans = std_ch_names
+        chans = raw_ch_names
     elif isinstance(chans, str):
         chans = [chans]
     
-    chans = [standardize_channel_name(ch) for ch in chans]
+    chans = [ch for ch in chans]
 
     values = []
     valid_chans = []
 
     for ch in chans:
-        if ch in std_ch_names:
-            idx = std_ch_names.index(ch)
+        if ch in raw_ch_names:
+            idx = raw_ch_names.index(ch)
             psds, freqs = psd_array_welch(data[:, idx, :], sfreq=sfreq, fmin=fmin, fmax=fmax, verbose='ERROR')
             
             bandwidths = []
@@ -477,22 +462,21 @@ def spectral_rolloff(epochs, chans=None, percentile=85, fmin=1, fmax=45):
     data = epochs.get_data()
     sfreq = epochs.info["sfreq"]
     raw_ch_names = epochs.info["ch_names"]
-    std_ch_names = [standardize_channel_name(ch) for ch in raw_ch_names]
     n_epochs = data.shape[0]
 
     if chans is None:
-        chans = std_ch_names
+        chans = raw_ch_names
     elif isinstance(chans, str):
         chans = [chans]
     
-    chans = [standardize_channel_name(ch) for ch in chans]
+    chans = [ch for ch in chans]
 
     values = []
     valid_chans = []
 
     for ch in chans:
-        if ch in std_ch_names:
-            idx = std_ch_names.index(ch)
+        if ch in raw_ch_names:
+            idx = raw_ch_names.index(ch)
             psds, freqs = psd_array_welch(data[:, idx, :], sfreq=sfreq, fmin=fmin, fmax=fmax, verbose='ERROR')
             
             rolloffs = []
@@ -526,22 +510,21 @@ def spectral_flatness(epochs, chans=None, fmin=1, fmax=45):
     data = epochs.get_data()
     sfreq = epochs.info["sfreq"]
     raw_ch_names = epochs.info["ch_names"]
-    std_ch_names = [standardize_channel_name(ch) for ch in raw_ch_names]
     n_epochs = data.shape[0]
 
     if chans is None:
-        chans = std_ch_names
+        chans = raw_ch_names
     elif isinstance(chans, str):
         chans = [chans]
     
-    chans = [standardize_channel_name(ch) for ch in chans]
+    chans = [ch for ch in chans]
 
     values = []
     valid_chans = []
 
     for ch in chans:
-        if ch in std_ch_names:
-            idx = std_ch_names.index(ch)
+        if ch in raw_ch_names:
+            idx = raw_ch_names.index(ch)
             psds, freqs = psd_array_welch(data[:, idx, :], sfreq=sfreq, fmin=fmin, fmax=fmax, verbose='ERROR')
             
             flatnesses = []
@@ -572,22 +555,21 @@ def spectral_skewness(epochs, chans=None, fmin=1, fmax=45):
     data = epochs.get_data()
     sfreq = epochs.info["sfreq"]
     raw_ch_names = epochs.info["ch_names"]
-    std_ch_names = [standardize_channel_name(ch) for ch in raw_ch_names]
     n_epochs = data.shape[0]
 
     if chans is None:
-        chans = std_ch_names
+        chans = raw_ch_names
     elif isinstance(chans, str):
         chans = [chans]
     
-    chans = [standardize_channel_name(ch) for ch in chans]
+    chans = [ch for ch in chans]
 
     values = []
     valid_chans = []
 
     for ch in chans:
-        if ch in std_ch_names:
-            idx = std_ch_names.index(ch)
+        if ch in raw_ch_names:
+            idx = raw_ch_names.index(ch)
             psds, freqs = psd_array_welch(data[:, idx, :], sfreq=sfreq, fmin=fmin, fmax=fmax, verbose='ERROR')
             
             skewnesses = []
@@ -623,22 +605,21 @@ def spectral_kurtosis(epochs, chans=None, fmin=1, fmax=45):
     data = epochs.get_data()
     sfreq = epochs.info["sfreq"]
     raw_ch_names = epochs.info["ch_names"]
-    std_ch_names = [standardize_channel_name(ch) for ch in raw_ch_names]
     n_epochs = data.shape[0]
 
     if chans is None:
-        chans = std_ch_names
+        chans = raw_ch_names
     elif isinstance(chans, str):
         chans = [chans]
     
-    chans = [standardize_channel_name(ch) for ch in chans]
+    chans = [ch for ch in chans]
 
     values = []
     valid_chans = []
 
     for ch in chans:
-        if ch in std_ch_names:
-            idx = std_ch_names.index(ch)
+        if ch in raw_ch_names:
+            idx = raw_ch_names.index(ch)
             psds, freqs = psd_array_welch(data[:, idx, :], sfreq=sfreq, fmin=fmin, fmax=fmax, verbose='ERROR')
             
             kurtoses = []
@@ -687,22 +668,21 @@ def band_energy_ratio(epochs, chans=None, band1="theta", band2="alpha"):
     data = epochs.get_data()
     sfreq = epochs.info["sfreq"]
     raw_ch_names = epochs.info["ch_names"]
-    std_ch_names = [standardize_channel_name(ch) for ch in raw_ch_names]
     n_epochs = data.shape[0]
 
     if chans is None:
-        chans = std_ch_names
+        chans = raw_ch_names
     elif isinstance(chans, str):
         chans = [chans]
     
-    chans = [standardize_channel_name(ch) for ch in chans]
+    chans = [ch for ch in chans]
 
     values = []
     valid_chans = []
 
     for ch in chans:
-        if ch in std_ch_names:
-            idx = std_ch_names.index(ch)
+        if ch in raw_ch_names:
+            idx = raw_ch_names.index(ch)
             
             # Calculate power of first frequency band
             psds1, _ = psd_array_welch(data[:, idx, :], sfreq=sfreq, fmin=fmin1, fmax=fmax1, verbose='ERROR')
@@ -732,22 +712,21 @@ def spectral_complexity(epochs, chans=None, fmin=1, fmax=45):
     data = epochs.get_data()
     sfreq = epochs.info["sfreq"]
     raw_ch_names = epochs.info["ch_names"]
-    std_ch_names = [standardize_channel_name(ch) for ch in raw_ch_names]
     n_epochs = data.shape[0]
 
     if chans is None:
-        chans = std_ch_names
+        chans = raw_ch_names
     elif isinstance(chans, str):
         chans = [chans]
     
-    chans = [standardize_channel_name(ch) for ch in chans]
+    chans = [ch for ch in chans]
 
     values = []
     valid_chans = []
 
     for ch in chans:
-        if ch in std_ch_names:
-            idx = std_ch_names.index(ch)
+        if ch in raw_ch_names:
+            idx = raw_ch_names.index(ch)
             psds, freqs = psd_array_welch(data[:, idx, :], sfreq=sfreq, fmin=fmin, fmax=fmax, verbose='ERROR')
             
             complexities = []
@@ -792,22 +771,21 @@ def frequency_modulation_index(epochs, chans=None, fmin=1, fmax=45):
     data = epochs.get_data()
     sfreq = epochs.info["sfreq"]
     raw_ch_names = epochs.info["ch_names"]
-    std_ch_names = [standardize_channel_name(ch) for ch in raw_ch_names]
     n_epochs = data.shape[0]
 
     if chans is None:
-        chans = std_ch_names
+        chans = raw_ch_names
     elif isinstance(chans, str):
         chans = [chans]
     
-    chans = [standardize_channel_name(ch) for ch in chans]
+    chans = [ch for ch in chans]
 
     values = []
     valid_chans = []
 
     for ch in chans:
-        if ch in std_ch_names:
-            idx = std_ch_names.index(ch)
+        if ch in raw_ch_names:
+            idx = raw_ch_names.index(ch)
             psds, freqs = psd_array_welch(data[:, idx, :], sfreq=sfreq, fmin=fmin, fmax=fmax, verbose='ERROR')
             
             modulation_indices = []

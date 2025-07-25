@@ -5,12 +5,11 @@ import gc
 from collections import deque
 import inspect
 from eeg2fx.featureset_grouping import build_feature_dag, load_fxdefs_for_set
-from eeg2fx.pipeline_executor import resolve_function, load_recording
+from eeg2fx.pipeline_executor import resolve_function
 from eeg2fx.pipeline_executor import toposort
 from eeg2fx.featureset_grouping import load_pipeline_structure
 from eeg2fx.feature_saver import save_feature_values
-from eeg2fx.steps import filter, reref, zscore, epoch, notch_filter, resample, ica, RecordingTooLargeError
-from eeg2fx.feature.common import standardize_channel_name
+from eeg2fx.steps import RecordingTooLargeError, load_recording
 import numpy as np
 from logging_config import logger
 
@@ -362,8 +361,8 @@ def prepare_feature_output(vals):
         }
 
 if __name__ == "__main__":
-    feature_set_id = 2
-    recording_id = 1
+    feature_set_id = 3
+    recording_id = 7
 
     print(f"Running feature set '{feature_set_id}' on recording {recording_id}")
     results = run_feature_set(feature_set_id, recording_id)

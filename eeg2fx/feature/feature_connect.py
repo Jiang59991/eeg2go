@@ -4,7 +4,7 @@ Most connectivity features are "channel-pair" features, therefore exactly two ch
 Develop a solution that allows two channels to be generated for this case
 """
 import numpy as np
-from eeg2fx.feature.common import standardize_channel_name, wrap_structured_result, auto_gc
+from eeg2fx.feature.common import wrap_structured_result, auto_gc
 from scipy.signal import coherence, hilbert
 from logging_config import logger
 import mne
@@ -30,20 +30,18 @@ def coherence_band(epochs, chans=None, band=(8, 13)):
     """
     data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
     sfreq = epochs.info["sfreq"]
-    ch_names = [standardize_channel_name(ch) for ch in epochs.info["ch_names"]]
+    ch_names = list(epochs.info["ch_names"])
     n_epochs = data.shape[0]
 
     # Process channel parameters
     if chans is None:
         raise ValueError("coherence_band requires exactly 2 channels to be specified")
     
-    # Standardize channel names
     if isinstance(chans, str):
         if "-" in chans:
-            # Hyphen format: "C3-C4"
             ch1, ch2 = chans.split("-", 1)
-            ch1 = standardize_channel_name(ch1.strip())
-            ch2 = standardize_channel_name(ch2.strip())
+            ch1 = ch1.strip()
+            ch2 = ch2.strip()
             chans = [ch1, ch2]
         else:
             raise ValueError(f"Invalid channel format: {chans}. Use 'C3-C4' format for channel pairs")
@@ -86,7 +84,7 @@ def plv(epochs, chans=None):
     data = epochs.get_data()
     n_epochs = data.shape[0]
     sfreq = epochs.info["sfreq"]
-    ch_names = [standardize_channel_name(ch) for ch in epochs.info["ch_names"]]
+    ch_names = list(epochs.info["ch_names"])
 
     if chans is None:
         raise ValueError("plv requires exactly 2 channels to be specified")
@@ -94,8 +92,8 @@ def plv(epochs, chans=None):
     if isinstance(chans, str):
         if "-" in chans:
             ch1, ch2 = chans.split("-", 1)
-            ch1 = standardize_channel_name(ch1.strip())
-            ch2 = standardize_channel_name(ch2.strip())
+            ch1 = ch1.strip()
+            ch2 = ch2.strip()
             chans = [ch1, ch2]
         else:
             raise ValueError(f"Invalid channel format: {chans}. Use 'C3-C4' format for channel pairs")
@@ -135,7 +133,7 @@ def mutual_information(epochs, chans=None, bins=20):
     """
     data = epochs.get_data()
     n_epochs = data.shape[0]
-    ch_names = [standardize_channel_name(ch) for ch in epochs.info["ch_names"]]
+    ch_names = list(epochs.info["ch_names"])
 
     if chans is None:
         raise ValueError("mutual_information requires exactly 2 channels to be specified")
@@ -143,8 +141,8 @@ def mutual_information(epochs, chans=None, bins=20):
     if isinstance(chans, str):
         if "-" in chans:
             ch1, ch2 = chans.split("-", 1)
-            ch1 = standardize_channel_name(ch1.strip())
-            ch2 = standardize_channel_name(ch2.strip())
+            ch1 = ch1.strip()
+            ch2 = ch2.strip()
             chans = [ch1, ch2]
         else:
             raise ValueError(f"Invalid channel format: {chans}. Use 'C3-C4' format for channel pairs")
@@ -185,7 +183,7 @@ def cross_correlation(epochs, chans=None, max_lag=None):
     """
     data = epochs.get_data()
     n_epochs = data.shape[0]
-    ch_names = [standardize_channel_name(ch) for ch in epochs.info["ch_names"]]
+    ch_names = list(epochs.info["ch_names"])
 
     if chans is None:
         raise ValueError("cross_correlation requires exactly 2 channels to be specified")
@@ -193,8 +191,8 @@ def cross_correlation(epochs, chans=None, max_lag=None):
     if isinstance(chans, str):
         if "-" in chans:
             ch1, ch2 = chans.split("-", 1)
-            ch1 = standardize_channel_name(ch1.strip())
-            ch2 = standardize_channel_name(ch2.strip())
+            ch1 = ch1.strip()
+            ch2 = ch2.strip()
             chans = [ch1, ch2]
         else:
             raise ValueError(f"Invalid channel format: {chans}. Use 'C3-C4' format for channel pairs")
@@ -238,7 +236,7 @@ def phase_synchronization(epochs, chans=None):
     """
     data = epochs.get_data()
     n_epochs = data.shape[0]
-    ch_names = [standardize_channel_name(ch) for ch in epochs.info["ch_names"]]
+    ch_names = list(epochs.info["ch_names"])
 
     if chans is None:
         raise ValueError("phase_synchronization requires exactly 2 channels to be specified")
@@ -246,8 +244,8 @@ def phase_synchronization(epochs, chans=None):
     if isinstance(chans, str):
         if "-" in chans:
             ch1, ch2 = chans.split("-", 1)
-            ch1 = standardize_channel_name(ch1.strip())
-            ch2 = standardize_channel_name(ch2.strip())
+            ch1 = ch1.strip()
+            ch2 = ch2.strip()
             chans = [ch1, ch2]
         else:
             raise ValueError(f"Invalid channel format: {chans}. Use 'C3-C4' format for channel pairs")
@@ -297,7 +295,7 @@ def amplitude_correlation(epochs, chans=None):
     """
     data = epochs.get_data()
     n_epochs = data.shape[0]
-    ch_names = [standardize_channel_name(ch) for ch in epochs.info["ch_names"]]
+    ch_names = list(epochs.info["ch_names"])
 
     # Process channel parameters
     if chans is None:
@@ -306,8 +304,8 @@ def amplitude_correlation(epochs, chans=None):
     if isinstance(chans, str):
         if "-" in chans:
             ch1, ch2 = chans.split("-", 1)
-            ch1 = standardize_channel_name(ch1.strip())
-            ch2 = standardize_channel_name(ch2.strip())
+            ch1 = ch1.strip()
+            ch2 = ch2.strip()
             chans = [ch1, ch2]
         else:
             raise ValueError(f"Invalid channel format: {chans}. Use 'C3-C4' format for channel pairs")
@@ -354,7 +352,7 @@ def granger_causality(epochs, chans=None, order=5):
     """
     data = epochs.get_data()
     n_epochs = data.shape[0]
-    ch_names = [standardize_channel_name(ch) for ch in epochs.info["ch_names"]]
+    ch_names = list(epochs.info["ch_names"])
 
     if chans is None:
         raise ValueError("granger_causality requires exactly 2 channels to be specified")
@@ -362,8 +360,8 @@ def granger_causality(epochs, chans=None, order=5):
     if isinstance(chans, str):
         if "-" in chans:
             ch1, ch2 = chans.split("-", 1)
-            ch1 = standardize_channel_name(ch1.strip())
-            ch2 = standardize_channel_name(ch2.strip())
+            ch1 = ch1.strip()
+            ch2 = ch2.strip()
             chans = [ch1, ch2]
         else:
             raise ValueError(f"Invalid channel format: {chans}. Use 'C3-C4' format for channel pairs")
@@ -433,7 +431,7 @@ def directed_transfer_function(epochs, chans=None, order=5):
     """
     data = epochs.get_data()
     n_epochs = data.shape[0]
-    ch_names = [standardize_channel_name(ch) for ch in epochs.info["ch_names"]]
+    ch_names = list(epochs.info["ch_names"])
 
     if chans is None:
         raise ValueError("directed_transfer_function requires exactly 2 channels to be specified")
@@ -441,8 +439,8 @@ def directed_transfer_function(epochs, chans=None, order=5):
     if isinstance(chans, str):
         if "-" in chans:
             ch1, ch2 = chans.split("-", 1)
-            ch1 = standardize_channel_name(ch1.strip())
-            ch2 = standardize_channel_name(ch2.strip())
+            ch1 = ch1.strip()
+            ch2 = ch2.strip()
             chans = [ch1, ch2]
         else:
             raise ValueError(f"Invalid channel format: {chans}. Use 'C3-C4' format for channel pairs")
@@ -489,7 +487,7 @@ def synchronization_likelihood(epochs, chans=None, threshold=0.1):
     """
     data = epochs.get_data()
     n_epochs = data.shape[0]
-    ch_names = [standardize_channel_name(ch) for ch in epochs.info["ch_names"]]
+    ch_names = list(epochs.info["ch_names"])
 
     if chans is None:
         raise ValueError("synchronization_likelihood requires exactly 2 channels to be specified")
@@ -497,8 +495,8 @@ def synchronization_likelihood(epochs, chans=None, threshold=0.1):
     if isinstance(chans, str):
         if "-" in chans:
             ch1, ch2 = chans.split("-", 1)
-            ch1 = standardize_channel_name(ch1.strip())
-            ch2 = standardize_channel_name(ch2.strip())
+            ch1 = ch1.strip()
+            ch2 = ch2.strip()
             chans = [ch1, ch2]
         else:
             raise ValueError(f"Invalid channel format: {chans}. Use 'C3-C4' format for channel pairs")

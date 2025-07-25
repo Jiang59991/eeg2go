@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.stats import skew as scipy_skew, kurtosis as scipy_kurt
-from eeg2fx.feature.common import standardize_channel_name, wrap_structured_result, auto_gc
+from eeg2fx.feature.common import wrap_structured_result, auto_gc
 from logging_config import logger
 import mne
 mne.set_log_level('WARNING')
@@ -10,11 +10,10 @@ mne.set_log_level('WARNING')
 def mean(epochs, chans=None):
     data = epochs.get_data()
     raw_ch_names = epochs.info["ch_names"]
-    std_ch_names = [standardize_channel_name(ch) for ch in raw_ch_names]
     n_epochs = data.shape[0]
 
     if chans is None:
-        chans = std_ch_names
+        chans = raw_ch_names
     elif isinstance(chans, str):
         chans = [chans]
 
@@ -22,8 +21,8 @@ def mean(epochs, chans=None):
     valid_chans = []
 
     for ch in chans:
-        if ch in std_ch_names:
-            idx = std_ch_names.index(ch)
+        if ch in raw_ch_names:
+            idx = raw_ch_names.index(ch)
             val = np.mean(data[:, idx, :], axis=1)
         else:
             val = np.full(n_epochs, np.nan)
@@ -38,11 +37,10 @@ def mean(epochs, chans=None):
 def std(epochs, chans=None):
     data = epochs.get_data()
     raw_ch_names = epochs.info["ch_names"]
-    std_ch_names = [standardize_channel_name(ch) for ch in raw_ch_names]
     n_epochs = data.shape[0]
 
     if chans is None:
-        chans = std_ch_names
+        chans = raw_ch_names
     elif isinstance(chans, str):
         chans = [chans]
 
@@ -50,8 +48,8 @@ def std(epochs, chans=None):
     valid_chans = []
 
     for ch in chans:
-        if ch in std_ch_names:
-            idx = std_ch_names.index(ch)
+        if ch in raw_ch_names:
+            idx = raw_ch_names.index(ch)
             val = np.std(data[:, idx, :], axis=1)
         else:
             val = np.full(n_epochs, np.nan)
@@ -66,11 +64,10 @@ def std(epochs, chans=None):
 def skew(epochs, chans=None):
     data = epochs.get_data()
     raw_ch_names = epochs.info["ch_names"]
-    std_ch_names = [standardize_channel_name(ch) for ch in raw_ch_names]
     n_epochs = data.shape[0]
 
     if chans is None:
-        chans = std_ch_names
+        chans = raw_ch_names
     elif isinstance(chans, str):
         chans = [chans]
 
@@ -78,8 +75,8 @@ def skew(epochs, chans=None):
     valid_chans = []
 
     for ch in chans:
-        if ch in std_ch_names:
-            idx = std_ch_names.index(ch)
+        if ch in raw_ch_names:
+            idx = raw_ch_names.index(ch)
             val = np.array([scipy_skew(epoch) for epoch in data[:, idx, :]])
         else:
             val = np.full(n_epochs, np.nan)
@@ -94,11 +91,10 @@ def skew(epochs, chans=None):
 def kurt(epochs, chans=None):
     data = epochs.get_data()
     raw_ch_names = epochs.info["ch_names"]
-    std_ch_names = [standardize_channel_name(ch) for ch in raw_ch_names]
     n_epochs = data.shape[0]
 
     if chans is None:
-        chans = std_ch_names
+        chans = raw_ch_names
     elif isinstance(chans, str):
         chans = [chans]
 
@@ -106,8 +102,8 @@ def kurt(epochs, chans=None):
     valid_chans = []
 
     for ch in chans:
-        if ch in std_ch_names:
-            idx = std_ch_names.index(ch)
+        if ch in raw_ch_names:
+            idx = raw_ch_names.index(ch)
             val = np.array([scipy_kurt(epoch, fisher=True, bias=False) for epoch in data[:, idx, :]])
         else:
             val = np.full(n_epochs, np.nan)
@@ -121,7 +117,7 @@ def kurt(epochs, chans=None):
 @auto_gc
 def zscore_stddev(epochs, chans=None):
     data = epochs.get_data()  # (n_epochs, n_channels, n_times)
-    ch_names = [standardize_channel_name(ch) for ch in epochs.info["ch_names"]]
+    ch_names = list(epochs.info["ch_names"])
 
     if chans is None:
         chans = ch_names

@@ -1,7 +1,7 @@
 import numpy as np
 import pywt
 from scipy.signal import stft
-from eeg2fx.feature.common import standardize_channel_name, wrap_structured_result, auto_gc
+from eeg2fx.feature.common import wrap_structured_result, auto_gc
 from logging_config import logger
 import mne
 mne.set_log_level('WARNING')
@@ -14,7 +14,7 @@ def wavelet_entropy(epochs, chans=None, wavelet="db4", level=4):
     """
     data = epochs.get_data()
     n_epochs = data.shape[0]
-    ch_names = [standardize_channel_name(ch) for ch in epochs.info["ch_names"]]
+    ch_names = list(epochs.info["ch_names"])
 
     if chans is None:
         chans = ch_names
@@ -52,7 +52,7 @@ def stft_power(epochs, chans=None, band=(8, 13)):
     data = epochs.get_data()
     n_epochs = data.shape[0]
     sfreq = epochs.info["sfreq"]
-    ch_names = [standardize_channel_name(ch) for ch in epochs.info["ch_names"]]
+    ch_names = list(epochs.info["ch_names"])
 
     if chans is None:
         chans = ch_names
