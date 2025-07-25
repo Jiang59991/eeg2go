@@ -12,10 +12,12 @@ from eeg2fx.feature_saver import save_feature_values
 from eeg2fx.steps import RecordingTooLargeError, load_recording
 import numpy as np
 from logging_config import logger
+from eeg2fx.feature.common import wrap_structured_result, auto_gc
 
 DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "database", "eeg2go.db"))
 MAX_MEMORY_GB = 3  # Set the memory usage limit for a single recording file (GB)
 
+@auto_gc
 def load_cached_feature_value(fxid, recording_id):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -50,6 +52,7 @@ def load_cached_feature_value(fxid, recording_id):
         return result
     return None
 
+@auto_gc
 def run_pipeline_with_cache(pipeid, recording_id, value_cache, node_output):
     """
     Execute one pipeline, use shared value_cache to avoid redoing nodes.
@@ -92,6 +95,7 @@ def run_pipeline_with_cache(pipeid, recording_id, value_cache, node_output):
 
     return node_output
 
+@auto_gc
 def check_all_features_cached(feature_set_id: str, recording_id: int) -> tuple[bool, dict]:
     """
     检查特征集中的所有特征是否都已经在数据库中缓存
@@ -118,6 +122,7 @@ def check_all_features_cached(feature_set_id: str, recording_id: int) -> tuple[b
     
     return all_cached, results
 
+@auto_gc
 def run_feature_set(feature_set_id: str, recording_id: int):
     """
     Execute a feature set extraction task for a single recording file.
@@ -251,6 +256,7 @@ def run_feature_set(feature_set_id: str, recording_id: int):
 
     return results
 
+@auto_gc
 def get_pipeline_output_node(pipeid):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -262,16 +268,15 @@ def get_pipeline_output_node(pipeid):
     return row[0]
 
 
+@auto_gc
 def split_channel(result_dict, chan):
     """
     Intelligently extract data from the dictionary returned by the feature function for the specified channel.
     It will try in turn:
     1. Direct match (e.g., 'C3' in {'C3': ...})
     2. Case-insensitive match (e.g., 'pz' in {'PZ': ...})
-    3. Standardized name match (e.g., 'EEG Fp1-REF' vs 'FP1')
-    4. Channel pair match (e.g., 'C3-C4' in {'C3-C4_asymmetry': ...})
+    3. Channel pair match (e.g., 'C3-C4' in {'C3-C4_asymmetry': ...})
     """
-    
     if not isinstance(result_dict, dict):
         return []
 
@@ -285,22 +290,16 @@ def split_channel(result_dict, chan):
         if key.upper() == chan_upper:
             return value
 
-    # 3. Standardized match
-    std_chan = standardize_channel_name(chan)
-    for key, value in result_dict.items():
-        std_key = standardize_channel_name(key)
-        if std_key == std_chan:
-            return value
-    
-    # 4. Channel pair match (for channel pair features)
+    # 3. Channel pair match (for channel pair features)
     # Look for keys that start with the channel pair followed by underscore
     # e.g., 'C3-C4' should match 'C3-C4_asymmetry', 'C3-C4_coherence', etc.
     for key, value in result_dict.items():
         if key.startswith(chan + "_"):
             return value
-            
+
     return []
 
+@auto_gc
 def prepare_feature_output(vals):
     """
     Prepare feature output for storage and retrieval.
