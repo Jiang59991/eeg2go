@@ -348,7 +348,17 @@
                         <!-- Right DAG Visualization -->
                         <div class="col-md-7 col-12">
                             <div class="card mb-3 h-100">
-                                <div class="card-header"><h6 class="mb-0">Merged Pipeline DAG</h6></div>
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">Merged Pipeline DAG</h6>
+                                    <div class="btn-group btn-group-sm">
+                                        <button id="dagExecuteBtn" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-play-circle"></i> Execute DAG
+                                        </button>
+                                        <button id="dagStatusBtn" class="btn btn-outline-info btn-sm">
+                                            <i class="bi bi-info-circle"></i> Status
+                                        </button>
+                                    </div>
+                                </div>
                                 <div class="card-body position-relative" style="min-height:400px;">
                                     <div id="featureset-cytoscape" style="width: 100%; height: 400px;"></div>
                                     <div class="cy-zoom-controls">
@@ -665,6 +675,82 @@
                                         </tr>
                                     </thead>
                                     <tbody id="experimentResultsBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DAG Execution Status Modal -->
+    <div class="modal fade" id="dagStatusModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">DAG Execution Status</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Execution Summary -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h4 id="totalNodes" class="text-primary">0</h4>
+                                    <p class="card-text">Total Nodes</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h4 id="successNodes" class="text-success">0</h4>
+                                    <p class="card-text">Success</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h4 id="failedNodes" class="text-danger">0</h4>
+                                    <p class="card-text">Failed</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h4 id="totalDuration" class="text-info">0s</h4>
+                                    <p class="card-text">Duration</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Node Details Table -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">Node Execution Details</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Node ID</th>
+                                            <th>Function</th>
+                                            <th>Status</th>
+                                            <th>Duration</th>
+                                            <th>Pipelines</th>
+                                            <th>FxDefs</th>
+                                            <th>Error</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="nodeDetailsTableBody">
+                                        <!-- 动态填充节点详情 -->
+                                    </tbody>
                                 </table>
                             </div>
                         </div>

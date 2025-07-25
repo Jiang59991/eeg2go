@@ -163,3 +163,13 @@ FEATURE_FUNCS = {
 UTILITY_FUNCS = {
     "split_channel": split_channel,
 }
+
+def resolve_function(func_name):
+    """解析函数名称到实际函数"""
+    if func_name in PREPROCESSING_FUNCS:
+        return PREPROCESSING_FUNCS[func_name]
+    if func_name in FEATURE_FUNCS:
+        return FEATURE_FUNCS[func_name]
+    if func_name in UTILITY_FUNCS:
+        return UTILITY_FUNCS[func_name]
+    raise ValueError(f"Function '{func_name}' is not registered in function_registry.")

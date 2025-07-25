@@ -1,0 +1,214 @@
+{
+  "filter_36485993": {
+    "func": "filter",
+    "inputnodes": [
+      "raw"
+    ],
+    "params": {
+      "hp": 1.0,
+      "lp": 35.0
+    },
+    "pipeline_paths": [
+      [
+        5,
+        "82f16a78e7ce243e8ae69a3d222059f6",
+        "cdfb2b420f33c59c8277e9d4a72229ac",
+        "183aa280e6047f3091f2572becedda78"
+      ]
+    ],
+    "fxdef_ids": [
+      154,
+      155,
+      156
+    ],
+    "upstream_paths": [
+      [
+        "82f16a78e7ce243e8ae69a3d222059f6",
+        "cdfb2b420f33c59c8277e9d4a72229ac",
+        "raw",
+        "183aa280e6047f3091f2572becedda78"
+      ]
+    ]
+  },
+  "raw": {
+    "func": "raw",
+    "inputnodes": [],
+    "params": {},
+    "pipeline_paths": [
+      [
+        5,
+        "f3f1e05db168e250d74d4958cb954706",
+        "",
+        "cdfb2b420f33c59c8277e9d4a72229ac"
+      ]
+    ],
+    "fxdef_ids": [
+      154,
+      155,
+      156
+    ],
+    "upstream_paths": [
+      [
+        "f3f1e05db168e250d74d4958cb954706",
+        "",
+        null,
+        "cdfb2b420f33c59c8277e9d4a72229ac"
+      ]
+    ]
+  },
+  "epoch_c7f91ab6": {
+    "func": "epoch",
+    "inputnodes": [
+      "filter_36485993"
+    ],
+    "params": {
+      "duration": 2.0
+    },
+    "pipeline_paths": [
+      [
+        5,
+        "4a7ff8d9a03126065a83bb7067c15485",
+        "183aa280e6047f3091f2572becedda78",
+        "63f65889487ec23bf1da214fa3c96c4d"
+      ]
+    ],
+    "fxdef_ids": [
+      154,
+      155,
+      156
+    ],
+    "upstream_paths": [
+      [
+        "4a7ff8d9a03126065a83bb7067c15485",
+        "183aa280e6047f3091f2572becedda78",
+        "filter_36485993",
+        "63f65889487ec23bf1da214fa3c96c4d"
+      ]
+    ]
+  },
+  "spectral_entropy_e3c4e4d6": {
+    "func": "feature - spectral_entropy",
+    "inputnodes": [
+      "epoch_c7f91ab6"
+    ],
+    "params": {},
+    "meta": {},
+    "pipeline_paths": [
+      [
+        5,
+        "spectral_entropy_e3c4e4d6",
+        "63f65889487ec23bf1da214fa3c96c4d",
+        "46c0eb35c1a6ad298c2d036a9e5087fd"
+      ]
+    ],
+    "fxdef_ids": [
+      154,
+      155,
+      156
+    ],
+    "upstream_paths": [
+      [
+        "spectral_entropy_e3c4e4d6",
+        "63f65889487ec23bf1da214fa3c96c4d",
+        "epoch_c7f91ab6",
+        "46c0eb35c1a6ad298c2d036a9e5087fd"
+      ]
+    ]
+  },
+  "spectral_entropy_e3c4e4d6__C3": {
+    "func": "split_channel",
+    "inputnodes": [
+      "spectral_entropy_e3c4e4d6"
+    ],
+    "params": {
+      "chan": "C3"
+    },
+    "meta": {
+      "fxdef_id": 154,
+      "chan": "C3"
+    },
+    "pipeline_paths": [
+      [
+        5,
+        "spectral_entropy_e3c4e4d6__C3",
+        "46c0eb35c1a6ad298c2d036a9e5087fd",
+        "34db2a5177d2f843481da98871ad3089"
+      ]
+    ],
+    "fxdef_ids": [
+      154
+    ],
+    "upstream_paths": [
+      [
+        "spectral_entropy_e3c4e4d6__C3",
+        "46c0eb35c1a6ad298c2d036a9e5087fd",
+        "spectral_entropy_e3c4e4d6",
+        "34db2a5177d2f843481da98871ad3089"
+      ]
+    ]
+  },
+  "spectral_entropy_e3c4e4d6__C4": {
+    "func": "split_channel",
+    "inputnodes": [
+      "spectral_entropy_e3c4e4d6"
+    ],
+    "params": {
+      "chan": "C4"
+    },
+    "meta": {
+      "fxdef_id": 155,
+      "chan": "C4"
+    },
+    "pipeline_paths": [
+      [
+        5,
+        "spectral_entropy_e3c4e4d6__C4",
+        "46c0eb35c1a6ad298c2d036a9e5087fd",
+        "afc9aeb7653e92c18435edc73984ecf8"
+      ]
+    ],
+    "fxdef_ids": [
+      155
+    ],
+    "upstream_paths": [
+      [
+        "spectral_entropy_e3c4e4d6__C4",
+        "46c0eb35c1a6ad298c2d036a9e5087fd",
+        "spectral_entropy_e3c4e4d6",
+        "afc9aeb7653e92c18435edc73984ecf8"
+      ]
+    ]
+  },
+  "spectral_entropy_e3c4e4d6__Pz": {
+    "func": "split_channel",
+    "inputnodes": [
+      "spectral_entropy_e3c4e4d6"
+    ],
+    "params": {
+      "chan": "Pz"
+    },
+    "meta": {
+      "fxdef_id": 156,
+      "chan": "Pz"
+    },
+    "pipeline_paths": [
+      [
+        5,
+        "spectral_entropy_e3c4e4d6__Pz",
+        "46c0eb35c1a6ad298c2d036a9e5087fd",
+        "673ad17fe568ba9faeddb1e5890955a1"
+      ]
+    ],
+    "fxdef_ids": [
+      156
+    ],
+    "upstream_paths": [
+      [
+        "spectral_entropy_e3c4e4d6__Pz",
+        "46c0eb35c1a6ad298c2d036a9e5087fd",
+        "spectral_entropy_e3c4e4d6",
+        "673ad17fe568ba9faeddb1e5890955a1"
+      ]
+    ]
+  }
+}

@@ -1,0 +1,4514 @@
+{
+  "filter_11f1ce89": {
+    "func": "filter",
+    "inputnodes": [
+      "raw"
+    ],
+    "params": {
+      "hp": 1.0,
+      "lp": 40.0
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "dae1973bec47d66af31384b627a62949",
+        "cdfb2b420f33c59c8277e9d4a72229ac",
+        "6c6ee062062cc07186ab8faaa1796901"
+      ]
+    ],
+    "fxdef_ids": [
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107,
+      108,
+      109,
+      110,
+      111,
+      112,
+      113,
+      114,
+      115,
+      116,
+      117,
+      118,
+      119,
+      120,
+      121,
+      122,
+      123,
+      124,
+      125,
+      126,
+      127,
+      128,
+      129,
+      130,
+      131,
+      132,
+      133,
+      134,
+      135,
+      136,
+      137,
+      138,
+      139,
+      140,
+      141,
+      142,
+      143,
+      144,
+      145,
+      146,
+      147,
+      148,
+      149,
+      150,
+      151,
+      152,
+      153
+    ],
+    "upstream_paths": [
+      [
+        "dae1973bec47d66af31384b627a62949",
+        "cdfb2b420f33c59c8277e9d4a72229ac",
+        "raw",
+        "6c6ee062062cc07186ab8faaa1796901"
+      ]
+    ]
+  },
+  "raw": {
+    "func": "raw",
+    "inputnodes": [],
+    "params": {},
+    "pipeline_paths": [
+      [
+        1,
+        "f3f1e05db168e250d74d4958cb954706",
+        "",
+        "cdfb2b420f33c59c8277e9d4a72229ac"
+      ]
+    ],
+    "fxdef_ids": [
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107,
+      108,
+      109,
+      110,
+      111,
+      112,
+      113,
+      114,
+      115,
+      116,
+      117,
+      118,
+      119,
+      120,
+      121,
+      122,
+      123,
+      124,
+      125,
+      126,
+      127,
+      128,
+      129,
+      130,
+      131,
+      132,
+      133,
+      134,
+      135,
+      136,
+      137,
+      138,
+      139,
+      140,
+      141,
+      142,
+      143,
+      144,
+      145,
+      146,
+      147,
+      148,
+      149,
+      150,
+      151,
+      152,
+      153
+    ],
+    "upstream_paths": [
+      [
+        "f3f1e05db168e250d74d4958cb954706",
+        "",
+        null,
+        "cdfb2b420f33c59c8277e9d4a72229ac"
+      ]
+    ]
+  },
+  "reref_97405fcd": {
+    "func": "reref",
+    "inputnodes": [
+      "filter_11f1ce89"
+    ],
+    "params": {},
+    "pipeline_paths": [
+      [
+        1,
+        "01d02822bc67be20c04c9378babc8db6",
+        "6c6ee062062cc07186ab8faaa1796901",
+        "c486e1e690db32e2fd7fde081863e41a"
+      ]
+    ],
+    "fxdef_ids": [
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107,
+      108,
+      109,
+      110,
+      111,
+      112,
+      113,
+      114,
+      115,
+      116,
+      117,
+      118,
+      119,
+      120,
+      121,
+      122,
+      123,
+      124,
+      125,
+      126,
+      127,
+      128,
+      129,
+      130,
+      131,
+      132,
+      133,
+      134,
+      135,
+      136,
+      137,
+      138,
+      139,
+      140,
+      141,
+      142,
+      143,
+      144,
+      145,
+      146,
+      147,
+      148,
+      149,
+      150,
+      151,
+      152,
+      153
+    ],
+    "upstream_paths": [
+      [
+        "01d02822bc67be20c04c9378babc8db6",
+        "6c6ee062062cc07186ab8faaa1796901",
+        "filter_11f1ce89",
+        "c486e1e690db32e2fd7fde081863e41a"
+      ]
+    ]
+  },
+  "epoch_76d1462d": {
+    "func": "epoch",
+    "inputnodes": [
+      "reref_97405fcd"
+    ],
+    "params": {
+      "duration": 5.0
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "c2658026d045f4938f6595c115464630",
+        "c486e1e690db32e2fd7fde081863e41a",
+        "74e82f263f802294c858ec5b001c1ac6"
+      ]
+    ],
+    "fxdef_ids": [
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107,
+      108,
+      109,
+      110,
+      111,
+      112,
+      113,
+      114,
+      115,
+      116,
+      117,
+      118,
+      119,
+      120,
+      121,
+      122,
+      123,
+      124,
+      125,
+      126,
+      127,
+      128,
+      129,
+      130,
+      131,
+      132,
+      133,
+      134,
+      135,
+      136,
+      137,
+      138,
+      139,
+      140,
+      141,
+      142,
+      143,
+      144,
+      145,
+      146,
+      147,
+      148,
+      149,
+      150,
+      151,
+      152,
+      153
+    ],
+    "upstream_paths": [
+      [
+        "c2658026d045f4938f6595c115464630",
+        "c486e1e690db32e2fd7fde081863e41a",
+        "reref_97405fcd",
+        "74e82f263f802294c858ec5b001c1ac6"
+      ]
+    ]
+  },
+  "mean_amplitude_611b7f7e": {
+    "func": "feature - mean_amplitude",
+    "inputnodes": [
+      "epoch_76d1462d"
+    ],
+    "params": {},
+    "meta": {},
+    "pipeline_paths": [
+      [
+        1,
+        "mean_amplitude_611b7f7e",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "78cdfa84e40e9f29b5725de0328207ba"
+      ]
+    ],
+    "fxdef_ids": [
+      51,
+      52,
+      53,
+      54,
+      55
+    ],
+    "upstream_paths": [
+      [
+        "mean_amplitude_611b7f7e",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "epoch_76d1462d",
+        "78cdfa84e40e9f29b5725de0328207ba"
+      ]
+    ]
+  },
+  "mean_amplitude_611b7f7e__C3": {
+    "func": "split_channel",
+    "inputnodes": [
+      "mean_amplitude_611b7f7e"
+    ],
+    "params": {
+      "chan": "C3"
+    },
+    "meta": {
+      "fxdef_id": 51,
+      "chan": "C3"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "mean_amplitude_611b7f7e__C3",
+        "78cdfa84e40e9f29b5725de0328207ba",
+        "98afab4c11417db726f061bb45c891d5"
+      ]
+    ],
+    "fxdef_ids": [
+      51
+    ],
+    "upstream_paths": [
+      [
+        "mean_amplitude_611b7f7e__C3",
+        "78cdfa84e40e9f29b5725de0328207ba",
+        "mean_amplitude_611b7f7e",
+        "98afab4c11417db726f061bb45c891d5"
+      ]
+    ]
+  },
+  "mean_amplitude_611b7f7e__C4": {
+    "func": "split_channel",
+    "inputnodes": [
+      "mean_amplitude_611b7f7e"
+    ],
+    "params": {
+      "chan": "C4"
+    },
+    "meta": {
+      "fxdef_id": 52,
+      "chan": "C4"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "mean_amplitude_611b7f7e__C4",
+        "78cdfa84e40e9f29b5725de0328207ba",
+        "765f0f7d3f1b1ce7c062504c80b49300"
+      ]
+    ],
+    "fxdef_ids": [
+      52
+    ],
+    "upstream_paths": [
+      [
+        "mean_amplitude_611b7f7e__C4",
+        "78cdfa84e40e9f29b5725de0328207ba",
+        "mean_amplitude_611b7f7e",
+        "765f0f7d3f1b1ce7c062504c80b49300"
+      ]
+    ]
+  },
+  "mean_amplitude_611b7f7e__Pz": {
+    "func": "split_channel",
+    "inputnodes": [
+      "mean_amplitude_611b7f7e"
+    ],
+    "params": {
+      "chan": "Pz"
+    },
+    "meta": {
+      "fxdef_id": 53,
+      "chan": "Pz"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "mean_amplitude_611b7f7e__Pz",
+        "78cdfa84e40e9f29b5725de0328207ba",
+        "3152782d2d136d674f57a2bb9913b4dd"
+      ]
+    ],
+    "fxdef_ids": [
+      53
+    ],
+    "upstream_paths": [
+      [
+        "mean_amplitude_611b7f7e__Pz",
+        "78cdfa84e40e9f29b5725de0328207ba",
+        "mean_amplitude_611b7f7e",
+        "3152782d2d136d674f57a2bb9913b4dd"
+      ]
+    ]
+  },
+  "mean_amplitude_611b7f7e__O1": {
+    "func": "split_channel",
+    "inputnodes": [
+      "mean_amplitude_611b7f7e"
+    ],
+    "params": {
+      "chan": "O1"
+    },
+    "meta": {
+      "fxdef_id": 54,
+      "chan": "O1"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "mean_amplitude_611b7f7e__O1",
+        "78cdfa84e40e9f29b5725de0328207ba",
+        "cc0241e7d0b76fa19c1a67e4c6bc0a53"
+      ]
+    ],
+    "fxdef_ids": [
+      54
+    ],
+    "upstream_paths": [
+      [
+        "mean_amplitude_611b7f7e__O1",
+        "78cdfa84e40e9f29b5725de0328207ba",
+        "mean_amplitude_611b7f7e",
+        "cc0241e7d0b76fa19c1a67e4c6bc0a53"
+      ]
+    ]
+  },
+  "mean_amplitude_611b7f7e__O2": {
+    "func": "split_channel",
+    "inputnodes": [
+      "mean_amplitude_611b7f7e"
+    ],
+    "params": {
+      "chan": "O2"
+    },
+    "meta": {
+      "fxdef_id": 55,
+      "chan": "O2"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "mean_amplitude_611b7f7e__O2",
+        "78cdfa84e40e9f29b5725de0328207ba",
+        "b6ab9193379adc315936e1a898209521"
+      ]
+    ],
+    "fxdef_ids": [
+      55
+    ],
+    "upstream_paths": [
+      [
+        "mean_amplitude_611b7f7e__O2",
+        "78cdfa84e40e9f29b5725de0328207ba",
+        "mean_amplitude_611b7f7e",
+        "b6ab9193379adc315936e1a898209521"
+      ]
+    ]
+  },
+  "rms_3c760be0": {
+    "func": "feature - rms",
+    "inputnodes": [
+      "epoch_76d1462d"
+    ],
+    "params": {},
+    "meta": {},
+    "pipeline_paths": [
+      [
+        1,
+        "rms_3c760be0",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "34b4225ddbf44033358615fd805fa355"
+      ]
+    ],
+    "fxdef_ids": [
+      56,
+      57,
+      58,
+      59,
+      60
+    ],
+    "upstream_paths": [
+      [
+        "rms_3c760be0",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "epoch_76d1462d",
+        "34b4225ddbf44033358615fd805fa355"
+      ]
+    ]
+  },
+  "rms_3c760be0__C3": {
+    "func": "split_channel",
+    "inputnodes": [
+      "rms_3c760be0"
+    ],
+    "params": {
+      "chan": "C3"
+    },
+    "meta": {
+      "fxdef_id": 56,
+      "chan": "C3"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "rms_3c760be0__C3",
+        "34b4225ddbf44033358615fd805fa355",
+        "2c5bb4427ec0cd66c479fc0c4c67128f"
+      ]
+    ],
+    "fxdef_ids": [
+      56
+    ],
+    "upstream_paths": [
+      [
+        "rms_3c760be0__C3",
+        "34b4225ddbf44033358615fd805fa355",
+        "rms_3c760be0",
+        "2c5bb4427ec0cd66c479fc0c4c67128f"
+      ]
+    ]
+  },
+  "rms_3c760be0__C4": {
+    "func": "split_channel",
+    "inputnodes": [
+      "rms_3c760be0"
+    ],
+    "params": {
+      "chan": "C4"
+    },
+    "meta": {
+      "fxdef_id": 57,
+      "chan": "C4"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "rms_3c760be0__C4",
+        "34b4225ddbf44033358615fd805fa355",
+        "b4449f45b76957bd5697546192d48ab5"
+      ]
+    ],
+    "fxdef_ids": [
+      57
+    ],
+    "upstream_paths": [
+      [
+        "rms_3c760be0__C4",
+        "34b4225ddbf44033358615fd805fa355",
+        "rms_3c760be0",
+        "b4449f45b76957bd5697546192d48ab5"
+      ]
+    ]
+  },
+  "rms_3c760be0__Pz": {
+    "func": "split_channel",
+    "inputnodes": [
+      "rms_3c760be0"
+    ],
+    "params": {
+      "chan": "Pz"
+    },
+    "meta": {
+      "fxdef_id": 58,
+      "chan": "Pz"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "rms_3c760be0__Pz",
+        "34b4225ddbf44033358615fd805fa355",
+        "80fe1e4d7f5c3d4630fea79d21537cc4"
+      ]
+    ],
+    "fxdef_ids": [
+      58
+    ],
+    "upstream_paths": [
+      [
+        "rms_3c760be0__Pz",
+        "34b4225ddbf44033358615fd805fa355",
+        "rms_3c760be0",
+        "80fe1e4d7f5c3d4630fea79d21537cc4"
+      ]
+    ]
+  },
+  "rms_3c760be0__O1": {
+    "func": "split_channel",
+    "inputnodes": [
+      "rms_3c760be0"
+    ],
+    "params": {
+      "chan": "O1"
+    },
+    "meta": {
+      "fxdef_id": 59,
+      "chan": "O1"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "rms_3c760be0__O1",
+        "34b4225ddbf44033358615fd805fa355",
+        "614fa55c045e8f17ba87dcc3ddf45b97"
+      ]
+    ],
+    "fxdef_ids": [
+      59
+    ],
+    "upstream_paths": [
+      [
+        "rms_3c760be0__O1",
+        "34b4225ddbf44033358615fd805fa355",
+        "rms_3c760be0",
+        "614fa55c045e8f17ba87dcc3ddf45b97"
+      ]
+    ]
+  },
+  "rms_3c760be0__O2": {
+    "func": "split_channel",
+    "inputnodes": [
+      "rms_3c760be0"
+    ],
+    "params": {
+      "chan": "O2"
+    },
+    "meta": {
+      "fxdef_id": 60,
+      "chan": "O2"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "rms_3c760be0__O2",
+        "34b4225ddbf44033358615fd805fa355",
+        "cc350fdf640a57071f71bbd6e416fd10"
+      ]
+    ],
+    "fxdef_ids": [
+      60
+    ],
+    "upstream_paths": [
+      [
+        "rms_3c760be0__O2",
+        "34b4225ddbf44033358615fd805fa355",
+        "rms_3c760be0",
+        "cc350fdf640a57071f71bbd6e416fd10"
+      ]
+    ]
+  },
+  "zero_crossings_f49193a3": {
+    "func": "feature - zero_crossings",
+    "inputnodes": [
+      "epoch_76d1462d"
+    ],
+    "params": {},
+    "meta": {},
+    "pipeline_paths": [
+      [
+        1,
+        "zero_crossings_f49193a3",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "49c5d76d5239f0e625e5d78096f3b591"
+      ]
+    ],
+    "fxdef_ids": [
+      61,
+      62,
+      63,
+      64,
+      65
+    ],
+    "upstream_paths": [
+      [
+        "zero_crossings_f49193a3",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "epoch_76d1462d",
+        "49c5d76d5239f0e625e5d78096f3b591"
+      ]
+    ]
+  },
+  "zero_crossings_f49193a3__C3": {
+    "func": "split_channel",
+    "inputnodes": [
+      "zero_crossings_f49193a3"
+    ],
+    "params": {
+      "chan": "C3"
+    },
+    "meta": {
+      "fxdef_id": 61,
+      "chan": "C3"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "zero_crossings_f49193a3__C3",
+        "49c5d76d5239f0e625e5d78096f3b591",
+        "f75292ff30b4c7c3bef8cfddaf880bac"
+      ]
+    ],
+    "fxdef_ids": [
+      61
+    ],
+    "upstream_paths": [
+      [
+        "zero_crossings_f49193a3__C3",
+        "49c5d76d5239f0e625e5d78096f3b591",
+        "zero_crossings_f49193a3",
+        "f75292ff30b4c7c3bef8cfddaf880bac"
+      ]
+    ]
+  },
+  "zero_crossings_f49193a3__C4": {
+    "func": "split_channel",
+    "inputnodes": [
+      "zero_crossings_f49193a3"
+    ],
+    "params": {
+      "chan": "C4"
+    },
+    "meta": {
+      "fxdef_id": 62,
+      "chan": "C4"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "zero_crossings_f49193a3__C4",
+        "49c5d76d5239f0e625e5d78096f3b591",
+        "82f7d0842454ba6ea2052f0f82bb7869"
+      ]
+    ],
+    "fxdef_ids": [
+      62
+    ],
+    "upstream_paths": [
+      [
+        "zero_crossings_f49193a3__C4",
+        "49c5d76d5239f0e625e5d78096f3b591",
+        "zero_crossings_f49193a3",
+        "82f7d0842454ba6ea2052f0f82bb7869"
+      ]
+    ]
+  },
+  "zero_crossings_f49193a3__Pz": {
+    "func": "split_channel",
+    "inputnodes": [
+      "zero_crossings_f49193a3"
+    ],
+    "params": {
+      "chan": "Pz"
+    },
+    "meta": {
+      "fxdef_id": 63,
+      "chan": "Pz"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "zero_crossings_f49193a3__Pz",
+        "49c5d76d5239f0e625e5d78096f3b591",
+        "f710e554e2925fcbef8e5185e61ba54b"
+      ]
+    ],
+    "fxdef_ids": [
+      63
+    ],
+    "upstream_paths": [
+      [
+        "zero_crossings_f49193a3__Pz",
+        "49c5d76d5239f0e625e5d78096f3b591",
+        "zero_crossings_f49193a3",
+        "f710e554e2925fcbef8e5185e61ba54b"
+      ]
+    ]
+  },
+  "zero_crossings_f49193a3__O1": {
+    "func": "split_channel",
+    "inputnodes": [
+      "zero_crossings_f49193a3"
+    ],
+    "params": {
+      "chan": "O1"
+    },
+    "meta": {
+      "fxdef_id": 64,
+      "chan": "O1"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "zero_crossings_f49193a3__O1",
+        "49c5d76d5239f0e625e5d78096f3b591",
+        "8f4a4e5941a047fd5b486099147c699c"
+      ]
+    ],
+    "fxdef_ids": [
+      64
+    ],
+    "upstream_paths": [
+      [
+        "zero_crossings_f49193a3__O1",
+        "49c5d76d5239f0e625e5d78096f3b591",
+        "zero_crossings_f49193a3",
+        "8f4a4e5941a047fd5b486099147c699c"
+      ]
+    ]
+  },
+  "zero_crossings_f49193a3__O2": {
+    "func": "split_channel",
+    "inputnodes": [
+      "zero_crossings_f49193a3"
+    ],
+    "params": {
+      "chan": "O2"
+    },
+    "meta": {
+      "fxdef_id": 65,
+      "chan": "O2"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "zero_crossings_f49193a3__O2",
+        "49c5d76d5239f0e625e5d78096f3b591",
+        "40b18c5c4e8b162878cf88a634f4e44f"
+      ]
+    ],
+    "fxdef_ids": [
+      65
+    ],
+    "upstream_paths": [
+      [
+        "zero_crossings_f49193a3__O2",
+        "49c5d76d5239f0e625e5d78096f3b591",
+        "zero_crossings_f49193a3",
+        "40b18c5c4e8b162878cf88a634f4e44f"
+      ]
+    ]
+  },
+  "bandpower_8697fc15": {
+    "func": "feature - bandpower",
+    "inputnodes": [
+      "epoch_76d1462d"
+    ],
+    "params": {},
+    "meta": {},
+    "pipeline_paths": [
+      [
+        1,
+        "bandpower_8697fc15",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "c87582e624fe026636cb84b454d37966"
+      ]
+    ],
+    "fxdef_ids": [
+      66,
+      67,
+      68,
+      69,
+      70
+    ],
+    "upstream_paths": [
+      [
+        "bandpower_8697fc15",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "epoch_76d1462d",
+        "c87582e624fe026636cb84b454d37966"
+      ]
+    ]
+  },
+  "bandpower_8697fc15__C3": {
+    "func": "split_channel",
+    "inputnodes": [
+      "bandpower_8697fc15"
+    ],
+    "params": {
+      "chan": "C3"
+    },
+    "meta": {
+      "fxdef_id": 66,
+      "chan": "C3"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "bandpower_8697fc15__C3",
+        "c87582e624fe026636cb84b454d37966",
+        "395d4abeecd833cb1cf977920eeb9244"
+      ]
+    ],
+    "fxdef_ids": [
+      66
+    ],
+    "upstream_paths": [
+      [
+        "bandpower_8697fc15__C3",
+        "c87582e624fe026636cb84b454d37966",
+        "bandpower_8697fc15",
+        "395d4abeecd833cb1cf977920eeb9244"
+      ]
+    ]
+  },
+  "bandpower_8697fc15__C4": {
+    "func": "split_channel",
+    "inputnodes": [
+      "bandpower_8697fc15"
+    ],
+    "params": {
+      "chan": "C4"
+    },
+    "meta": {
+      "fxdef_id": 67,
+      "chan": "C4"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "bandpower_8697fc15__C4",
+        "c87582e624fe026636cb84b454d37966",
+        "6d9e47e6a22c27b0e37029d2e78f1918"
+      ]
+    ],
+    "fxdef_ids": [
+      67
+    ],
+    "upstream_paths": [
+      [
+        "bandpower_8697fc15__C4",
+        "c87582e624fe026636cb84b454d37966",
+        "bandpower_8697fc15",
+        "6d9e47e6a22c27b0e37029d2e78f1918"
+      ]
+    ]
+  },
+  "bandpower_8697fc15__Pz": {
+    "func": "split_channel",
+    "inputnodes": [
+      "bandpower_8697fc15"
+    ],
+    "params": {
+      "chan": "Pz"
+    },
+    "meta": {
+      "fxdef_id": 68,
+      "chan": "Pz"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "bandpower_8697fc15__Pz",
+        "c87582e624fe026636cb84b454d37966",
+        "06b3bc3101b82c9896b348ded4683b92"
+      ]
+    ],
+    "fxdef_ids": [
+      68
+    ],
+    "upstream_paths": [
+      [
+        "bandpower_8697fc15__Pz",
+        "c87582e624fe026636cb84b454d37966",
+        "bandpower_8697fc15",
+        "06b3bc3101b82c9896b348ded4683b92"
+      ]
+    ]
+  },
+  "bandpower_8697fc15__O1": {
+    "func": "split_channel",
+    "inputnodes": [
+      "bandpower_8697fc15"
+    ],
+    "params": {
+      "chan": "O1"
+    },
+    "meta": {
+      "fxdef_id": 69,
+      "chan": "O1"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "bandpower_8697fc15__O1",
+        "c87582e624fe026636cb84b454d37966",
+        "774461a6026d648c535412ac2fd00a36"
+      ]
+    ],
+    "fxdef_ids": [
+      69
+    ],
+    "upstream_paths": [
+      [
+        "bandpower_8697fc15__O1",
+        "c87582e624fe026636cb84b454d37966",
+        "bandpower_8697fc15",
+        "774461a6026d648c535412ac2fd00a36"
+      ]
+    ]
+  },
+  "bandpower_8697fc15__O2": {
+    "func": "split_channel",
+    "inputnodes": [
+      "bandpower_8697fc15"
+    ],
+    "params": {
+      "chan": "O2"
+    },
+    "meta": {
+      "fxdef_id": 70,
+      "chan": "O2"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "bandpower_8697fc15__O2",
+        "c87582e624fe026636cb84b454d37966",
+        "a2cdb850b61ddd89a3c9e5fcff3c6dbb"
+      ]
+    ],
+    "fxdef_ids": [
+      70
+    ],
+    "upstream_paths": [
+      [
+        "bandpower_8697fc15__O2",
+        "c87582e624fe026636cb84b454d37966",
+        "bandpower_8697fc15",
+        "a2cdb850b61ddd89a3c9e5fcff3c6dbb"
+      ]
+    ]
+  },
+  "relative_power_6c7bb898": {
+    "func": "feature - relative_power",
+    "inputnodes": [
+      "epoch_76d1462d"
+    ],
+    "params": {},
+    "meta": {},
+    "pipeline_paths": [
+      [
+        1,
+        "relative_power_6c7bb898",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "ad1c0854ced98b235e4dfa85a4387ad6"
+      ]
+    ],
+    "fxdef_ids": [
+      71,
+      72,
+      73,
+      74,
+      75
+    ],
+    "upstream_paths": [
+      [
+        "relative_power_6c7bb898",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "epoch_76d1462d",
+        "ad1c0854ced98b235e4dfa85a4387ad6"
+      ]
+    ]
+  },
+  "relative_power_6c7bb898__C3": {
+    "func": "split_channel",
+    "inputnodes": [
+      "relative_power_6c7bb898"
+    ],
+    "params": {
+      "chan": "C3"
+    },
+    "meta": {
+      "fxdef_id": 71,
+      "chan": "C3"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "relative_power_6c7bb898__C3",
+        "ad1c0854ced98b235e4dfa85a4387ad6",
+        "f04d3525d2fdb14024c8a82060b78049"
+      ]
+    ],
+    "fxdef_ids": [
+      71
+    ],
+    "upstream_paths": [
+      [
+        "relative_power_6c7bb898__C3",
+        "ad1c0854ced98b235e4dfa85a4387ad6",
+        "relative_power_6c7bb898",
+        "f04d3525d2fdb14024c8a82060b78049"
+      ]
+    ]
+  },
+  "relative_power_6c7bb898__C4": {
+    "func": "split_channel",
+    "inputnodes": [
+      "relative_power_6c7bb898"
+    ],
+    "params": {
+      "chan": "C4"
+    },
+    "meta": {
+      "fxdef_id": 72,
+      "chan": "C4"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "relative_power_6c7bb898__C4",
+        "ad1c0854ced98b235e4dfa85a4387ad6",
+        "27750832df44d0969c87c8b224b159fd"
+      ]
+    ],
+    "fxdef_ids": [
+      72
+    ],
+    "upstream_paths": [
+      [
+        "relative_power_6c7bb898__C4",
+        "ad1c0854ced98b235e4dfa85a4387ad6",
+        "relative_power_6c7bb898",
+        "27750832df44d0969c87c8b224b159fd"
+      ]
+    ]
+  },
+  "relative_power_6c7bb898__Pz": {
+    "func": "split_channel",
+    "inputnodes": [
+      "relative_power_6c7bb898"
+    ],
+    "params": {
+      "chan": "Pz"
+    },
+    "meta": {
+      "fxdef_id": 73,
+      "chan": "Pz"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "relative_power_6c7bb898__Pz",
+        "ad1c0854ced98b235e4dfa85a4387ad6",
+        "1198488ec9133551dd6f1bffb08353b9"
+      ]
+    ],
+    "fxdef_ids": [
+      73
+    ],
+    "upstream_paths": [
+      [
+        "relative_power_6c7bb898__Pz",
+        "ad1c0854ced98b235e4dfa85a4387ad6",
+        "relative_power_6c7bb898",
+        "1198488ec9133551dd6f1bffb08353b9"
+      ]
+    ]
+  },
+  "relative_power_6c7bb898__O1": {
+    "func": "split_channel",
+    "inputnodes": [
+      "relative_power_6c7bb898"
+    ],
+    "params": {
+      "chan": "O1"
+    },
+    "meta": {
+      "fxdef_id": 74,
+      "chan": "O1"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "relative_power_6c7bb898__O1",
+        "ad1c0854ced98b235e4dfa85a4387ad6",
+        "326b8ec3cc7c6d9f7f73e5232c1c84cb"
+      ]
+    ],
+    "fxdef_ids": [
+      74
+    ],
+    "upstream_paths": [
+      [
+        "relative_power_6c7bb898__O1",
+        "ad1c0854ced98b235e4dfa85a4387ad6",
+        "relative_power_6c7bb898",
+        "326b8ec3cc7c6d9f7f73e5232c1c84cb"
+      ]
+    ]
+  },
+  "relative_power_6c7bb898__O2": {
+    "func": "split_channel",
+    "inputnodes": [
+      "relative_power_6c7bb898"
+    ],
+    "params": {
+      "chan": "O2"
+    },
+    "meta": {
+      "fxdef_id": 75,
+      "chan": "O2"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "relative_power_6c7bb898__O2",
+        "ad1c0854ced98b235e4dfa85a4387ad6",
+        "49f252c7e4268ca265a8a63aea057228"
+      ]
+    ],
+    "fxdef_ids": [
+      75
+    ],
+    "upstream_paths": [
+      [
+        "relative_power_6c7bb898__O2",
+        "ad1c0854ced98b235e4dfa85a4387ad6",
+        "relative_power_6c7bb898",
+        "49f252c7e4268ca265a8a63aea057228"
+      ]
+    ]
+  },
+  "spectral_entropy_e3c4e4d6": {
+    "func": "feature - spectral_entropy",
+    "inputnodes": [
+      "epoch_76d1462d"
+    ],
+    "params": {},
+    "meta": {},
+    "pipeline_paths": [
+      [
+        1,
+        "spectral_entropy_e3c4e4d6",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "665babb6ce0a4603993960f7bdeda73f"
+      ]
+    ],
+    "fxdef_ids": [
+      76,
+      77,
+      78,
+      79,
+      80
+    ],
+    "upstream_paths": [
+      [
+        "spectral_entropy_e3c4e4d6",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "epoch_76d1462d",
+        "665babb6ce0a4603993960f7bdeda73f"
+      ]
+    ]
+  },
+  "spectral_entropy_e3c4e4d6__C3": {
+    "func": "split_channel",
+    "inputnodes": [
+      "spectral_entropy_e3c4e4d6"
+    ],
+    "params": {
+      "chan": "C3"
+    },
+    "meta": {
+      "fxdef_id": 76,
+      "chan": "C3"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "spectral_entropy_e3c4e4d6__C3",
+        "665babb6ce0a4603993960f7bdeda73f",
+        "34db2a5177d2f843481da98871ad3089"
+      ]
+    ],
+    "fxdef_ids": [
+      76
+    ],
+    "upstream_paths": [
+      [
+        "spectral_entropy_e3c4e4d6__C3",
+        "665babb6ce0a4603993960f7bdeda73f",
+        "spectral_entropy_e3c4e4d6",
+        "34db2a5177d2f843481da98871ad3089"
+      ]
+    ]
+  },
+  "spectral_entropy_e3c4e4d6__C4": {
+    "func": "split_channel",
+    "inputnodes": [
+      "spectral_entropy_e3c4e4d6"
+    ],
+    "params": {
+      "chan": "C4"
+    },
+    "meta": {
+      "fxdef_id": 77,
+      "chan": "C4"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "spectral_entropy_e3c4e4d6__C4",
+        "665babb6ce0a4603993960f7bdeda73f",
+        "afc9aeb7653e92c18435edc73984ecf8"
+      ]
+    ],
+    "fxdef_ids": [
+      77
+    ],
+    "upstream_paths": [
+      [
+        "spectral_entropy_e3c4e4d6__C4",
+        "665babb6ce0a4603993960f7bdeda73f",
+        "spectral_entropy_e3c4e4d6",
+        "afc9aeb7653e92c18435edc73984ecf8"
+      ]
+    ]
+  },
+  "spectral_entropy_e3c4e4d6__Pz": {
+    "func": "split_channel",
+    "inputnodes": [
+      "spectral_entropy_e3c4e4d6"
+    ],
+    "params": {
+      "chan": "Pz"
+    },
+    "meta": {
+      "fxdef_id": 78,
+      "chan": "Pz"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "spectral_entropy_e3c4e4d6__Pz",
+        "665babb6ce0a4603993960f7bdeda73f",
+        "673ad17fe568ba9faeddb1e5890955a1"
+      ]
+    ],
+    "fxdef_ids": [
+      78
+    ],
+    "upstream_paths": [
+      [
+        "spectral_entropy_e3c4e4d6__Pz",
+        "665babb6ce0a4603993960f7bdeda73f",
+        "spectral_entropy_e3c4e4d6",
+        "673ad17fe568ba9faeddb1e5890955a1"
+      ]
+    ]
+  },
+  "spectral_entropy_e3c4e4d6__O1": {
+    "func": "split_channel",
+    "inputnodes": [
+      "spectral_entropy_e3c4e4d6"
+    ],
+    "params": {
+      "chan": "O1"
+    },
+    "meta": {
+      "fxdef_id": 79,
+      "chan": "O1"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "spectral_entropy_e3c4e4d6__O1",
+        "665babb6ce0a4603993960f7bdeda73f",
+        "923dfdc2d816466bae25a8cd3b45f32a"
+      ]
+    ],
+    "fxdef_ids": [
+      79
+    ],
+    "upstream_paths": [
+      [
+        "spectral_entropy_e3c4e4d6__O1",
+        "665babb6ce0a4603993960f7bdeda73f",
+        "spectral_entropy_e3c4e4d6",
+        "923dfdc2d816466bae25a8cd3b45f32a"
+      ]
+    ]
+  },
+  "spectral_entropy_e3c4e4d6__O2": {
+    "func": "split_channel",
+    "inputnodes": [
+      "spectral_entropy_e3c4e4d6"
+    ],
+    "params": {
+      "chan": "O2"
+    },
+    "meta": {
+      "fxdef_id": 80,
+      "chan": "O2"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "spectral_entropy_e3c4e4d6__O2",
+        "665babb6ce0a4603993960f7bdeda73f",
+        "2d9b1e53321578d15dce3eab80a36cc4"
+      ]
+    ],
+    "fxdef_ids": [
+      80
+    ],
+    "upstream_paths": [
+      [
+        "spectral_entropy_e3c4e4d6__O2",
+        "665babb6ce0a4603993960f7bdeda73f",
+        "spectral_entropy_e3c4e4d6",
+        "2d9b1e53321578d15dce3eab80a36cc4"
+      ]
+    ]
+  },
+  "alpha_peak_frequency_3b12eb1e": {
+    "func": "feature - alpha_peak_frequency",
+    "inputnodes": [
+      "epoch_76d1462d"
+    ],
+    "params": {},
+    "meta": {},
+    "pipeline_paths": [
+      [
+        1,
+        "alpha_peak_frequency_3b12eb1e",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "01b28f2e0c3776f60f54747fe8979de6"
+      ]
+    ],
+    "fxdef_ids": [
+      81,
+      82,
+      83,
+      84,
+      85
+    ],
+    "upstream_paths": [
+      [
+        "alpha_peak_frequency_3b12eb1e",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "epoch_76d1462d",
+        "01b28f2e0c3776f60f54747fe8979de6"
+      ]
+    ]
+  },
+  "alpha_peak_frequency_3b12eb1e__C3": {
+    "func": "split_channel",
+    "inputnodes": [
+      "alpha_peak_frequency_3b12eb1e"
+    ],
+    "params": {
+      "chan": "C3"
+    },
+    "meta": {
+      "fxdef_id": 81,
+      "chan": "C3"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "alpha_peak_frequency_3b12eb1e__C3",
+        "01b28f2e0c3776f60f54747fe8979de6",
+        "6cfe19541dbba7a9e706f0cfd5970289"
+      ]
+    ],
+    "fxdef_ids": [
+      81
+    ],
+    "upstream_paths": [
+      [
+        "alpha_peak_frequency_3b12eb1e__C3",
+        "01b28f2e0c3776f60f54747fe8979de6",
+        "alpha_peak_frequency_3b12eb1e",
+        "6cfe19541dbba7a9e706f0cfd5970289"
+      ]
+    ]
+  },
+  "alpha_peak_frequency_3b12eb1e__C4": {
+    "func": "split_channel",
+    "inputnodes": [
+      "alpha_peak_frequency_3b12eb1e"
+    ],
+    "params": {
+      "chan": "C4"
+    },
+    "meta": {
+      "fxdef_id": 82,
+      "chan": "C4"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "alpha_peak_frequency_3b12eb1e__C4",
+        "01b28f2e0c3776f60f54747fe8979de6",
+        "e05a46a22e90fc3d02902ca6345cadf0"
+      ]
+    ],
+    "fxdef_ids": [
+      82
+    ],
+    "upstream_paths": [
+      [
+        "alpha_peak_frequency_3b12eb1e__C4",
+        "01b28f2e0c3776f60f54747fe8979de6",
+        "alpha_peak_frequency_3b12eb1e",
+        "e05a46a22e90fc3d02902ca6345cadf0"
+      ]
+    ]
+  },
+  "alpha_peak_frequency_3b12eb1e__Pz": {
+    "func": "split_channel",
+    "inputnodes": [
+      "alpha_peak_frequency_3b12eb1e"
+    ],
+    "params": {
+      "chan": "Pz"
+    },
+    "meta": {
+      "fxdef_id": 83,
+      "chan": "Pz"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "alpha_peak_frequency_3b12eb1e__Pz",
+        "01b28f2e0c3776f60f54747fe8979de6",
+        "52e27c56b262036187b2843817701420"
+      ]
+    ],
+    "fxdef_ids": [
+      83
+    ],
+    "upstream_paths": [
+      [
+        "alpha_peak_frequency_3b12eb1e__Pz",
+        "01b28f2e0c3776f60f54747fe8979de6",
+        "alpha_peak_frequency_3b12eb1e",
+        "52e27c56b262036187b2843817701420"
+      ]
+    ]
+  },
+  "alpha_peak_frequency_3b12eb1e__O1": {
+    "func": "split_channel",
+    "inputnodes": [
+      "alpha_peak_frequency_3b12eb1e"
+    ],
+    "params": {
+      "chan": "O1"
+    },
+    "meta": {
+      "fxdef_id": 84,
+      "chan": "O1"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "alpha_peak_frequency_3b12eb1e__O1",
+        "01b28f2e0c3776f60f54747fe8979de6",
+        "80d53d305d46eabd5cf1ec4894cee2a3"
+      ]
+    ],
+    "fxdef_ids": [
+      84
+    ],
+    "upstream_paths": [
+      [
+        "alpha_peak_frequency_3b12eb1e__O1",
+        "01b28f2e0c3776f60f54747fe8979de6",
+        "alpha_peak_frequency_3b12eb1e",
+        "80d53d305d46eabd5cf1ec4894cee2a3"
+      ]
+    ]
+  },
+  "alpha_peak_frequency_3b12eb1e__O2": {
+    "func": "split_channel",
+    "inputnodes": [
+      "alpha_peak_frequency_3b12eb1e"
+    ],
+    "params": {
+      "chan": "O2"
+    },
+    "meta": {
+      "fxdef_id": 85,
+      "chan": "O2"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "alpha_peak_frequency_3b12eb1e__O2",
+        "01b28f2e0c3776f60f54747fe8979de6",
+        "67f6d2bc8ebab357422f73ddba98a712"
+      ]
+    ],
+    "fxdef_ids": [
+      85
+    ],
+    "upstream_paths": [
+      [
+        "alpha_peak_frequency_3b12eb1e__O2",
+        "01b28f2e0c3776f60f54747fe8979de6",
+        "alpha_peak_frequency_3b12eb1e",
+        "67f6d2bc8ebab357422f73ddba98a712"
+      ]
+    ]
+  },
+  "theta_alpha_ratio_7a4913e8": {
+    "func": "feature - theta_alpha_ratio",
+    "inputnodes": [
+      "epoch_76d1462d"
+    ],
+    "params": {},
+    "meta": {},
+    "pipeline_paths": [
+      [
+        1,
+        "theta_alpha_ratio_7a4913e8",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "4dc1c2f97f3d6c0341d33a76651c7464"
+      ]
+    ],
+    "fxdef_ids": [
+      86,
+      87,
+      88,
+      89,
+      90
+    ],
+    "upstream_paths": [
+      [
+        "theta_alpha_ratio_7a4913e8",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "epoch_76d1462d",
+        "4dc1c2f97f3d6c0341d33a76651c7464"
+      ]
+    ]
+  },
+  "theta_alpha_ratio_7a4913e8__C3": {
+    "func": "split_channel",
+    "inputnodes": [
+      "theta_alpha_ratio_7a4913e8"
+    ],
+    "params": {
+      "chan": "C3"
+    },
+    "meta": {
+      "fxdef_id": 86,
+      "chan": "C3"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "theta_alpha_ratio_7a4913e8__C3",
+        "4dc1c2f97f3d6c0341d33a76651c7464",
+        "f41609f9c575c582ffccaa2b83d93908"
+      ]
+    ],
+    "fxdef_ids": [
+      86
+    ],
+    "upstream_paths": [
+      [
+        "theta_alpha_ratio_7a4913e8__C3",
+        "4dc1c2f97f3d6c0341d33a76651c7464",
+        "theta_alpha_ratio_7a4913e8",
+        "f41609f9c575c582ffccaa2b83d93908"
+      ]
+    ]
+  },
+  "theta_alpha_ratio_7a4913e8__C4": {
+    "func": "split_channel",
+    "inputnodes": [
+      "theta_alpha_ratio_7a4913e8"
+    ],
+    "params": {
+      "chan": "C4"
+    },
+    "meta": {
+      "fxdef_id": 87,
+      "chan": "C4"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "theta_alpha_ratio_7a4913e8__C4",
+        "4dc1c2f97f3d6c0341d33a76651c7464",
+        "4d6a3108105ba1f5bff28e81fc89d6cb"
+      ]
+    ],
+    "fxdef_ids": [
+      87
+    ],
+    "upstream_paths": [
+      [
+        "theta_alpha_ratio_7a4913e8__C4",
+        "4dc1c2f97f3d6c0341d33a76651c7464",
+        "theta_alpha_ratio_7a4913e8",
+        "4d6a3108105ba1f5bff28e81fc89d6cb"
+      ]
+    ]
+  },
+  "theta_alpha_ratio_7a4913e8__Pz": {
+    "func": "split_channel",
+    "inputnodes": [
+      "theta_alpha_ratio_7a4913e8"
+    ],
+    "params": {
+      "chan": "Pz"
+    },
+    "meta": {
+      "fxdef_id": 88,
+      "chan": "Pz"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "theta_alpha_ratio_7a4913e8__Pz",
+        "4dc1c2f97f3d6c0341d33a76651c7464",
+        "18b3ad79859875137ced4769f8d075c8"
+      ]
+    ],
+    "fxdef_ids": [
+      88
+    ],
+    "upstream_paths": [
+      [
+        "theta_alpha_ratio_7a4913e8__Pz",
+        "4dc1c2f97f3d6c0341d33a76651c7464",
+        "theta_alpha_ratio_7a4913e8",
+        "18b3ad79859875137ced4769f8d075c8"
+      ]
+    ]
+  },
+  "theta_alpha_ratio_7a4913e8__O1": {
+    "func": "split_channel",
+    "inputnodes": [
+      "theta_alpha_ratio_7a4913e8"
+    ],
+    "params": {
+      "chan": "O1"
+    },
+    "meta": {
+      "fxdef_id": 89,
+      "chan": "O1"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "theta_alpha_ratio_7a4913e8__O1",
+        "4dc1c2f97f3d6c0341d33a76651c7464",
+        "369e02bcf6fb811b61eddba21b204631"
+      ]
+    ],
+    "fxdef_ids": [
+      89
+    ],
+    "upstream_paths": [
+      [
+        "theta_alpha_ratio_7a4913e8__O1",
+        "4dc1c2f97f3d6c0341d33a76651c7464",
+        "theta_alpha_ratio_7a4913e8",
+        "369e02bcf6fb811b61eddba21b204631"
+      ]
+    ]
+  },
+  "theta_alpha_ratio_7a4913e8__O2": {
+    "func": "split_channel",
+    "inputnodes": [
+      "theta_alpha_ratio_7a4913e8"
+    ],
+    "params": {
+      "chan": "O2"
+    },
+    "meta": {
+      "fxdef_id": 90,
+      "chan": "O2"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "theta_alpha_ratio_7a4913e8__O2",
+        "4dc1c2f97f3d6c0341d33a76651c7464",
+        "772ab0e1c4f78c2bd66ad6c347eef371"
+      ]
+    ],
+    "fxdef_ids": [
+      90
+    ],
+    "upstream_paths": [
+      [
+        "theta_alpha_ratio_7a4913e8__O2",
+        "4dc1c2f97f3d6c0341d33a76651c7464",
+        "theta_alpha_ratio_7a4913e8",
+        "772ab0e1c4f78c2bd66ad6c347eef371"
+      ]
+    ]
+  },
+  "spectral_edge_frequency_faf606a0": {
+    "func": "feature - spectral_edge_frequency",
+    "inputnodes": [
+      "epoch_76d1462d"
+    ],
+    "params": {},
+    "meta": {},
+    "pipeline_paths": [
+      [
+        1,
+        "spectral_edge_frequency_faf606a0",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "8c765fe37a23d103ab354132d73ead90"
+      ]
+    ],
+    "fxdef_ids": [
+      91,
+      92,
+      93,
+      94,
+      95
+    ],
+    "upstream_paths": [
+      [
+        "spectral_edge_frequency_faf606a0",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "epoch_76d1462d",
+        "8c765fe37a23d103ab354132d73ead90"
+      ]
+    ]
+  },
+  "spectral_edge_frequency_faf606a0__C3": {
+    "func": "split_channel",
+    "inputnodes": [
+      "spectral_edge_frequency_faf606a0"
+    ],
+    "params": {
+      "chan": "C3"
+    },
+    "meta": {
+      "fxdef_id": 91,
+      "chan": "C3"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "spectral_edge_frequency_faf606a0__C3",
+        "8c765fe37a23d103ab354132d73ead90",
+        "f044f536295bd57f0b63d591df5d73d5"
+      ]
+    ],
+    "fxdef_ids": [
+      91
+    ],
+    "upstream_paths": [
+      [
+        "spectral_edge_frequency_faf606a0__C3",
+        "8c765fe37a23d103ab354132d73ead90",
+        "spectral_edge_frequency_faf606a0",
+        "f044f536295bd57f0b63d591df5d73d5"
+      ]
+    ]
+  },
+  "spectral_edge_frequency_faf606a0__C4": {
+    "func": "split_channel",
+    "inputnodes": [
+      "spectral_edge_frequency_faf606a0"
+    ],
+    "params": {
+      "chan": "C4"
+    },
+    "meta": {
+      "fxdef_id": 92,
+      "chan": "C4"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "spectral_edge_frequency_faf606a0__C4",
+        "8c765fe37a23d103ab354132d73ead90",
+        "9c32d62f17b19448bd8b490a754daea8"
+      ]
+    ],
+    "fxdef_ids": [
+      92
+    ],
+    "upstream_paths": [
+      [
+        "spectral_edge_frequency_faf606a0__C4",
+        "8c765fe37a23d103ab354132d73ead90",
+        "spectral_edge_frequency_faf606a0",
+        "9c32d62f17b19448bd8b490a754daea8"
+      ]
+    ]
+  },
+  "spectral_edge_frequency_faf606a0__Pz": {
+    "func": "split_channel",
+    "inputnodes": [
+      "spectral_edge_frequency_faf606a0"
+    ],
+    "params": {
+      "chan": "Pz"
+    },
+    "meta": {
+      "fxdef_id": 93,
+      "chan": "Pz"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "spectral_edge_frequency_faf606a0__Pz",
+        "8c765fe37a23d103ab354132d73ead90",
+        "71905b2a87aef9e12ce36e55986dd197"
+      ]
+    ],
+    "fxdef_ids": [
+      93
+    ],
+    "upstream_paths": [
+      [
+        "spectral_edge_frequency_faf606a0__Pz",
+        "8c765fe37a23d103ab354132d73ead90",
+        "spectral_edge_frequency_faf606a0",
+        "71905b2a87aef9e12ce36e55986dd197"
+      ]
+    ]
+  },
+  "spectral_edge_frequency_faf606a0__O1": {
+    "func": "split_channel",
+    "inputnodes": [
+      "spectral_edge_frequency_faf606a0"
+    ],
+    "params": {
+      "chan": "O1"
+    },
+    "meta": {
+      "fxdef_id": 94,
+      "chan": "O1"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "spectral_edge_frequency_faf606a0__O1",
+        "8c765fe37a23d103ab354132d73ead90",
+        "6fc56e7f1ec3e6cf28382c5245d57ba9"
+      ]
+    ],
+    "fxdef_ids": [
+      94
+    ],
+    "upstream_paths": [
+      [
+        "spectral_edge_frequency_faf606a0__O1",
+        "8c765fe37a23d103ab354132d73ead90",
+        "spectral_edge_frequency_faf606a0",
+        "6fc56e7f1ec3e6cf28382c5245d57ba9"
+      ]
+    ]
+  },
+  "spectral_edge_frequency_faf606a0__O2": {
+    "func": "split_channel",
+    "inputnodes": [
+      "spectral_edge_frequency_faf606a0"
+    ],
+    "params": {
+      "chan": "O2"
+    },
+    "meta": {
+      "fxdef_id": 95,
+      "chan": "O2"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "spectral_edge_frequency_faf606a0__O2",
+        "8c765fe37a23d103ab354132d73ead90",
+        "cc3e6b65b7ebecebc383df2e151a620b"
+      ]
+    ],
+    "fxdef_ids": [
+      95
+    ],
+    "upstream_paths": [
+      [
+        "spectral_edge_frequency_faf606a0__O2",
+        "8c765fe37a23d103ab354132d73ead90",
+        "spectral_edge_frequency_faf606a0",
+        "cc3e6b65b7ebecebc383df2e151a620b"
+      ]
+    ]
+  },
+  "alpha_asymmetry_fef1e7de": {
+    "func": "feature - alpha_asymmetry",
+    "inputnodes": [
+      "epoch_76d1462d"
+    ],
+    "params": {},
+    "meta": {},
+    "pipeline_paths": [
+      [
+        1,
+        "alpha_asymmetry_fef1e7de",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "f891a397917fc509eb3a13e83dff3780"
+      ]
+    ],
+    "fxdef_ids": [
+      96
+    ],
+    "upstream_paths": [
+      [
+        "alpha_asymmetry_fef1e7de",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "epoch_76d1462d",
+        "f891a397917fc509eb3a13e83dff3780"
+      ]
+    ]
+  },
+  "alpha_asymmetry_fef1e7de__C3-C4": {
+    "func": "split_channel",
+    "inputnodes": [
+      "alpha_asymmetry_fef1e7de"
+    ],
+    "params": {
+      "chan": "C3-C4"
+    },
+    "meta": {
+      "fxdef_id": 96,
+      "chan": "C3-C4"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "alpha_asymmetry_fef1e7de__C3-C4",
+        "f891a397917fc509eb3a13e83dff3780",
+        "2f6ed2085de4dcd54952228274e6b0e5"
+      ]
+    ],
+    "fxdef_ids": [
+      96
+    ],
+    "upstream_paths": [
+      [
+        "alpha_asymmetry_fef1e7de__C3-C4",
+        "f891a397917fc509eb3a13e83dff3780",
+        "alpha_asymmetry_fef1e7de",
+        "2f6ed2085de4dcd54952228274e6b0e5"
+      ]
+    ]
+  },
+  "permutation_entropy_ceff2141": {
+    "func": "feature - permutation_entropy",
+    "inputnodes": [
+      "epoch_76d1462d"
+    ],
+    "params": {},
+    "meta": {},
+    "pipeline_paths": [
+      [
+        1,
+        "permutation_entropy_ceff2141",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "cfa694089ff03c3f7d934ebd9abe3e47"
+      ]
+    ],
+    "fxdef_ids": [
+      97,
+      98,
+      99,
+      100,
+      101
+    ],
+    "upstream_paths": [
+      [
+        "permutation_entropy_ceff2141",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "epoch_76d1462d",
+        "cfa694089ff03c3f7d934ebd9abe3e47"
+      ]
+    ]
+  },
+  "permutation_entropy_ceff2141__C3": {
+    "func": "split_channel",
+    "inputnodes": [
+      "permutation_entropy_ceff2141"
+    ],
+    "params": {
+      "chan": "C3"
+    },
+    "meta": {
+      "fxdef_id": 97,
+      "chan": "C3"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "permutation_entropy_ceff2141__C3",
+        "cfa694089ff03c3f7d934ebd9abe3e47",
+        "eac1e15e1127582764d70ec4b6db8ee8"
+      ]
+    ],
+    "fxdef_ids": [
+      97
+    ],
+    "upstream_paths": [
+      [
+        "permutation_entropy_ceff2141__C3",
+        "cfa694089ff03c3f7d934ebd9abe3e47",
+        "permutation_entropy_ceff2141",
+        "eac1e15e1127582764d70ec4b6db8ee8"
+      ]
+    ]
+  },
+  "permutation_entropy_ceff2141__C4": {
+    "func": "split_channel",
+    "inputnodes": [
+      "permutation_entropy_ceff2141"
+    ],
+    "params": {
+      "chan": "C4"
+    },
+    "meta": {
+      "fxdef_id": 98,
+      "chan": "C4"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "permutation_entropy_ceff2141__C4",
+        "cfa694089ff03c3f7d934ebd9abe3e47",
+        "70354272162dc2e859e56b1161279ec3"
+      ]
+    ],
+    "fxdef_ids": [
+      98
+    ],
+    "upstream_paths": [
+      [
+        "permutation_entropy_ceff2141__C4",
+        "cfa694089ff03c3f7d934ebd9abe3e47",
+        "permutation_entropy_ceff2141",
+        "70354272162dc2e859e56b1161279ec3"
+      ]
+    ]
+  },
+  "permutation_entropy_ceff2141__Pz": {
+    "func": "split_channel",
+    "inputnodes": [
+      "permutation_entropy_ceff2141"
+    ],
+    "params": {
+      "chan": "Pz"
+    },
+    "meta": {
+      "fxdef_id": 99,
+      "chan": "Pz"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "permutation_entropy_ceff2141__Pz",
+        "cfa694089ff03c3f7d934ebd9abe3e47",
+        "3377ed510e33286f8c6f5fb084e7077e"
+      ]
+    ],
+    "fxdef_ids": [
+      99
+    ],
+    "upstream_paths": [
+      [
+        "permutation_entropy_ceff2141__Pz",
+        "cfa694089ff03c3f7d934ebd9abe3e47",
+        "permutation_entropy_ceff2141",
+        "3377ed510e33286f8c6f5fb084e7077e"
+      ]
+    ]
+  },
+  "permutation_entropy_ceff2141__O1": {
+    "func": "split_channel",
+    "inputnodes": [
+      "permutation_entropy_ceff2141"
+    ],
+    "params": {
+      "chan": "O1"
+    },
+    "meta": {
+      "fxdef_id": 100,
+      "chan": "O1"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "permutation_entropy_ceff2141__O1",
+        "cfa694089ff03c3f7d934ebd9abe3e47",
+        "6371cd425d8c66a8cee415efe4018bbd"
+      ]
+    ],
+    "fxdef_ids": [
+      100
+    ],
+    "upstream_paths": [
+      [
+        "permutation_entropy_ceff2141__O1",
+        "cfa694089ff03c3f7d934ebd9abe3e47",
+        "permutation_entropy_ceff2141",
+        "6371cd425d8c66a8cee415efe4018bbd"
+      ]
+    ]
+  },
+  "permutation_entropy_ceff2141__O2": {
+    "func": "split_channel",
+    "inputnodes": [
+      "permutation_entropy_ceff2141"
+    ],
+    "params": {
+      "chan": "O2"
+    },
+    "meta": {
+      "fxdef_id": 101,
+      "chan": "O2"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "permutation_entropy_ceff2141__O2",
+        "cfa694089ff03c3f7d934ebd9abe3e47",
+        "fbbdd1516c862553cbddffa9e418fca3"
+      ]
+    ],
+    "fxdef_ids": [
+      101
+    ],
+    "upstream_paths": [
+      [
+        "permutation_entropy_ceff2141__O2",
+        "cfa694089ff03c3f7d934ebd9abe3e47",
+        "permutation_entropy_ceff2141",
+        "fbbdd1516c862553cbddffa9e418fca3"
+      ]
+    ]
+  },
+  "approximate_entropy_c931b687": {
+    "func": "feature - approximate_entropy",
+    "inputnodes": [
+      "epoch_76d1462d"
+    ],
+    "params": {},
+    "meta": {},
+    "pipeline_paths": [
+      [
+        1,
+        "approximate_entropy_c931b687",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "686adeaabcd0b3c71797a016c90b968b"
+      ]
+    ],
+    "fxdef_ids": [
+      102,
+      103,
+      104,
+      105,
+      106
+    ],
+    "upstream_paths": [
+      [
+        "approximate_entropy_c931b687",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "epoch_76d1462d",
+        "686adeaabcd0b3c71797a016c90b968b"
+      ]
+    ]
+  },
+  "approximate_entropy_c931b687__C3": {
+    "func": "split_channel",
+    "inputnodes": [
+      "approximate_entropy_c931b687"
+    ],
+    "params": {
+      "chan": "C3"
+    },
+    "meta": {
+      "fxdef_id": 102,
+      "chan": "C3"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "approximate_entropy_c931b687__C3",
+        "686adeaabcd0b3c71797a016c90b968b",
+        "455a1503d4ef6bcb330c5130c7d2b28f"
+      ]
+    ],
+    "fxdef_ids": [
+      102
+    ],
+    "upstream_paths": [
+      [
+        "approximate_entropy_c931b687__C3",
+        "686adeaabcd0b3c71797a016c90b968b",
+        "approximate_entropy_c931b687",
+        "455a1503d4ef6bcb330c5130c7d2b28f"
+      ]
+    ]
+  },
+  "approximate_entropy_c931b687__C4": {
+    "func": "split_channel",
+    "inputnodes": [
+      "approximate_entropy_c931b687"
+    ],
+    "params": {
+      "chan": "C4"
+    },
+    "meta": {
+      "fxdef_id": 103,
+      "chan": "C4"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "approximate_entropy_c931b687__C4",
+        "686adeaabcd0b3c71797a016c90b968b",
+        "2fab666aadbee62b5a3a1defbc4cb133"
+      ]
+    ],
+    "fxdef_ids": [
+      103
+    ],
+    "upstream_paths": [
+      [
+        "approximate_entropy_c931b687__C4",
+        "686adeaabcd0b3c71797a016c90b968b",
+        "approximate_entropy_c931b687",
+        "2fab666aadbee62b5a3a1defbc4cb133"
+      ]
+    ]
+  },
+  "approximate_entropy_c931b687__Pz": {
+    "func": "split_channel",
+    "inputnodes": [
+      "approximate_entropy_c931b687"
+    ],
+    "params": {
+      "chan": "Pz"
+    },
+    "meta": {
+      "fxdef_id": 104,
+      "chan": "Pz"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "approximate_entropy_c931b687__Pz",
+        "686adeaabcd0b3c71797a016c90b968b",
+        "4464557b219c959e989e59878576ccb2"
+      ]
+    ],
+    "fxdef_ids": [
+      104
+    ],
+    "upstream_paths": [
+      [
+        "approximate_entropy_c931b687__Pz",
+        "686adeaabcd0b3c71797a016c90b968b",
+        "approximate_entropy_c931b687",
+        "4464557b219c959e989e59878576ccb2"
+      ]
+    ]
+  },
+  "approximate_entropy_c931b687__O1": {
+    "func": "split_channel",
+    "inputnodes": [
+      "approximate_entropy_c931b687"
+    ],
+    "params": {
+      "chan": "O1"
+    },
+    "meta": {
+      "fxdef_id": 105,
+      "chan": "O1"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "approximate_entropy_c931b687__O1",
+        "686adeaabcd0b3c71797a016c90b968b",
+        "216c6264abe6eada5ceb9dba6b3f27c8"
+      ]
+    ],
+    "fxdef_ids": [
+      105
+    ],
+    "upstream_paths": [
+      [
+        "approximate_entropy_c931b687__O1",
+        "686adeaabcd0b3c71797a016c90b968b",
+        "approximate_entropy_c931b687",
+        "216c6264abe6eada5ceb9dba6b3f27c8"
+      ]
+    ]
+  },
+  "approximate_entropy_c931b687__O2": {
+    "func": "split_channel",
+    "inputnodes": [
+      "approximate_entropy_c931b687"
+    ],
+    "params": {
+      "chan": "O2"
+    },
+    "meta": {
+      "fxdef_id": 106,
+      "chan": "O2"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "approximate_entropy_c931b687__O2",
+        "686adeaabcd0b3c71797a016c90b968b",
+        "0f73142a611f91852f3d25b075ba6390"
+      ]
+    ],
+    "fxdef_ids": [
+      106
+    ],
+    "upstream_paths": [
+      [
+        "approximate_entropy_c931b687__O2",
+        "686adeaabcd0b3c71797a016c90b968b",
+        "approximate_entropy_c931b687",
+        "0f73142a611f91852f3d25b075ba6390"
+      ]
+    ]
+  },
+  "signal_skewness_f2a3e3b2": {
+    "func": "feature - signal_skewness",
+    "inputnodes": [
+      "epoch_76d1462d"
+    ],
+    "params": {},
+    "meta": {},
+    "pipeline_paths": [
+      [
+        1,
+        "signal_skewness_f2a3e3b2",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "66928cc811703992ad752922244e5589"
+      ]
+    ],
+    "fxdef_ids": [
+      107,
+      108,
+      109,
+      110,
+      111
+    ],
+    "upstream_paths": [
+      [
+        "signal_skewness_f2a3e3b2",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "epoch_76d1462d",
+        "66928cc811703992ad752922244e5589"
+      ]
+    ]
+  },
+  "signal_skewness_f2a3e3b2__C3": {
+    "func": "split_channel",
+    "inputnodes": [
+      "signal_skewness_f2a3e3b2"
+    ],
+    "params": {
+      "chan": "C3"
+    },
+    "meta": {
+      "fxdef_id": 107,
+      "chan": "C3"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "signal_skewness_f2a3e3b2__C3",
+        "66928cc811703992ad752922244e5589",
+        "20de3e2d99afa0f2ecefc55184a5e73f"
+      ]
+    ],
+    "fxdef_ids": [
+      107
+    ],
+    "upstream_paths": [
+      [
+        "signal_skewness_f2a3e3b2__C3",
+        "66928cc811703992ad752922244e5589",
+        "signal_skewness_f2a3e3b2",
+        "20de3e2d99afa0f2ecefc55184a5e73f"
+      ]
+    ]
+  },
+  "signal_skewness_f2a3e3b2__C4": {
+    "func": "split_channel",
+    "inputnodes": [
+      "signal_skewness_f2a3e3b2"
+    ],
+    "params": {
+      "chan": "C4"
+    },
+    "meta": {
+      "fxdef_id": 108,
+      "chan": "C4"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "signal_skewness_f2a3e3b2__C4",
+        "66928cc811703992ad752922244e5589",
+        "096310a7e4fe6cf473d0a4e9fd4f6a64"
+      ]
+    ],
+    "fxdef_ids": [
+      108
+    ],
+    "upstream_paths": [
+      [
+        "signal_skewness_f2a3e3b2__C4",
+        "66928cc811703992ad752922244e5589",
+        "signal_skewness_f2a3e3b2",
+        "096310a7e4fe6cf473d0a4e9fd4f6a64"
+      ]
+    ]
+  },
+  "signal_skewness_f2a3e3b2__Pz": {
+    "func": "split_channel",
+    "inputnodes": [
+      "signal_skewness_f2a3e3b2"
+    ],
+    "params": {
+      "chan": "Pz"
+    },
+    "meta": {
+      "fxdef_id": 109,
+      "chan": "Pz"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "signal_skewness_f2a3e3b2__Pz",
+        "66928cc811703992ad752922244e5589",
+        "3b840bbb8abc338b7b38f3cfd76db4ce"
+      ]
+    ],
+    "fxdef_ids": [
+      109
+    ],
+    "upstream_paths": [
+      [
+        "signal_skewness_f2a3e3b2__Pz",
+        "66928cc811703992ad752922244e5589",
+        "signal_skewness_f2a3e3b2",
+        "3b840bbb8abc338b7b38f3cfd76db4ce"
+      ]
+    ]
+  },
+  "signal_skewness_f2a3e3b2__O1": {
+    "func": "split_channel",
+    "inputnodes": [
+      "signal_skewness_f2a3e3b2"
+    ],
+    "params": {
+      "chan": "O1"
+    },
+    "meta": {
+      "fxdef_id": 110,
+      "chan": "O1"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "signal_skewness_f2a3e3b2__O1",
+        "66928cc811703992ad752922244e5589",
+        "2873c2b02986a8db636a7bfd79006798"
+      ]
+    ],
+    "fxdef_ids": [
+      110
+    ],
+    "upstream_paths": [
+      [
+        "signal_skewness_f2a3e3b2__O1",
+        "66928cc811703992ad752922244e5589",
+        "signal_skewness_f2a3e3b2",
+        "2873c2b02986a8db636a7bfd79006798"
+      ]
+    ]
+  },
+  "signal_skewness_f2a3e3b2__O2": {
+    "func": "split_channel",
+    "inputnodes": [
+      "signal_skewness_f2a3e3b2"
+    ],
+    "params": {
+      "chan": "O2"
+    },
+    "meta": {
+      "fxdef_id": 111,
+      "chan": "O2"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "signal_skewness_f2a3e3b2__O2",
+        "66928cc811703992ad752922244e5589",
+        "c19c1141db2b9739bece0d365271ae6d"
+      ]
+    ],
+    "fxdef_ids": [
+      111
+    ],
+    "upstream_paths": [
+      [
+        "signal_skewness_f2a3e3b2__O2",
+        "66928cc811703992ad752922244e5589",
+        "signal_skewness_f2a3e3b2",
+        "c19c1141db2b9739bece0d365271ae6d"
+      ]
+    ]
+  },
+  "signal_kurtosis_da5d5a38": {
+    "func": "feature - signal_kurtosis",
+    "inputnodes": [
+      "epoch_76d1462d"
+    ],
+    "params": {},
+    "meta": {},
+    "pipeline_paths": [
+      [
+        1,
+        "signal_kurtosis_da5d5a38",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "8521dbf0e5ed9f594caebc2882780bef"
+      ]
+    ],
+    "fxdef_ids": [
+      112,
+      113,
+      114,
+      115,
+      116
+    ],
+    "upstream_paths": [
+      [
+        "signal_kurtosis_da5d5a38",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "epoch_76d1462d",
+        "8521dbf0e5ed9f594caebc2882780bef"
+      ]
+    ]
+  },
+  "signal_kurtosis_da5d5a38__C3": {
+    "func": "split_channel",
+    "inputnodes": [
+      "signal_kurtosis_da5d5a38"
+    ],
+    "params": {
+      "chan": "C3"
+    },
+    "meta": {
+      "fxdef_id": 112,
+      "chan": "C3"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "signal_kurtosis_da5d5a38__C3",
+        "8521dbf0e5ed9f594caebc2882780bef",
+        "03328ae9f2889965ae6bd07b1ca61fb5"
+      ]
+    ],
+    "fxdef_ids": [
+      112
+    ],
+    "upstream_paths": [
+      [
+        "signal_kurtosis_da5d5a38__C3",
+        "8521dbf0e5ed9f594caebc2882780bef",
+        "signal_kurtosis_da5d5a38",
+        "03328ae9f2889965ae6bd07b1ca61fb5"
+      ]
+    ]
+  },
+  "signal_kurtosis_da5d5a38__C4": {
+    "func": "split_channel",
+    "inputnodes": [
+      "signal_kurtosis_da5d5a38"
+    ],
+    "params": {
+      "chan": "C4"
+    },
+    "meta": {
+      "fxdef_id": 113,
+      "chan": "C4"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "signal_kurtosis_da5d5a38__C4",
+        "8521dbf0e5ed9f594caebc2882780bef",
+        "b734321afe8cde8e05877114cbd3b9ca"
+      ]
+    ],
+    "fxdef_ids": [
+      113
+    ],
+    "upstream_paths": [
+      [
+        "signal_kurtosis_da5d5a38__C4",
+        "8521dbf0e5ed9f594caebc2882780bef",
+        "signal_kurtosis_da5d5a38",
+        "b734321afe8cde8e05877114cbd3b9ca"
+      ]
+    ]
+  },
+  "signal_kurtosis_da5d5a38__Pz": {
+    "func": "split_channel",
+    "inputnodes": [
+      "signal_kurtosis_da5d5a38"
+    ],
+    "params": {
+      "chan": "Pz"
+    },
+    "meta": {
+      "fxdef_id": 114,
+      "chan": "Pz"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "signal_kurtosis_da5d5a38__Pz",
+        "8521dbf0e5ed9f594caebc2882780bef",
+        "5cdf92c0fae635c9d3115c58857de64e"
+      ]
+    ],
+    "fxdef_ids": [
+      114
+    ],
+    "upstream_paths": [
+      [
+        "signal_kurtosis_da5d5a38__Pz",
+        "8521dbf0e5ed9f594caebc2882780bef",
+        "signal_kurtosis_da5d5a38",
+        "5cdf92c0fae635c9d3115c58857de64e"
+      ]
+    ]
+  },
+  "signal_kurtosis_da5d5a38__O1": {
+    "func": "split_channel",
+    "inputnodes": [
+      "signal_kurtosis_da5d5a38"
+    ],
+    "params": {
+      "chan": "O1"
+    },
+    "meta": {
+      "fxdef_id": 115,
+      "chan": "O1"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "signal_kurtosis_da5d5a38__O1",
+        "8521dbf0e5ed9f594caebc2882780bef",
+        "367d48847a23bc8deee69bbdcca77264"
+      ]
+    ],
+    "fxdef_ids": [
+      115
+    ],
+    "upstream_paths": [
+      [
+        "signal_kurtosis_da5d5a38__O1",
+        "8521dbf0e5ed9f594caebc2882780bef",
+        "signal_kurtosis_da5d5a38",
+        "367d48847a23bc8deee69bbdcca77264"
+      ]
+    ]
+  },
+  "signal_kurtosis_da5d5a38__O2": {
+    "func": "split_channel",
+    "inputnodes": [
+      "signal_kurtosis_da5d5a38"
+    ],
+    "params": {
+      "chan": "O2"
+    },
+    "meta": {
+      "fxdef_id": 116,
+      "chan": "O2"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "signal_kurtosis_da5d5a38__O2",
+        "8521dbf0e5ed9f594caebc2882780bef",
+        "0a339ffd02acedd288ea56ed4d3cfdd7"
+      ]
+    ],
+    "fxdef_ids": [
+      116
+    ],
+    "upstream_paths": [
+      [
+        "signal_kurtosis_da5d5a38__O2",
+        "8521dbf0e5ed9f594caebc2882780bef",
+        "signal_kurtosis_da5d5a38",
+        "0a339ffd02acedd288ea56ed4d3cfdd7"
+      ]
+    ]
+  },
+  "wavelet_entropy_2e9884f1": {
+    "func": "feature - wavelet_entropy",
+    "inputnodes": [
+      "epoch_76d1462d"
+    ],
+    "params": {},
+    "meta": {},
+    "pipeline_paths": [
+      [
+        1,
+        "wavelet_entropy_2e9884f1",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "c5db5d885ad03cb3e2cfe4474df36957"
+      ]
+    ],
+    "fxdef_ids": [
+      117,
+      118,
+      119,
+      120,
+      121
+    ],
+    "upstream_paths": [
+      [
+        "wavelet_entropy_2e9884f1",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "epoch_76d1462d",
+        "c5db5d885ad03cb3e2cfe4474df36957"
+      ]
+    ]
+  },
+  "wavelet_entropy_2e9884f1__C3": {
+    "func": "split_channel",
+    "inputnodes": [
+      "wavelet_entropy_2e9884f1"
+    ],
+    "params": {
+      "chan": "C3"
+    },
+    "meta": {
+      "fxdef_id": 117,
+      "chan": "C3"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "wavelet_entropy_2e9884f1__C3",
+        "c5db5d885ad03cb3e2cfe4474df36957",
+        "7080150c1b4df81bda47eb62a1d1c5c3"
+      ]
+    ],
+    "fxdef_ids": [
+      117
+    ],
+    "upstream_paths": [
+      [
+        "wavelet_entropy_2e9884f1__C3",
+        "c5db5d885ad03cb3e2cfe4474df36957",
+        "wavelet_entropy_2e9884f1",
+        "7080150c1b4df81bda47eb62a1d1c5c3"
+      ]
+    ]
+  },
+  "wavelet_entropy_2e9884f1__C4": {
+    "func": "split_channel",
+    "inputnodes": [
+      "wavelet_entropy_2e9884f1"
+    ],
+    "params": {
+      "chan": "C4"
+    },
+    "meta": {
+      "fxdef_id": 118,
+      "chan": "C4"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "wavelet_entropy_2e9884f1__C4",
+        "c5db5d885ad03cb3e2cfe4474df36957",
+        "6f2b007b0a3e637e1cfea86c69daaeee"
+      ]
+    ],
+    "fxdef_ids": [
+      118
+    ],
+    "upstream_paths": [
+      [
+        "wavelet_entropy_2e9884f1__C4",
+        "c5db5d885ad03cb3e2cfe4474df36957",
+        "wavelet_entropy_2e9884f1",
+        "6f2b007b0a3e637e1cfea86c69daaeee"
+      ]
+    ]
+  },
+  "wavelet_entropy_2e9884f1__Pz": {
+    "func": "split_channel",
+    "inputnodes": [
+      "wavelet_entropy_2e9884f1"
+    ],
+    "params": {
+      "chan": "Pz"
+    },
+    "meta": {
+      "fxdef_id": 119,
+      "chan": "Pz"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "wavelet_entropy_2e9884f1__Pz",
+        "c5db5d885ad03cb3e2cfe4474df36957",
+        "db73d6e152da620e3d8b956b4ca1ad56"
+      ]
+    ],
+    "fxdef_ids": [
+      119
+    ],
+    "upstream_paths": [
+      [
+        "wavelet_entropy_2e9884f1__Pz",
+        "c5db5d885ad03cb3e2cfe4474df36957",
+        "wavelet_entropy_2e9884f1",
+        "db73d6e152da620e3d8b956b4ca1ad56"
+      ]
+    ]
+  },
+  "wavelet_entropy_2e9884f1__O1": {
+    "func": "split_channel",
+    "inputnodes": [
+      "wavelet_entropy_2e9884f1"
+    ],
+    "params": {
+      "chan": "O1"
+    },
+    "meta": {
+      "fxdef_id": 120,
+      "chan": "O1"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "wavelet_entropy_2e9884f1__O1",
+        "c5db5d885ad03cb3e2cfe4474df36957",
+        "cf89a64f52c1de67b3f6233a2195bf0a"
+      ]
+    ],
+    "fxdef_ids": [
+      120
+    ],
+    "upstream_paths": [
+      [
+        "wavelet_entropy_2e9884f1__O1",
+        "c5db5d885ad03cb3e2cfe4474df36957",
+        "wavelet_entropy_2e9884f1",
+        "cf89a64f52c1de67b3f6233a2195bf0a"
+      ]
+    ]
+  },
+  "wavelet_entropy_2e9884f1__O2": {
+    "func": "split_channel",
+    "inputnodes": [
+      "wavelet_entropy_2e9884f1"
+    ],
+    "params": {
+      "chan": "O2"
+    },
+    "meta": {
+      "fxdef_id": 121,
+      "chan": "O2"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "wavelet_entropy_2e9884f1__O2",
+        "c5db5d885ad03cb3e2cfe4474df36957",
+        "e56d3cb3763a67f99b4796355988dbfe"
+      ]
+    ],
+    "fxdef_ids": [
+      121
+    ],
+    "upstream_paths": [
+      [
+        "wavelet_entropy_2e9884f1__O2",
+        "c5db5d885ad03cb3e2cfe4474df36957",
+        "wavelet_entropy_2e9884f1",
+        "e56d3cb3763a67f99b4796355988dbfe"
+      ]
+    ]
+  },
+  "stft_power_8efec0c5": {
+    "func": "feature - stft_power",
+    "inputnodes": [
+      "epoch_76d1462d"
+    ],
+    "params": {},
+    "meta": {},
+    "pipeline_paths": [
+      [
+        1,
+        "stft_power_8efec0c5",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "78b3282a918ae9264f97aa9ed1bdbd7a"
+      ]
+    ],
+    "fxdef_ids": [
+      122,
+      123,
+      124,
+      125,
+      126
+    ],
+    "upstream_paths": [
+      [
+        "stft_power_8efec0c5",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "epoch_76d1462d",
+        "78b3282a918ae9264f97aa9ed1bdbd7a"
+      ]
+    ]
+  },
+  "stft_power_8efec0c5__C3": {
+    "func": "split_channel",
+    "inputnodes": [
+      "stft_power_8efec0c5"
+    ],
+    "params": {
+      "chan": "C3"
+    },
+    "meta": {
+      "fxdef_id": 122,
+      "chan": "C3"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "stft_power_8efec0c5__C3",
+        "78b3282a918ae9264f97aa9ed1bdbd7a",
+        "eef15e0d88d407655965421f352d07d2"
+      ]
+    ],
+    "fxdef_ids": [
+      122
+    ],
+    "upstream_paths": [
+      [
+        "stft_power_8efec0c5__C3",
+        "78b3282a918ae9264f97aa9ed1bdbd7a",
+        "stft_power_8efec0c5",
+        "eef15e0d88d407655965421f352d07d2"
+      ]
+    ]
+  },
+  "stft_power_8efec0c5__C4": {
+    "func": "split_channel",
+    "inputnodes": [
+      "stft_power_8efec0c5"
+    ],
+    "params": {
+      "chan": "C4"
+    },
+    "meta": {
+      "fxdef_id": 123,
+      "chan": "C4"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "stft_power_8efec0c5__C4",
+        "78b3282a918ae9264f97aa9ed1bdbd7a",
+        "a571dc17889ed64a52e74741b6fbf055"
+      ]
+    ],
+    "fxdef_ids": [
+      123
+    ],
+    "upstream_paths": [
+      [
+        "stft_power_8efec0c5__C4",
+        "78b3282a918ae9264f97aa9ed1bdbd7a",
+        "stft_power_8efec0c5",
+        "a571dc17889ed64a52e74741b6fbf055"
+      ]
+    ]
+  },
+  "stft_power_8efec0c5__Pz": {
+    "func": "split_channel",
+    "inputnodes": [
+      "stft_power_8efec0c5"
+    ],
+    "params": {
+      "chan": "Pz"
+    },
+    "meta": {
+      "fxdef_id": 124,
+      "chan": "Pz"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "stft_power_8efec0c5__Pz",
+        "78b3282a918ae9264f97aa9ed1bdbd7a",
+        "7c8b4505b2e1dfd93d8c04e29b8454ab"
+      ]
+    ],
+    "fxdef_ids": [
+      124
+    ],
+    "upstream_paths": [
+      [
+        "stft_power_8efec0c5__Pz",
+        "78b3282a918ae9264f97aa9ed1bdbd7a",
+        "stft_power_8efec0c5",
+        "7c8b4505b2e1dfd93d8c04e29b8454ab"
+      ]
+    ]
+  },
+  "stft_power_8efec0c5__O1": {
+    "func": "split_channel",
+    "inputnodes": [
+      "stft_power_8efec0c5"
+    ],
+    "params": {
+      "chan": "O1"
+    },
+    "meta": {
+      "fxdef_id": 125,
+      "chan": "O1"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "stft_power_8efec0c5__O1",
+        "78b3282a918ae9264f97aa9ed1bdbd7a",
+        "c3f58590ad628833095515225bce6594"
+      ]
+    ],
+    "fxdef_ids": [
+      125
+    ],
+    "upstream_paths": [
+      [
+        "stft_power_8efec0c5__O1",
+        "78b3282a918ae9264f97aa9ed1bdbd7a",
+        "stft_power_8efec0c5",
+        "c3f58590ad628833095515225bce6594"
+      ]
+    ]
+  },
+  "stft_power_8efec0c5__O2": {
+    "func": "split_channel",
+    "inputnodes": [
+      "stft_power_8efec0c5"
+    ],
+    "params": {
+      "chan": "O2"
+    },
+    "meta": {
+      "fxdef_id": 126,
+      "chan": "O2"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "stft_power_8efec0c5__O2",
+        "78b3282a918ae9264f97aa9ed1bdbd7a",
+        "57c23b57244bdb437447bf83805aaa6e"
+      ]
+    ],
+    "fxdef_ids": [
+      126
+    ],
+    "upstream_paths": [
+      [
+        "stft_power_8efec0c5__O2",
+        "78b3282a918ae9264f97aa9ed1bdbd7a",
+        "stft_power_8efec0c5",
+        "57c23b57244bdb437447bf83805aaa6e"
+      ]
+    ]
+  },
+  "coherence_band_1c4e46de": {
+    "func": "feature - coherence_band",
+    "inputnodes": [
+      "epoch_76d1462d"
+    ],
+    "params": {},
+    "meta": {},
+    "pipeline_paths": [
+      [
+        1,
+        "coherence_band_1c4e46de",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "fc9d8a14fadfbbd87d1e7f14cb29be84"
+      ]
+    ],
+    "fxdef_ids": [
+      127,
+      128,
+      129
+    ],
+    "upstream_paths": [
+      [
+        "coherence_band_1c4e46de",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "epoch_76d1462d",
+        "fc9d8a14fadfbbd87d1e7f14cb29be84"
+      ]
+    ]
+  },
+  "coherence_band_1c4e46de__C3-C4": {
+    "func": "split_channel",
+    "inputnodes": [
+      "coherence_band_1c4e46de"
+    ],
+    "params": {
+      "chan": "C3-C4"
+    },
+    "meta": {
+      "fxdef_id": 127,
+      "chan": "C3-C4"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "coherence_band_1c4e46de__C3-C4",
+        "fc9d8a14fadfbbd87d1e7f14cb29be84",
+        "e86e1b85939789f0142c50ffac17da41"
+      ]
+    ],
+    "fxdef_ids": [
+      127
+    ],
+    "upstream_paths": [
+      [
+        "coherence_band_1c4e46de__C3-C4",
+        "fc9d8a14fadfbbd87d1e7f14cb29be84",
+        "coherence_band_1c4e46de",
+        "e86e1b85939789f0142c50ffac17da41"
+      ]
+    ]
+  },
+  "coherence_band_1c4e46de__F3-F4": {
+    "func": "split_channel",
+    "inputnodes": [
+      "coherence_band_1c4e46de"
+    ],
+    "params": {
+      "chan": "F3-F4"
+    },
+    "meta": {
+      "fxdef_id": 128,
+      "chan": "F3-F4"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "coherence_band_1c4e46de__F3-F4",
+        "fc9d8a14fadfbbd87d1e7f14cb29be84",
+        "c0ad712338a72aeeafed76b8715c1878"
+      ]
+    ],
+    "fxdef_ids": [
+      128
+    ],
+    "upstream_paths": [
+      [
+        "coherence_band_1c4e46de__F3-F4",
+        "fc9d8a14fadfbbd87d1e7f14cb29be84",
+        "coherence_band_1c4e46de",
+        "c0ad712338a72aeeafed76b8715c1878"
+      ]
+    ]
+  },
+  "coherence_band_1c4e46de__P3-P4": {
+    "func": "split_channel",
+    "inputnodes": [
+      "coherence_band_1c4e46de"
+    ],
+    "params": {
+      "chan": "P3-P4"
+    },
+    "meta": {
+      "fxdef_id": 129,
+      "chan": "P3-P4"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "coherence_band_1c4e46de__P3-P4",
+        "fc9d8a14fadfbbd87d1e7f14cb29be84",
+        "9098ac287b4e87e29514a6b566296d53"
+      ]
+    ],
+    "fxdef_ids": [
+      129
+    ],
+    "upstream_paths": [
+      [
+        "coherence_band_1c4e46de__P3-P4",
+        "fc9d8a14fadfbbd87d1e7f14cb29be84",
+        "coherence_band_1c4e46de",
+        "9098ac287b4e87e29514a6b566296d53"
+      ]
+    ]
+  },
+  "plv_96c22352": {
+    "func": "feature - plv",
+    "inputnodes": [
+      "epoch_76d1462d"
+    ],
+    "params": {},
+    "meta": {},
+    "pipeline_paths": [
+      [
+        1,
+        "plv_96c22352",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "c95bf5352af278ddf4ca9e1f90492522"
+      ]
+    ],
+    "fxdef_ids": [
+      130,
+      131,
+      132
+    ],
+    "upstream_paths": [
+      [
+        "plv_96c22352",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "epoch_76d1462d",
+        "c95bf5352af278ddf4ca9e1f90492522"
+      ]
+    ]
+  },
+  "plv_96c22352__C3-C4": {
+    "func": "split_channel",
+    "inputnodes": [
+      "plv_96c22352"
+    ],
+    "params": {
+      "chan": "C3-C4"
+    },
+    "meta": {
+      "fxdef_id": 130,
+      "chan": "C3-C4"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "plv_96c22352__C3-C4",
+        "c95bf5352af278ddf4ca9e1f90492522",
+        "4158dd6674e1292765c9fed10c71976a"
+      ]
+    ],
+    "fxdef_ids": [
+      130
+    ],
+    "upstream_paths": [
+      [
+        "plv_96c22352__C3-C4",
+        "c95bf5352af278ddf4ca9e1f90492522",
+        "plv_96c22352",
+        "4158dd6674e1292765c9fed10c71976a"
+      ]
+    ]
+  },
+  "plv_96c22352__F3-F4": {
+    "func": "split_channel",
+    "inputnodes": [
+      "plv_96c22352"
+    ],
+    "params": {
+      "chan": "F3-F4"
+    },
+    "meta": {
+      "fxdef_id": 131,
+      "chan": "F3-F4"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "plv_96c22352__F3-F4",
+        "c95bf5352af278ddf4ca9e1f90492522",
+        "b4abe2404ffa8a24e7ed85a7ce0c4751"
+      ]
+    ],
+    "fxdef_ids": [
+      131
+    ],
+    "upstream_paths": [
+      [
+        "plv_96c22352__F3-F4",
+        "c95bf5352af278ddf4ca9e1f90492522",
+        "plv_96c22352",
+        "b4abe2404ffa8a24e7ed85a7ce0c4751"
+      ]
+    ]
+  },
+  "plv_96c22352__P3-P4": {
+    "func": "split_channel",
+    "inputnodes": [
+      "plv_96c22352"
+    ],
+    "params": {
+      "chan": "P3-P4"
+    },
+    "meta": {
+      "fxdef_id": 132,
+      "chan": "P3-P4"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "plv_96c22352__P3-P4",
+        "c95bf5352af278ddf4ca9e1f90492522",
+        "e89ce1060be531bcb0849b061fe7e4b8"
+      ]
+    ],
+    "fxdef_ids": [
+      132
+    ],
+    "upstream_paths": [
+      [
+        "plv_96c22352__P3-P4",
+        "c95bf5352af278ddf4ca9e1f90492522",
+        "plv_96c22352",
+        "e89ce1060be531bcb0849b061fe7e4b8"
+      ]
+    ]
+  },
+  "mean_296e4843": {
+    "func": "feature - mean",
+    "inputnodes": [
+      "epoch_76d1462d"
+    ],
+    "params": {},
+    "meta": {},
+    "pipeline_paths": [
+      [
+        1,
+        "mean_296e4843",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "3709a2a61f0b6795ff992829bbd3d2d8"
+      ]
+    ],
+    "fxdef_ids": [
+      133,
+      134,
+      135,
+      136,
+      137
+    ],
+    "upstream_paths": [
+      [
+        "mean_296e4843",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "epoch_76d1462d",
+        "3709a2a61f0b6795ff992829bbd3d2d8"
+      ]
+    ]
+  },
+  "mean_296e4843__C3": {
+    "func": "split_channel",
+    "inputnodes": [
+      "mean_296e4843"
+    ],
+    "params": {
+      "chan": "C3"
+    },
+    "meta": {
+      "fxdef_id": 133,
+      "chan": "C3"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "mean_296e4843__C3",
+        "3709a2a61f0b6795ff992829bbd3d2d8",
+        "134e3c2d0ac5eb983ee5fdd83be685df"
+      ]
+    ],
+    "fxdef_ids": [
+      133
+    ],
+    "upstream_paths": [
+      [
+        "mean_296e4843__C3",
+        "3709a2a61f0b6795ff992829bbd3d2d8",
+        "mean_296e4843",
+        "134e3c2d0ac5eb983ee5fdd83be685df"
+      ]
+    ]
+  },
+  "mean_296e4843__C4": {
+    "func": "split_channel",
+    "inputnodes": [
+      "mean_296e4843"
+    ],
+    "params": {
+      "chan": "C4"
+    },
+    "meta": {
+      "fxdef_id": 134,
+      "chan": "C4"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "mean_296e4843__C4",
+        "3709a2a61f0b6795ff992829bbd3d2d8",
+        "09c02ee10635e4b60948fbda57491917"
+      ]
+    ],
+    "fxdef_ids": [
+      134
+    ],
+    "upstream_paths": [
+      [
+        "mean_296e4843__C4",
+        "3709a2a61f0b6795ff992829bbd3d2d8",
+        "mean_296e4843",
+        "09c02ee10635e4b60948fbda57491917"
+      ]
+    ]
+  },
+  "mean_296e4843__Pz": {
+    "func": "split_channel",
+    "inputnodes": [
+      "mean_296e4843"
+    ],
+    "params": {
+      "chan": "Pz"
+    },
+    "meta": {
+      "fxdef_id": 135,
+      "chan": "Pz"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "mean_296e4843__Pz",
+        "3709a2a61f0b6795ff992829bbd3d2d8",
+        "fd2e3270e7cebce5f34b2f58e6a12822"
+      ]
+    ],
+    "fxdef_ids": [
+      135
+    ],
+    "upstream_paths": [
+      [
+        "mean_296e4843__Pz",
+        "3709a2a61f0b6795ff992829bbd3d2d8",
+        "mean_296e4843",
+        "fd2e3270e7cebce5f34b2f58e6a12822"
+      ]
+    ]
+  },
+  "mean_296e4843__O1": {
+    "func": "split_channel",
+    "inputnodes": [
+      "mean_296e4843"
+    ],
+    "params": {
+      "chan": "O1"
+    },
+    "meta": {
+      "fxdef_id": 136,
+      "chan": "O1"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "mean_296e4843__O1",
+        "3709a2a61f0b6795ff992829bbd3d2d8",
+        "7d10237204c8025454e8f400b96f3ebc"
+      ]
+    ],
+    "fxdef_ids": [
+      136
+    ],
+    "upstream_paths": [
+      [
+        "mean_296e4843__O1",
+        "3709a2a61f0b6795ff992829bbd3d2d8",
+        "mean_296e4843",
+        "7d10237204c8025454e8f400b96f3ebc"
+      ]
+    ]
+  },
+  "mean_296e4843__O2": {
+    "func": "split_channel",
+    "inputnodes": [
+      "mean_296e4843"
+    ],
+    "params": {
+      "chan": "O2"
+    },
+    "meta": {
+      "fxdef_id": 137,
+      "chan": "O2"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "mean_296e4843__O2",
+        "3709a2a61f0b6795ff992829bbd3d2d8",
+        "5b3fb231422caef3750be1da65a6a1ec"
+      ]
+    ],
+    "fxdef_ids": [
+      137
+    ],
+    "upstream_paths": [
+      [
+        "mean_296e4843__O2",
+        "3709a2a61f0b6795ff992829bbd3d2d8",
+        "mean_296e4843",
+        "5b3fb231422caef3750be1da65a6a1ec"
+      ]
+    ]
+  },
+  "std_970bec1f": {
+    "func": "feature - std",
+    "inputnodes": [
+      "epoch_76d1462d"
+    ],
+    "params": {},
+    "meta": {},
+    "pipeline_paths": [
+      [
+        1,
+        "std_970bec1f",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "bbcf330310e261c06787b0a9968c7c6d"
+      ]
+    ],
+    "fxdef_ids": [
+      138,
+      139,
+      140,
+      141,
+      142
+    ],
+    "upstream_paths": [
+      [
+        "std_970bec1f",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "epoch_76d1462d",
+        "bbcf330310e261c06787b0a9968c7c6d"
+      ]
+    ]
+  },
+  "std_970bec1f__C3": {
+    "func": "split_channel",
+    "inputnodes": [
+      "std_970bec1f"
+    ],
+    "params": {
+      "chan": "C3"
+    },
+    "meta": {
+      "fxdef_id": 138,
+      "chan": "C3"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "std_970bec1f__C3",
+        "bbcf330310e261c06787b0a9968c7c6d",
+        "91c3ef8be6fef3cba7d257ceb646703a"
+      ]
+    ],
+    "fxdef_ids": [
+      138
+    ],
+    "upstream_paths": [
+      [
+        "std_970bec1f__C3",
+        "bbcf330310e261c06787b0a9968c7c6d",
+        "std_970bec1f",
+        "91c3ef8be6fef3cba7d257ceb646703a"
+      ]
+    ]
+  },
+  "std_970bec1f__C4": {
+    "func": "split_channel",
+    "inputnodes": [
+      "std_970bec1f"
+    ],
+    "params": {
+      "chan": "C4"
+    },
+    "meta": {
+      "fxdef_id": 139,
+      "chan": "C4"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "std_970bec1f__C4",
+        "bbcf330310e261c06787b0a9968c7c6d",
+        "b5e08a788944ce4d59b0bccb161ecd6f"
+      ]
+    ],
+    "fxdef_ids": [
+      139
+    ],
+    "upstream_paths": [
+      [
+        "std_970bec1f__C4",
+        "bbcf330310e261c06787b0a9968c7c6d",
+        "std_970bec1f",
+        "b5e08a788944ce4d59b0bccb161ecd6f"
+      ]
+    ]
+  },
+  "std_970bec1f__Pz": {
+    "func": "split_channel",
+    "inputnodes": [
+      "std_970bec1f"
+    ],
+    "params": {
+      "chan": "Pz"
+    },
+    "meta": {
+      "fxdef_id": 140,
+      "chan": "Pz"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "std_970bec1f__Pz",
+        "bbcf330310e261c06787b0a9968c7c6d",
+        "22dca90e482f547898b93a1264cbaead"
+      ]
+    ],
+    "fxdef_ids": [
+      140
+    ],
+    "upstream_paths": [
+      [
+        "std_970bec1f__Pz",
+        "bbcf330310e261c06787b0a9968c7c6d",
+        "std_970bec1f",
+        "22dca90e482f547898b93a1264cbaead"
+      ]
+    ]
+  },
+  "std_970bec1f__O1": {
+    "func": "split_channel",
+    "inputnodes": [
+      "std_970bec1f"
+    ],
+    "params": {
+      "chan": "O1"
+    },
+    "meta": {
+      "fxdef_id": 141,
+      "chan": "O1"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "std_970bec1f__O1",
+        "bbcf330310e261c06787b0a9968c7c6d",
+        "3e846c6682f31c59d6ab27d68a94a0d5"
+      ]
+    ],
+    "fxdef_ids": [
+      141
+    ],
+    "upstream_paths": [
+      [
+        "std_970bec1f__O1",
+        "bbcf330310e261c06787b0a9968c7c6d",
+        "std_970bec1f",
+        "3e846c6682f31c59d6ab27d68a94a0d5"
+      ]
+    ]
+  },
+  "std_970bec1f__O2": {
+    "func": "split_channel",
+    "inputnodes": [
+      "std_970bec1f"
+    ],
+    "params": {
+      "chan": "O2"
+    },
+    "meta": {
+      "fxdef_id": 142,
+      "chan": "O2"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "std_970bec1f__O2",
+        "bbcf330310e261c06787b0a9968c7c6d",
+        "dc31d8fb7989eddbb8262e37e3bf0b75"
+      ]
+    ],
+    "fxdef_ids": [
+      142
+    ],
+    "upstream_paths": [
+      [
+        "std_970bec1f__O2",
+        "bbcf330310e261c06787b0a9968c7c6d",
+        "std_970bec1f",
+        "dc31d8fb7989eddbb8262e37e3bf0b75"
+      ]
+    ]
+  },
+  "skew_62b39eb2": {
+    "func": "feature - skew",
+    "inputnodes": [
+      "epoch_76d1462d"
+    ],
+    "params": {},
+    "meta": {},
+    "pipeline_paths": [
+      [
+        1,
+        "skew_62b39eb2",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "ab69bdc8a212accfcc91bcc9e8da4db7"
+      ]
+    ],
+    "fxdef_ids": [
+      143,
+      144,
+      145,
+      146,
+      147
+    ],
+    "upstream_paths": [
+      [
+        "skew_62b39eb2",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "epoch_76d1462d",
+        "ab69bdc8a212accfcc91bcc9e8da4db7"
+      ]
+    ]
+  },
+  "skew_62b39eb2__C3": {
+    "func": "split_channel",
+    "inputnodes": [
+      "skew_62b39eb2"
+    ],
+    "params": {
+      "chan": "C3"
+    },
+    "meta": {
+      "fxdef_id": 143,
+      "chan": "C3"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "skew_62b39eb2__C3",
+        "ab69bdc8a212accfcc91bcc9e8da4db7",
+        "c89fd97d79fb63595718ac5f344d81a6"
+      ]
+    ],
+    "fxdef_ids": [
+      143
+    ],
+    "upstream_paths": [
+      [
+        "skew_62b39eb2__C3",
+        "ab69bdc8a212accfcc91bcc9e8da4db7",
+        "skew_62b39eb2",
+        "c89fd97d79fb63595718ac5f344d81a6"
+      ]
+    ]
+  },
+  "skew_62b39eb2__C4": {
+    "func": "split_channel",
+    "inputnodes": [
+      "skew_62b39eb2"
+    ],
+    "params": {
+      "chan": "C4"
+    },
+    "meta": {
+      "fxdef_id": 144,
+      "chan": "C4"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "skew_62b39eb2__C4",
+        "ab69bdc8a212accfcc91bcc9e8da4db7",
+        "afb255a5cb21a60a09725781bc11c7be"
+      ]
+    ],
+    "fxdef_ids": [
+      144
+    ],
+    "upstream_paths": [
+      [
+        "skew_62b39eb2__C4",
+        "ab69bdc8a212accfcc91bcc9e8da4db7",
+        "skew_62b39eb2",
+        "afb255a5cb21a60a09725781bc11c7be"
+      ]
+    ]
+  },
+  "skew_62b39eb2__Pz": {
+    "func": "split_channel",
+    "inputnodes": [
+      "skew_62b39eb2"
+    ],
+    "params": {
+      "chan": "Pz"
+    },
+    "meta": {
+      "fxdef_id": 145,
+      "chan": "Pz"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "skew_62b39eb2__Pz",
+        "ab69bdc8a212accfcc91bcc9e8da4db7",
+        "d3784eb692751d32b570eb6d0296f511"
+      ]
+    ],
+    "fxdef_ids": [
+      145
+    ],
+    "upstream_paths": [
+      [
+        "skew_62b39eb2__Pz",
+        "ab69bdc8a212accfcc91bcc9e8da4db7",
+        "skew_62b39eb2",
+        "d3784eb692751d32b570eb6d0296f511"
+      ]
+    ]
+  },
+  "skew_62b39eb2__O1": {
+    "func": "split_channel",
+    "inputnodes": [
+      "skew_62b39eb2"
+    ],
+    "params": {
+      "chan": "O1"
+    },
+    "meta": {
+      "fxdef_id": 146,
+      "chan": "O1"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "skew_62b39eb2__O1",
+        "ab69bdc8a212accfcc91bcc9e8da4db7",
+        "4cb2c5a052e690cebe0cfdb54d70fe25"
+      ]
+    ],
+    "fxdef_ids": [
+      146
+    ],
+    "upstream_paths": [
+      [
+        "skew_62b39eb2__O1",
+        "ab69bdc8a212accfcc91bcc9e8da4db7",
+        "skew_62b39eb2",
+        "4cb2c5a052e690cebe0cfdb54d70fe25"
+      ]
+    ]
+  },
+  "skew_62b39eb2__O2": {
+    "func": "split_channel",
+    "inputnodes": [
+      "skew_62b39eb2"
+    ],
+    "params": {
+      "chan": "O2"
+    },
+    "meta": {
+      "fxdef_id": 147,
+      "chan": "O2"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "skew_62b39eb2__O2",
+        "ab69bdc8a212accfcc91bcc9e8da4db7",
+        "4e0e9659acb9b8f6f5b1253310fbab16"
+      ]
+    ],
+    "fxdef_ids": [
+      147
+    ],
+    "upstream_paths": [
+      [
+        "skew_62b39eb2__O2",
+        "ab69bdc8a212accfcc91bcc9e8da4db7",
+        "skew_62b39eb2",
+        "4e0e9659acb9b8f6f5b1253310fbab16"
+      ]
+    ]
+  },
+  "kurt_18f560b4": {
+    "func": "feature - kurt",
+    "inputnodes": [
+      "epoch_76d1462d"
+    ],
+    "params": {},
+    "meta": {},
+    "pipeline_paths": [
+      [
+        1,
+        "kurt_18f560b4",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "0c63625058375a257355b38cdc18b6c3"
+      ]
+    ],
+    "fxdef_ids": [
+      148,
+      149,
+      150,
+      151,
+      152
+    ],
+    "upstream_paths": [
+      [
+        "kurt_18f560b4",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "epoch_76d1462d",
+        "0c63625058375a257355b38cdc18b6c3"
+      ]
+    ]
+  },
+  "kurt_18f560b4__C3": {
+    "func": "split_channel",
+    "inputnodes": [
+      "kurt_18f560b4"
+    ],
+    "params": {
+      "chan": "C3"
+    },
+    "meta": {
+      "fxdef_id": 148,
+      "chan": "C3"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "kurt_18f560b4__C3",
+        "0c63625058375a257355b38cdc18b6c3",
+        "4077cd8d0e174ad18839c3a3f7d998b0"
+      ]
+    ],
+    "fxdef_ids": [
+      148
+    ],
+    "upstream_paths": [
+      [
+        "kurt_18f560b4__C3",
+        "0c63625058375a257355b38cdc18b6c3",
+        "kurt_18f560b4",
+        "4077cd8d0e174ad18839c3a3f7d998b0"
+      ]
+    ]
+  },
+  "kurt_18f560b4__C4": {
+    "func": "split_channel",
+    "inputnodes": [
+      "kurt_18f560b4"
+    ],
+    "params": {
+      "chan": "C4"
+    },
+    "meta": {
+      "fxdef_id": 149,
+      "chan": "C4"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "kurt_18f560b4__C4",
+        "0c63625058375a257355b38cdc18b6c3",
+        "2495de1e3647a3617be9b0c248c15304"
+      ]
+    ],
+    "fxdef_ids": [
+      149
+    ],
+    "upstream_paths": [
+      [
+        "kurt_18f560b4__C4",
+        "0c63625058375a257355b38cdc18b6c3",
+        "kurt_18f560b4",
+        "2495de1e3647a3617be9b0c248c15304"
+      ]
+    ]
+  },
+  "kurt_18f560b4__Pz": {
+    "func": "split_channel",
+    "inputnodes": [
+      "kurt_18f560b4"
+    ],
+    "params": {
+      "chan": "Pz"
+    },
+    "meta": {
+      "fxdef_id": 150,
+      "chan": "Pz"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "kurt_18f560b4__Pz",
+        "0c63625058375a257355b38cdc18b6c3",
+        "19bbb347129d789ab087dc74232e2f66"
+      ]
+    ],
+    "fxdef_ids": [
+      150
+    ],
+    "upstream_paths": [
+      [
+        "kurt_18f560b4__Pz",
+        "0c63625058375a257355b38cdc18b6c3",
+        "kurt_18f560b4",
+        "19bbb347129d789ab087dc74232e2f66"
+      ]
+    ]
+  },
+  "kurt_18f560b4__O1": {
+    "func": "split_channel",
+    "inputnodes": [
+      "kurt_18f560b4"
+    ],
+    "params": {
+      "chan": "O1"
+    },
+    "meta": {
+      "fxdef_id": 151,
+      "chan": "O1"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "kurt_18f560b4__O1",
+        "0c63625058375a257355b38cdc18b6c3",
+        "fb9e0b86cfa7323c048f76ae4a42f2a4"
+      ]
+    ],
+    "fxdef_ids": [
+      151
+    ],
+    "upstream_paths": [
+      [
+        "kurt_18f560b4__O1",
+        "0c63625058375a257355b38cdc18b6c3",
+        "kurt_18f560b4",
+        "fb9e0b86cfa7323c048f76ae4a42f2a4"
+      ]
+    ]
+  },
+  "kurt_18f560b4__O2": {
+    "func": "split_channel",
+    "inputnodes": [
+      "kurt_18f560b4"
+    ],
+    "params": {
+      "chan": "O2"
+    },
+    "meta": {
+      "fxdef_id": 152,
+      "chan": "O2"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "kurt_18f560b4__O2",
+        "0c63625058375a257355b38cdc18b6c3",
+        "0a9d817db5b65f036e28248a8270bdf1"
+      ]
+    ],
+    "fxdef_ids": [
+      152
+    ],
+    "upstream_paths": [
+      [
+        "kurt_18f560b4__O2",
+        "0c63625058375a257355b38cdc18b6c3",
+        "kurt_18f560b4",
+        "0a9d817db5b65f036e28248a8270bdf1"
+      ]
+    ]
+  },
+  "zscore_stddev_966c22a9": {
+    "func": "feature - zscore_stddev",
+    "inputnodes": [
+      "epoch_76d1462d"
+    ],
+    "params": {},
+    "meta": {},
+    "pipeline_paths": [
+      [
+        1,
+        "zscore_stddev_966c22a9",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "c3ef2a4ae4968d46f7031477d85a0ad9"
+      ]
+    ],
+    "fxdef_ids": [
+      153
+    ],
+    "upstream_paths": [
+      [
+        "zscore_stddev_966c22a9",
+        "74e82f263f802294c858ec5b001c1ac6",
+        "epoch_76d1462d",
+        "c3ef2a4ae4968d46f7031477d85a0ad9"
+      ]
+    ]
+  },
+  "zscore_stddev_966c22a9__C3": {
+    "func": "split_channel",
+    "inputnodes": [
+      "zscore_stddev_966c22a9"
+    ],
+    "params": {
+      "chan": "C3"
+    },
+    "meta": {
+      "fxdef_id": 153,
+      "chan": "C3"
+    },
+    "pipeline_paths": [
+      [
+        1,
+        "zscore_stddev_966c22a9__C3",
+        "c3ef2a4ae4968d46f7031477d85a0ad9",
+        "1ccd76768724265584a8d5621c964bc1"
+      ]
+    ],
+    "fxdef_ids": [
+      153
+    ],
+    "upstream_paths": [
+      [
+        "zscore_stddev_966c22a9__C3",
+        "c3ef2a4ae4968d46f7031477d85a0ad9",
+        "zscore_stddev_966c22a9",
+        "1ccd76768724265584a8d5621c964bc1"
+      ]
+    ]
+  }
+}

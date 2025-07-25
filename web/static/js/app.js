@@ -1204,6 +1204,8 @@ async function showFeatureSetDetails(featureSetId) {
                 if (dagData.cytoscape_data.nodes.length > 0) {
                     initializeFeaturesetCytoscape(dagData.cytoscape_data);
                 }
+                // 绑定DAG执行事件
+                bindDagExecutionEvents(featureSetId);
                 // 只监听一次
                 modalEl.removeEventListener('shown.bs.modal', handler);
             });
@@ -2740,4 +2742,128 @@ function downloadExtractionResult(taskId) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+}
+
+// DAG Execution Functions
+function bindDagExecutionEvents(featureSetId) {
+    // 绑定执行按钮
+    const executeBtn = document.getElementById('dagExecuteBtn');
+    const statusBtn = document.getElementById('dagStatusBtn');
+    
+    if (executeBtn) {
+        executeBtn.onclick = () => executeDag(featureSetId);
+    }
+    
+    if (statusBtn) {
+        statusBtn.onclick = () => showDagStatus(featureSetId);
+    }
+}
+
+async function executeDag(featureSetId) {
+    try {
+        showStatus('Executing DAG...', 'info');
+        showProgress(true);
+        
+        const response = await fetch(`/api/execute_dag/${featureSetId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                recording_id: 22  // 可以改为可配置的
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            showStatus('DAG execution completed successfully', 'success');
+            showDagStatus(featureSetId, result);
+        } else {
+            showStatus(`DAG execution failed: ${result.error}`, 'error');
+        }
+    } catch (error) {
+        console.error('Error executing DAG:', error);
+        showStatus('Error executing DAG', 'error');
+    } finally {
+        showProgress(false);
+    }
+}
+
+async function showDagStatus(featureSetId, executionData = null) {
+    try {
+        let data = executionData;
+        
+        if (!data) {
+            const response = await fetch(`/api/dag_status/${featureSetId}`);
+            data = await response.json();
+        }
+        
+        if (data) {
+            // 更新摘要信息
+            document.getElementById('totalNodes').textContent = data.total_nodes || 0;
+            document.getElementById('successNodes').textContent = data.status_counts?.success || 0;
+            document.getElementById('failedNodes').textContent = data.status_counts?.failed || 0;
+            document.getElementById('totalDuration').textContent = `${(data.total_duration || 0).toFixed(2)}s`;
+            
+            // 更新节点详情表格
+            const tbody = document.getElementById('nodeDetailsTableBody');
+            tbody.innerHTML = '';
+            
+            if (data.node_details) {
+                Object.entries(data.node_details).forEach(([nodeId, details]) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><code>${nodeId}</code></td>
+                        <td>${details.function || 'N/A'}</td>
+                        <td>${getNodeStatusBadge(details.status)}</td>
+                        <td>${details.duration ? `${details.duration.toFixed(3)}s` : 'N/A'}</td>
+                        <td>${details.pipeline_count || 0}</td>
+                        <td>${details.fxdef_count || 0}</td>
+                        <td>${details.error || '-'}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+            
+            // 显示模态框
+            const modal = new bootstrap.Modal(document.getElementById('dagStatusModal'));
+            modal.show();
+        }
+    } catch (error) {
+        console.error('Error loading DAG status:', error);
+        showStatus('Error loading DAG status', 'error');
+    }
+}
+
+function getNodeStatusBadge(status) {
+    const statusMap = {
+        'success': 'success',
+        'failed': 'danger',
+        'running': 'warning',
+        'pending': 'secondary'
+    };
+    
+    const badgeClass = statusMap[status] || 'secondary';
+    return `<span class="badge bg-${badgeClass}">${status}</span>`;
+}
+
+async function loadRecordingsForDagSelect() {
+    const select = document.getElementById('dagRecordingSelect');
+    select.innerHTML = '<option value="">选择Recording...</option>';
+    const resp = await fetch('/api/recordings');
+    const recordings = await resp.json();
+    recordings.forEach(r => {
+        select.innerHTML += `<option value="${r.id}">${r.filename} (${(r.duration||0).toFixed(1)}s, ${r.channels}ch, ${r.sampling_rate}Hz)</option>`;
+    });
+    // 选中第一个或默认22
+    select.value = 22;
+    // 绑定change事件，显示详细信息
+    select.onchange = function() {
+        const rec = recordings.find(x => x.id == select.value);
+        document.getElementById('dagRecordingInfo').innerText = rec
+            ? `文件大小: ${rec.file_size||'未知'}，通道: ${rec.channels}，采样率: ${rec.sampling_rate}Hz，时长: ${rec.duration}s`
+            : '';
+    };
+    select.onchange();
 } 

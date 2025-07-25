@@ -1253,5 +1253,91 @@ def download_extraction_result(task_id):
         logger.error(f"Failed to download extraction result: {e}")
         return jsonify({'error': f'Failed to download extraction result: {str(e)}'}), 500
 
+@app.route('/api/execute_dag/<int:feature_set_id>', methods=['POST'])
+def execute_dag_api(feature_set_id):
+    """执行DAG并返回执行报告"""
+    try:
+        data = request.get_json()
+        recording_id = data.get('recording_id', 22)
+        
+        # 导入必要的模块
+        from eeg2fx.featureset_grouping import build_feature_dag, load_fxdefs_for_set
+        from eeg2fx.node_executor import NodeExecutor
+        
+        # 加载特征定义
+        fxdefs = load_fxdefs_for_set(feature_set_id)
+        
+        # 构建DAG
+        dag = build_feature_dag(fxdefs)
+        
+        # 执行DAG
+        executor = NodeExecutor(recording_id)
+        node_outputs = executor.execute_dag(dag)
+        
+        # 获取执行报告
+        execution_report = executor.generate_execution_report()
+        
+        return jsonify(execution_report)
+        
+    except Exception as e:
+        logger.error(f"Failed to execute DAG: {e}")
+        return jsonify({'error': f'Failed to execute DAG: {str(e)}'}), 500
+
+@app.route('/api/dag_status/<int:feature_set_id>')
+def get_dag_status(feature_set_id):
+    """获取DAG执行状态（模拟数据）"""
+    try:
+        # 这里应该从数据库获取实际的执行状态
+        # 暂时返回模拟数据
+        mock_status = {
+            "total_nodes": 6,
+            "status_counts": {
+                "success": 6,
+                "failed": 0
+            },
+            "total_duration": 7.89,
+            "execution_order": [
+                "raw", "filter_36485993", "epoch_c7f91ab6", 
+                "notch_filter_537173d2", "spectral_entropy_e3c4e4d6", 
+                "spectral_entropy_e3c4e4d6__C3"
+            ],
+            "node_details": {
+                "raw": {
+                    "status": "success",
+                    "duration": 0.521,
+                    "pipeline_count": 2,
+                    "fxdef_count": 2,
+                    "error": None
+                },
+                "filter_36485993": {
+                    "status": "success",
+                    "duration": 2.436,
+                    "pipeline_count": 2,
+                    "fxdef_count": 2,
+                    "error": None
+                },
+                "spectral_entropy_e3c4e4d6": {
+                    "status": "success",
+                    "duration": 1.728,
+                    "pipeline_count": 2,
+                    "fxdef_count": 2,
+                    "error": None
+                },
+                "spectral_entropy_e3c4e4d6__C3": {
+                    "status": "success",
+                    "duration": 0.0,
+                    "pipeline_count": 1,
+                    "fxdef_count": 2,
+                    "error": None
+                }
+            }
+        }
+        
+        return jsonify(mock_status)
+        
+    except Exception as e:
+        logger.error(f"Failed to get DAG status: {e}")
+        return jsonify({'error': f'Failed to get DAG status: {str(e)}'}), 500
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000) 

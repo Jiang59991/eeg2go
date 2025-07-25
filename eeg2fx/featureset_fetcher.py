@@ -2,17 +2,16 @@ import os
 import sqlite3
 import json
 import gc
+import hashlib
 from collections import deque
 import inspect
 from eeg2fx.featureset_grouping import build_feature_dag, load_fxdefs_for_set
-from eeg2fx.pipeline_executor import resolve_function, load_recording
-from eeg2fx.pipeline_executor import toposort
-from eeg2fx.featureset_grouping import load_pipeline_structure
+from eeg2fx.steps import load_recording, RecordingTooLargeError
 from eeg2fx.feature_saver import save_feature_values
-from eeg2fx.steps import filter, reref, zscore, epoch, notch_filter, resample, ica, RecordingTooLargeError
 from eeg2fx.feature.common import standardize_channel_name
 import numpy as np
 from logging_config import logger
+from eeg2fx.node_executor import NodeExecutor
 
 DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "database", "eeg2go.db"))
 MAX_MEMORY_GB = 3  # Set the memory usage limit for a single recording file (GB)
@@ -51,47 +50,7 @@ def load_cached_feature_value(fxid, recording_id):
         return result
     return None
 
-def run_pipeline_with_cache(pipeid, recording_id, value_cache, node_output):
-    """
-    Execute one pipeline, use shared value_cache to avoid redoing nodes.
-    Return all intermediate results for this pipeline.
-    """
-    dag = load_pipeline_structure(pipeid)
-    execution_order = toposort(dag)
 
-    for nid in execution_order:
-        node = dag[nid]
-        func_name = node["func"]
-        params = node["params"]
-        input_ids = node["inputnodes"]
-        inputs = [node_output[i] for i in input_ids]
-
-        cache_key = (
-            func_name,
-            json.dumps(params, sort_keys=True),
-            tuple(input_ids)
-        )
-
-        if cache_key in value_cache:
-            output = value_cache[cache_key]
-            # print(f"[CACHE HIT] func={func_name} | key={cache_key}")
-        else:
-            func = resolve_function(func_name)
-            # print(f"[EXECUTE] func={func_name} | input_nodes={input_ids} | params={params}")
-
-            if func_name == "raw":
-                output = func(recording_id, **params)
-            else:
-                if "chans" in node:
-                    output = func(*inputs, chans=node["chans"], **params)
-                else:
-                    output = func(*inputs, **params)
-            value_cache[cache_key] = output
-            # print(f"[RESULT] node={nid} → output_type={type(output)} | shape={getattr(output, 'shape', 'N/A') or getattr(output, 'get_data', lambda: 'no get_data')()}")
-
-        node_output[nid] = output
-
-    return node_output
 
 def check_all_features_cached(feature_set_id: str, recording_id: int) -> tuple[bool, dict]:
     """
@@ -115,15 +74,15 @@ def check_all_features_cached(feature_set_id: str, recording_id: int) -> tuple[b
             results[fxid] = cached
         else:
             all_cached = False
-            # 不需要在这里创建空结果，因为如果不全缓存就会重新计算
+            break
     
     return all_cached, results
 
 def run_feature_set(feature_set_id: str, recording_id: int):
     """
-    Execute a feature set extraction task for a single recording file.
+    Execute a feature set extraction task using DAG execution.
     First check if all features are already cached, if so return them directly.
-    Otherwise, check the estimated memory usage before starting, and skip if it is too large.
+    Otherwise, build DAG and execute all nodes in topological order.
     """
     # --- Pre-check: 检查所有特征是否都已经缓存 ---
     all_cached, cached_results = check_all_features_cached(feature_set_id, recording_id)
@@ -155,68 +114,61 @@ def run_feature_set(feature_set_id: str, recording_id: int):
         save_feature_values(recording_id, results)
         return results
 
-    # --- Normal feature extraction ---
+    # --- DAG-based feature extraction ---
     fxdefs = load_fxdefs_for_set(feature_set_id)
+    
+    # 构建DAG
+    dag = build_feature_dag(fxdefs)
+    logger.info(f"构建DAG完成，包含 {len(dag)} 个节点")
 
+    executor = NodeExecutor(recording_id)
+    node_outputs = executor.execute_dag(dag)
+    logger.info(f"DAG执行完成，输出节点数: {len(node_outputs)}")
+    
+    # 提取特征结果
     results = {}
-    value_cache = {}
-
-    # Put the preloaded raw object into the cache to avoid reloading
-    raw_node_cache_key = ('raw', '{}', ())
-    value_cache[raw_node_cache_key] = raw
-
     for fx in fxdefs:
         fxid = fx["id"]
         cached = load_cached_feature_value(fxid, recording_id)
         if cached:
-            # print(f"[HIT] fxdef_id={fxid} recording_id={recording_id} loaded from feature_values table")
             results[fxid] = cached
             continue
 
-        pipeid = fx["pipeid"]
         chan = fx["chans"]
         params = fx["params"]
         func = fx["func"]
-        feature_type = fx.get("feature_type", "single_channel")
-
-        # Create fresh node_output for each feature to prevent memory accumulation
-        node_output = {}
 
         try:
-            # Run pipeline and release node_output after use
-            run_pipeline_with_cache(pipeid, recording_id, value_cache, node_output)
-            output_node = get_pipeline_output_node(pipeid)
-            fx_input = node_output[output_node]
-            fx_func = resolve_function(func)
+            # 从DAG输出中提取特征
+            # 查找对应的分割节点（特征节点 -> 分割节点）
+            split_id = None
+            split_upstream_hash = None
+            for node_id, node in dag.items():
+                if (node["func"] == "split_channel" and 
+                    node["params"].get("chan") == chan and
+                    fxid in node.get("fxdef_ids", [])):
+                    split_id = node_id
+                    # 获取分割节点的upstream_hash
+                    upstream_paths = node.get("upstream_paths", set())
+                    if upstream_paths:
+                        # 取第一个upstream_path的upstream_hash
+                        split_upstream_hash = list(upstream_paths)[0][3]
+                    break
             
-            # Handle channel parameters according to the feature type
-            if feature_type == "single_channel":
-                chans_for_func = chan
-                chan_for_split = chan
-            elif feature_type == "channel_pair":
-                if "-" in chan:
-                    ch1, ch2 = chan.split("-", 1)
-                    chans_for_func = [ch1.strip(), ch2.strip()]
-                else:
-                    # Single channel, use default pairing
-                    chans_for_func = [chan, "C3"]  # or other default pairing logic
-                chan_for_split = chan  # Keep the original format for splitting
-            elif feature_type == "scalar":
-                chans_for_func = chan
-                chan_for_split = chan
+            if split_upstream_hash and split_upstream_hash in node_outputs:
+                # 直接使用分割节点的输出
+                final_result = node_outputs[split_upstream_hash]
+                results[fxid] = prepare_feature_output(final_result)
+                logger.debug(f"从分割节点 {split_id} (upstream_hash: {split_upstream_hash}) 提取特征 {fxid}")
             else:
-                chans_for_func = chan
-                chan_for_split = chan
-
-            sig = inspect.signature(fx_func)
-            if 'chans' in sig.parameters:
-                fx_output = fx_func(fx_input, chans=chans_for_func, **params)
-            else:
-                fx_output = fx_func(fx_input, **params)
-
-            final_result = split_channel(fx_output, chan_for_split)
-
-            results[fxid] = prepare_feature_output(final_result)
+                # 如果找不到分割节点，记录错误
+                logger.warning(f"Split node not found for fxid={fxid}, chan={chan}")
+                results[fxid] = {
+                    "value": None,
+                    "dim": "unknown", 
+                    "shape": [],
+                    "notes": f"Split node not found in DAG for chan={chan}"
+                }
             
         except Exception as e:
             # Store failed feature with error information
@@ -230,25 +182,8 @@ def run_feature_set(feature_set_id: str, recording_id: int):
                 "shape": [],
                 "notes": error_msg
             }
-        finally:
-            # Clean up memory for this feature - CRITICAL for preventing memory leaks
-            if 'fx_input' in locals():
-                del fx_input
-            if 'fx_output' in locals():
-                del fx_output
-            if 'final_result' in locals():
-                del final_result
-            # Clear node_output to prevent memory accumulation
-            node_output.clear()
-            del node_output
-            # Force garbage collection
-            gc.collect()
 
     save_feature_values(recording_id, results)
-
-    # Clean up after full run
-    del value_cache
-    gc.collect()
 
     return results
 
@@ -362,8 +297,8 @@ def prepare_feature_output(vals):
         }
 
 if __name__ == "__main__":
-    feature_set_id = 2
-    recording_id = 1
+    feature_set_id = 4
+    recording_id = 22
 
     print(f"Running feature set '{feature_set_id}' on recording {recording_id}")
     results = run_feature_set(feature_set_id, recording_id)
