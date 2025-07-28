@@ -54,12 +54,12 @@ export async function loadExperiments() {
         const experiments = await response.json();
         console.log('Experiments loaded:', experiments);
         
-        const tbody = document.getElementById('experimentsTableBody');
+    const tbody = document.getElementById('experimentsTableBody');
         if (!tbody) {
             console.error('experimentsTableBody element not found');
-            return;
-        }
-        
+        return;
+    }
+    
         if (experiments.length === 0) {
             tbody.innerHTML = `
                 <tr>
@@ -93,21 +93,21 @@ export async function loadExperiments() {
         } else {
             tbody.innerHTML = experiments.map(exp => `
                 <tr>
-                    <td>${exp.id}</td>
+            <td>${exp.id}</td>
                     <td>${exp.experiment_name || 'N/A'}</td>
                     <td>${exp.experiment_type}</td>
-                    <td>${exp.dataset_name || 'N/A'}</td>
-                    <td>${exp.feature_set_name || 'N/A'}</td>
+            <td>${exp.dataset_name || 'N/A'}</td>
+            <td>${exp.feature_set_name || 'N/A'}</td>
                     <td>
                         <span class="badge bg-${getStatusBadgeColor(exp.status)}">${exp.status}</span>
                     </td>
                     <td>${exp.run_time ? new Date(exp.run_time).toLocaleString() : 'N/A'}</td>
                     <td>${exp.duration_seconds ? `${exp.duration_seconds}s` : 'N/A'}</td>
                     <td>
-                        <button class="btn btn-sm btn-outline-primary" onclick="showExperimentDetails(${exp.id})">
+                        <button class="btn btn-sm btn-outline-primary" onclick="showExperimentDetails('${exp.id}')">
                             <i class="bi bi-eye"></i> Details
-                        </button>
-                    </td>
+                </button>
+            </td>
                 </tr>
             `).join('');
             console.log(`Displayed ${experiments.length} experiments`);
@@ -149,54 +149,164 @@ export function showExperimentDetails(experimentId) {
     console.log('Showing experiment details for ID:', experimentId);
     
     fetch(`/api/experiment_details/${experimentId}`)
-        .then(response => response.json())
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log('Received data:', data);
+            
             if (data.error) {
+                console.error('API returned error:', data.error);
                 showStatus(`Error: ${data.error}`, 'error');
                 return;
             }
             
+            if (!data.experiment) {
+                console.error('No experiment data in response');
+                showStatus('No experiment data received', 'error');
+                return;
+            }
+            
+            const experiment = data.experiment;
+            console.log('Experiment data:', experiment);
+            
             // 填充实验信息
-            document.getElementById('experimentInfo').innerHTML = `
+            let infoHTML = `
                 <table class="table table-sm">
-                    <tr><td><strong>ID:</strong></td><td>${data.experiment.id}</td></tr>
-                    <tr><td><strong>Name:</strong></td><td>${data.experiment.experiment_name || 'N/A'}</td></tr>
-                    <tr><td><strong>Type:</strong></td><td>${data.experiment.experiment_type}</td></tr>
-                    <tr><td><strong>Dataset:</strong></td><td>${data.experiment.dataset_name || 'N/A'}</td></tr>
-                    <tr><td><strong>Feature Set:</strong></td><td>${data.experiment.feature_set_name || 'N/A'}</td></tr>
-                    <tr><td><strong>Status:</strong></td><td><span class="badge bg-${getStatusBadgeColor(data.experiment.status)}">${data.experiment.status}</span></td></tr>
-                    <tr><td><strong>Run Time:</strong></td><td>${data.experiment.run_time ? new Date(data.experiment.run_time).toLocaleString() : 'N/A'}</td></tr>
-                    <tr><td><strong>Duration:</strong></td><td>${data.experiment.duration_seconds ? `${data.experiment.duration_seconds}s` : 'N/A'}</td></tr>
-                </table>
+                    <tr><td><strong>ID:</strong></td><td>${experiment.id || 'N/A'}</td></tr>
+                    <tr><td><strong>Name:</strong></td><td>${experiment.experiment_name || 'N/A'}</td></tr>
+                    <tr><td><strong>Type:</strong></td><td>${experiment.experiment_type || 'N/A'}</td></tr>
+                    <tr><td><strong>Dataset:</strong></td><td>${experiment.dataset_name || 'N/A'}</td></tr>
+                    <tr><td><strong>Feature Set:</strong></td><td>${experiment.feature_set_name || 'N/A'}</td></tr>
+                    <tr><td><strong>Status:</strong></td><td><span class="badge bg-${getStatusBadgeColor(experiment.status)}">${experiment.status || 'N/A'}</span></td></tr>
+                    <tr><td><strong>Run Time:</strong></td><td>${experiment.run_time ? new Date(experiment.run_time).toLocaleString() : 'N/A'}</td></tr>
+                    <tr><td><strong>Duration:</strong></td><td>${experiment.duration_seconds ? `${experiment.duration_seconds}s` : 'N/A'}</td></tr>
             `;
             
-            // 填充特征结果
+            // 如果是任务，显示额外信息
+            if (experiment.is_task) {
+                console.log('This is a task, showing additional info');
+                infoHTML += `
+                    <tr><td><strong>Progress:</strong></td><td>${experiment.progress || 0}%</td></tr>
+                    <tr><td><strong>Processed:</strong></td><td>${experiment.processed_count || 0} / ${experiment.total_count || 0}</td></tr>
+                `;
+                
+                if (experiment.notes) {
+                    infoHTML += `<tr><td><strong>Notes:</strong></td><td>${experiment.notes}</td></tr>`;
+                }
+                
+                if (experiment.error_message) {
+                    infoHTML += `<tr><td><strong>Error:</strong></td><td class="text-danger">${experiment.error_message}</td></tr>`;
+                }
+            }
+            
+            infoHTML += '</table>';
+            console.log('Generated info HTML:', infoHTML);
+            
+            const experimentInfo = document.getElementById('experimentInfo');
+            if (experimentInfo) {
+                console.log('Found experimentInfo element, setting innerHTML');
+                experimentInfo.innerHTML = infoHTML;
+            } else {
+                console.error('experimentInfo element not found');
+            }
+            
+            // 填充特征结果（只有实验结果才有）
             const resultsBody = document.getElementById('experimentResultsBody');
-            if (data.feature_results && data.feature_results.length > 0) {
+            const resultsSection = document.getElementById('experimentResultsSection');
+            if (data.feature_results && data.feature_results.length > 0 && resultsBody && resultsSection) {
+                console.log('Showing feature results');
                 resultsBody.innerHTML = data.feature_results.map(result => `
                     <tr>
                         <td>${result.rank_position || 'N/A'}</td>
                         <td>${result.feature_shortname || 'N/A'}</td>
                         <td>${result.feature_channels || 'N/A'}</td>
-                        <td>${result.target_variable || 'N/A'}</td>
                         <td>${result.metric_name || 'N/A'}</td>
-                        <td>${result.metric_value ? result.metric_value.toFixed(4) : 'N/A'}</td>
-                        <td>${result.significance_level || 'N/A'}</td>
+                        <td>${result.metric_value || 'N/A'}</td>
+                        <td>${result.p_value || 'N/A'}</td>
                     </tr>
                 `).join('');
-            } else {
-                resultsBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No feature results available</td></tr>';
+                resultsSection.style.display = 'block';
+            } else if (resultsSection) {
+                console.log('Hiding feature results section');
+                resultsSection.style.display = 'none';
+            }
+            
+            // 填充元数据
+            const metadataBody = document.getElementById('experimentMetadataBody');
+            const metadataSection = document.getElementById('experimentMetadataSection');
+            if (data.metadata && data.metadata.length > 0 && metadataBody && metadataSection) {
+                console.log('Showing metadata');
+                metadataBody.innerHTML = data.metadata.map(md => `
+                    <tr>
+                        <td>${md.key}</td>
+                        <td>${md.value}</td>
+                        <td>${md.value_type}</td>
+                    </tr>
+                `).join('');
+                metadataSection.style.display = 'block';
+            } else if (metadataSection) {
+                console.log('Hiding metadata section');
+                metadataSection.style.display = 'none';
+            }
+            
+            // 填充输出文件
+            const filesBody = document.getElementById('experimentFilesBody');
+            const filesSection = document.getElementById('experimentFilesSection');
+            if (data.output_files && data.output_files.length > 0 && filesBody && filesSection) {
+                console.log('Showing output files');
+                filesBody.innerHTML = data.output_files.map(file => `
+                    <tr>
+                        <td>${file.name}</td>
+                        <td>${(file.size / 1024).toFixed(2)} KB</td>
+                        <td>${file.type}</td>
+                        <td>${new Date(file.modified).toLocaleString()}</td>
+                        <td>
+                            <a href="/api/experiment_file/${experiment.id}/${file.name}" 
+                               class="btn btn-sm btn-outline-primary" target="_blank">
+                                <i class="bi bi-download"></i> Download
+                            </a>
+                        </td>
+                    </tr>
+                `).join('');
+                filesSection.style.display = 'block';
+            } else if (filesSection) {
+                console.log('Hiding output files section');
+                filesSection.style.display = 'none';
             }
             
             // 显示模态框
-            const modal = new bootstrap.Modal(document.getElementById('experimentModal'));
-            modal.show();
-            
+            const modalElement = document.getElementById('experimentDetailsModal');
+            if (modalElement) {
+                console.log('Found modal element, showing modal');
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
+            } else {
+                console.error('experimentDetailsModal element not found');
+                showStatus('Modal element not found', 'error');
+            }
         })
         .catch(error => {
             console.error('Failed to load experiment details:', error);
             showStatus('Failed to load experiment details', 'error');
         });
+}
+
+// 添加刷新函数
+export function refreshExperimentDetails() {
+    // 这里可以重新加载当前实验的详情
+    // 暂时只是关闭模态框
+    const modalElement = document.getElementById('experimentDetailsModal');
+    if (modalElement) {
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        if (modal) {
+            modal.hide();
+        }
+    }
 }
 
 export function showAddExperimentModal() {
@@ -390,3 +500,4 @@ window.showExperiments = showExperiments;
 window.generateParameterForm = generateParameterForm;
 window.submitExperiment = submitExperiment;
 window.loadExperiments = loadExperiments;
+window.refreshExperimentDetails = refreshExperimentDetails;

@@ -914,6 +914,103 @@
         </div>
     </div>
 
+    <!-- Experiment Details Modal -->
+    <div class="modal fade" id="experimentDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Experiment Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Experiment Information -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6>Experiment Information</h6>
+                            <div id="experimentInfo">
+                                <!-- Experiment info will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Feature Results Section -->
+                    <div class="row mb-4" id="experimentResultsSection" style="display: none;">
+                        <div class="col-12">
+                            <h6>Feature Results</h6>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Rank</th>
+                                            <th>Feature</th>
+                                            <th>Channels</th>
+                                            <th>Metric</th>
+                                            <th>Value</th>
+                                            <th>P-Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="experimentResultsBody">
+                                        <!-- Feature results will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Metadata Section -->
+                    <div class="row mb-4" id="experimentMetadataSection" style="display: none;">
+                        <div class="col-12">
+                            <h6>Experiment Metadata</h6>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Key</th>
+                                            <th>Value</th>
+                                            <th>Type</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="experimentMetadataBody">
+                                        <!-- Metadata will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Output Files Section -->
+                    <div class="row mb-4" id="experimentFilesSection" style="display: none;">
+                        <div class="col-12">
+                            <h6>Output Files</h6>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Filename</th>
+                                            <th>Size</th>
+                                            <th>Type</th>
+                                            <th>Modified</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="experimentFilesBody">
+                                        <!-- Output files will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="refreshExperimentDetails()">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <style>
     .page-desc {
         margin-top: 4px;

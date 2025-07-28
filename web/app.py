@@ -701,11 +701,24 @@ def get_featureset_dag(feature_set_id):
 
 @app.route('/api/experiments')
 def get_experiments():
-    """Get all experiment results"""
+    """Get all experiment results and tasks"""
     conn = get_db_connection()
     
-    # 获取实验列表，包含数据集和特征集信息
-    experiments = conn.execute('''
+    # 获取实验任务（从tasks表）
+    tasks = conn.execute('''
+        SELECT t.id, t.task_type, t.status, t.created_at, t.started_at, t.completed_at,
+               t.dataset_id, t.feature_set_id, t.experiment_type, t.progress,
+               t.processed_count, t.total_count, t.notes,
+               d.name as dataset_name, fs.name as feature_set_name
+        FROM tasks t
+        LEFT JOIN datasets d ON t.dataset_id = d.id
+        LEFT JOIN feature_sets fs ON t.feature_set_id = fs.id
+        WHERE t.task_type = 'experiment'
+        ORDER BY t.created_at DESC
+    ''').fetchall()
+    
+    # 获取实验结果（从experiment_results表）
+    results = conn.execute('''
         SELECT er.*, 
                d.name as dataset_name,
                fs.name as feature_set_name
@@ -717,74 +730,178 @@ def get_experiments():
     
     conn.close()
     
-    return jsonify([dict(exp) for exp in experiments])
+    # 合并任务和结果
+    experiments = []
+    
+    # 添加任务
+    for task in tasks:
+        experiments.append({
+            'id': f"task_{task[0]}",  # 添加前缀区分
+            'experiment_name': f"Task {task[0]}",
+            'experiment_type': task[8] or 'unknown',
+            'dataset_name': task[13] or 'N/A',
+            'feature_set_name': task[14] or 'N/A',
+            'status': task[2],
+            'run_time': task[3],  # created_at
+            'duration_seconds': None,  # 需要计算
+            'is_task': True,
+            'task_id': task[0],
+            'progress': task[9],
+            'processed_count': task[10],
+            'total_count': task[11]
+        })
+    
+    # 添加结果
+    for result in results:
+        experiments.append({
+            'id': result[0],
+            'experiment_name': result[2] or f"Experiment {result[0]}",
+            'experiment_type': result[1],
+            'dataset_name': result[8] or 'N/A',
+            'feature_set_name': result[9] or 'N/A',
+            'status': result[3],
+            'run_time': result[4],
+            'duration_seconds': result[5],
+            'is_task': False,
+            'task_id': None
+        })
+    
+    # 按时间排序
+    experiments.sort(key=lambda x: x['run_time'] or '', reverse=True)
+    
+    return jsonify(experiments)
 
-@app.route('/api/experiment_details/<int:experiment_id>')
+@app.route('/api/experiment_details/<experiment_id>')
 def get_experiment_details(experiment_id):
-    """Get detailed experiment results"""
+    """Get detailed experiment results or task details"""
     conn = get_db_connection()
     
-    # 获取实验基本信息
-    experiment = conn.execute('''
-        SELECT er.*, 
-               d.name as dataset_name,
-               fs.name as feature_set_name
-        FROM experiment_results er
-        LEFT JOIN datasets d ON er.dataset_id = d.id
-        LEFT JOIN feature_sets fs ON er.feature_set_id = fs.id
-        WHERE er.id = ?
-    ''', (experiment_id,)).fetchone()
-    
-    if not experiment:
+    # 检查是否是任务ID（以 "task_" 开头）
+    if str(experiment_id).startswith('task_'):
+        # 处理任务详情
+        task_id = int(experiment_id.replace('task_', ''))
+        
+        # 获取任务基本信息
+        task = conn.execute('''
+            SELECT t.*, 
+                   d.name as dataset_name,
+                   fs.name as feature_set_name
+            FROM tasks t
+            LEFT JOIN datasets d ON t.dataset_id = d.id
+            LEFT JOIN feature_sets fs ON t.feature_set_id = fs.id
+            WHERE t.id = ? AND t.task_type = 'experiment'
+        ''', (task_id,)).fetchone()
+        
+        if not task:
+            conn.close()
+            return jsonify({'error': 'Task not found'}), 404
+        
+        # 计算持续时间
+        duration = None
+        if task[7] and task[6]:  # completed_at and created_at
+            try:
+                from datetime import datetime
+                start_time = datetime.fromisoformat(task[6])
+                end_time = datetime.fromisoformat(task[7])
+                duration = (end_time - start_time).total_seconds()
+            except:
+                duration = None
+        
+        # 构建任务详情响应
+        task_details = {
+            'id': f"task_{task[0]}",
+            'experiment_name': f"Task {task[0]}",
+            'experiment_type': task[8] or 'unknown',
+            'dataset_name': task[13] or 'N/A',
+            'feature_set_name': task[14] or 'N/A',
+            'status': task[2],
+            'run_time': task[6],  # created_at
+            'duration_seconds': duration,
+            'is_task': True,
+            'task_id': task[0],
+            'progress': task[9],
+            'processed_count': task[10],
+            'total_count': task[11],
+            'notes': task[16],
+            'parameters': task[3],  # parameters JSON
+            'result': task[4],      # result JSON
+            'error_message': task[5]
+        }
+        
         conn.close()
-        return jsonify({'error': 'Experiment not found'}), 404
+        
+        return jsonify({
+            'experiment': task_details,
+            'feature_results': [],  # 任务没有特征结果
+            'metadata': [],         # 任务没有元数据
+            'output_files': []      # 任务没有输出文件
+        })
     
-    # 获取特征级别的结果
-    feature_results = conn.execute('''
-        SELECT efr.*, fd.shortname as feature_shortname, fd.chans as feature_channels
-        FROM experiment_feature_results efr
-        LEFT JOIN fxdef fd ON efr.fxdef_id = fd.id
-        WHERE efr.experiment_result_id = ?
-        ORDER BY efr.rank_position ASC, efr.metric_value DESC
-    ''', (experiment_id,)).fetchall()
-    
-    # 获取实验元数据
-    metadata = conn.execute('''
-        SELECT key, value, value_type
-        FROM experiment_metadata
-        WHERE experiment_result_id = ?
-        ORDER BY key
-    ''', (experiment_id,)).fetchall()
-    
-    conn.close()
-    
-    # 检查输出目录是否存在文件
-    output_files = []
-    if experiment['output_dir'] and os.path.exists(experiment['output_dir']):
-        try:
-            for filename in os.listdir(experiment['output_dir']):
-                file_path = os.path.join(experiment['output_dir'], filename)
-                if os.path.isfile(file_path):
-                    stat = os.stat(file_path)
-                    file_info = {
-                        'name': filename,
-                        'size': stat.st_size,
-                        'modified': datetime.fromtimestamp(stat.st_mtime).isoformat(),
-                        'type': get_file_type(filename)
-                    }
-                    output_files.append(file_info)
-            
-            # 按文件类型排序
-            output_files.sort(key=lambda x: get_file_sort_order(x['type']))
-        except Exception as e:
-            print(f"Error listing output files: {e}")
-    
-    return jsonify({
-        'experiment': dict(experiment),
-        'feature_results': [dict(fr) for fr in feature_results],
-        'metadata': [dict(md) for md in metadata],
-        'output_files': output_files
-    })
+    else:
+        # 处理实验结果详情（原有逻辑）
+        experiment_id_int = int(experiment_id)
+        
+        # 获取实验基本信息
+        experiment = conn.execute('''
+            SELECT er.*, 
+                   d.name as dataset_name,
+                   fs.name as feature_set_name
+            FROM experiment_results er
+            LEFT JOIN datasets d ON er.dataset_id = d.id
+            LEFT JOIN feature_sets fs ON er.feature_set_id = fs.id
+            WHERE er.id = ?
+        ''', (experiment_id_int,)).fetchone()
+        
+        if not experiment:
+            conn.close()
+            return jsonify({'error': 'Experiment not found'}), 404
+        
+        # 获取特征级别的结果
+        feature_results = conn.execute('''
+            SELECT efr.*, fd.shortname as feature_shortname, fd.chans as feature_channels
+            FROM experiment_feature_results efr
+            LEFT JOIN fxdef fd ON efr.fxdef_id = fd.id
+            WHERE efr.experiment_result_id = ?
+            ORDER BY efr.rank_position ASC, efr.metric_value DESC
+        ''', (experiment_id_int,)).fetchall()
+        
+        # 获取实验元数据
+        metadata = conn.execute('''
+            SELECT key, value, value_type
+            FROM experiment_metadata
+            WHERE experiment_result_id = ?
+            ORDER BY key
+        ''', (experiment_id_int,)).fetchall()
+        
+        conn.close()
+        
+        # 检查输出目录是否存在文件
+        output_files = []
+        if experiment['output_dir'] and os.path.exists(experiment['output_dir']):
+            try:
+                for filename in os.listdir(experiment['output_dir']):
+                    file_path = os.path.join(experiment['output_dir'], filename)
+                    if os.path.isfile(file_path):
+                        stat = os.stat(file_path)
+                        file_info = {
+                            'name': filename,
+                            'size': stat.st_size,
+                            'modified': datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                            'type': get_file_type(filename)
+                        }
+                        output_files.append(file_info)
+                
+                # 按文件类型排序
+                output_files.sort(key=lambda x: get_file_sort_order(x['type']))
+            except Exception as e:
+                print(f"Error listing output files: {e}")
+        
+        return jsonify({
+            'experiment': dict(experiment),
+            'feature_results': [dict(fr) for fr in feature_results],
+            'metadata': [dict(md) for md in metadata],
+            'output_files': output_files
+        })
 
 @app.route('/api/experiment_summary/<int:experiment_id>')
 def get_experiment_summary(experiment_id):
