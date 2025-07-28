@@ -1,4 +1,4 @@
-from eeg2fx.steps import load_recording, filter, reref, zscore, epoch, reref, notch_filter, resample, ica
+from eeg2fx.steps import load_recording, filter, reref, zscore, epoch, reref, notch_filter, resample, ica, epoch_by_event
 from eeg2fx.feature import (
     feature_time,
     feature_freq,
@@ -162,4 +162,8 @@ FEATURE_FUNCS = {
 
 UTILITY_FUNCS = {
     "split_channel": split_channel,
+}
+
+EPOCH_BY_EVENT_FUNCS = {
+    "epoch_by_event": lambda context: lambda raw, **params: epoch_by_event(raw, recording_id=context["recording_id"], **params),
 }

@@ -14,7 +14,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dagre/0.8.5/dagre.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.5.0/cytoscape-dagre.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </head>
 <body>
     <div class="container-fluid">
@@ -30,7 +29,7 @@
                 <div class="sidebar-section">
                     <h6><i class="bi bi-compass"></i> Navigation</h6>
                     <div class="nav-buttons">
-                        <button id="navDatasetsBtn" class="btn btn-outline-primary btn-sm w-100 mb-2 active">
+                        <button id="navDatasetsBtn" class="btn btn-outline-secondary btn-sm w-100 mb-2">
                             <i class="bi bi-database"></i> Datasets
                         </button>
                         <button id="navPipelinesBtn" class="btn btn-outline-secondary btn-sm w-100 mb-2">
@@ -48,6 +47,10 @@
                 <button id="navExperimentsBtn" class="btn btn-outline-secondary btn-sm w-100 mb-2">
                     <i class="bi bi-graph-up"></i> Experiments
                 </button>
+                        <!-- 新增：任务队列按钮 -->
+                        <button id="navTasksBtn" class="btn btn-outline-secondary btn-sm w-100 mb-2">
+                            <i class="bi bi-list-task"></i> Task Queue
+                        </button>
                     </div>
                 </div>
                 
@@ -80,6 +83,10 @@
                 <li class="breadcrumb-item" id="breadcrumb-experiments" style="display: none;">
                     <a href="#" onclick="showExperiments()">Experiments</a>
                 </li>
+                        <!-- 新增：任务队列面包屑 -->
+                        <li class="breadcrumb-item" id="breadcrumb-tasks" style="display: none;">
+                            <a href="#" onclick="showTasks()">Task Queue</a>
+                        </li>
                     </ol>
                 </nav>
                 
@@ -206,62 +213,54 @@
                 <div id="featureExtractionView" style="display: none;">
                     <div class="content-header">
                         <h3>Feature Extraction</h3>
-                        <div class="page-desc text-muted">Extract features from recordings using feature sets</div>
+                        <div class="page-desc text-muted">Extract features from EEG recordings using predefined feature sets</div>
                     </div>
                     
-                    <!-- 新建提取任务 -->
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="mb-0">New Extraction Task</h5>
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label for="extractionDatasetSelect" class="form-label">Dataset</label>
+                            <select class="form-select" id="extractionDatasetSelect">
+                                <option value="">Choose dataset...</option>
+                            </select>
                         </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <label for="extractionDatasetSelect" class="form-label">Dataset</label>
-                                    <select id="extractionDatasetSelect" class="form-select">
-                                        <option value="">Choose dataset...</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="extractionFeatureSetSelect" class="form-label">Feature Set</label>
-                                    <select id="extractionFeatureSetSelect" class="form-select">
-                                        <option value="">Choose feature set...</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4 d-flex align-items-end">
-                                    <button class="btn btn-primary" onclick="startFeatureExtraction()">
-                                        <i class="bi bi-play-circle"></i> Start Extraction
-                                    </button>
-                                </div>
-                            </div>
+                        <div class="col-md-6">
+                            <label for="extractionFeatureSetSelect" class="form-label">Feature Set</label>
+                            <select class="form-select" id="extractionFeatureSetSelect">
+                                <option value="">Choose feature set...</option>
+                            </select>
                         </div>
                     </div>
                     
-                    <!-- 提取任务列表 -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <button class="btn btn-primary" onclick="startFeatureExtraction()">
+                            <i class="bi bi-play-circle"></i> Start Feature Extraction
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="loadExtractionTasks()">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh Tasks
+                        </button>
+                    </div>
+                    
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="mb-0">Extraction History</h5>
+                            <h5 class="mb-0">Extraction Tasks</h5>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table table-hover">
+                                <table class="table table-striped">
                                     <thead>
                                         <tr>
                                             <th>ID</th>
                                             <th>Dataset</th>
                                             <th>Feature Set</th>
                                             <th>Status</th>
-                                            <th>Progress</th>
-                                            <th>Start Time</th>
+                                            <th>Created</th>
                                             <th>Duration</th>
-                                            <th>Download</th>
+                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="extractionTableBody">
                                         <tr>
-                                            <td colspan="8" class="text-center text-muted">
-                                                Loading extractions...
-                                            </td>
+                                            <td colspan="7" class="text-center text-muted">Loading tasks...</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -277,35 +276,84 @@
                         <div class="page-desc text-muted">View and analyze experiment results from feature_mill</div>
                     </div>
                     
-                    <div class="d-flex justify-content-end mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
                         <button class="btn btn-primary" onclick="showAddExperimentModal()">
                             <i class="bi bi-plus-circle"></i> Add Experiment
                         </button>
+                        <button class="btn btn-outline-secondary" onclick="loadExperiments()">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh Experiments
+                        </button>
                     </div>
                     
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Experiment Name</th>
-                                    <th>Type</th>
-                                    <th>Dataset</th>
-                                    <th>Feature Set</th>
-                                    <th>Status</th>
-                                    <th>Run Time</th>
-                                    <th>Duration</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="experimentsTableBody">
-                                <tr>
-                                    <td colspan="9" class="text-center text-muted">
-                                        Loading experiments...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Experiment Results</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Type</th>
+                                            <th>Dataset</th>
+                                            <th>Feature Set</th>
+                                            <th>Status</th>
+                                            <th>Run Time</th>
+                                            <th>Duration</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="experimentsTableBody">
+                                        <tr>
+                                            <td colspan="9" class="text-center text-muted">Loading experiments...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Task Queue View -->
+                <div id="tasksView" style="display: none;">
+                    <div class="content-header">
+                        <h3>Task Queue</h3>
+                        <div class="page-desc text-muted">Monitor and manage background tasks</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Active Tasks</h5>
+                            <button class="btn btn-sm btn-outline-primary" onclick="refreshTasks()">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Type</th>
+                                            <th>Status</th>
+                                            <th>Progress</th>
+                                            <th>Created</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tasksTableBody">
+                                        <!-- 任务列表将通过JavaScript动态填充 -->
+                                        <tr>
+                                            <td colspan="6" class="text-center text-muted">
+                                                Loading tasks...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -676,59 +724,191 @@
 
     <!-- Add Experiment Modal -->
     <div class="modal fade" id="addExperimentModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Add New Experiment</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <!-- 错误提示 -->
-                    <div id="experimentErrorAlert" class="alert alert-danger alert-dismissible fade show" style="display:none;" role="alert">
-                        <span id="experimentErrorText"></span>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                    <!-- 表单内容 -->
-                    <form id="addExperimentForm">
-                        <div class="mb-3">
-                            <label class="form-label"><span style="color:red">*</span> Experiment Type</label>
-                            <select name="experiment_type" class="form-select" required>
-                                <option value="">Select experiment type...</option>
-                                <option value="correlation">Correlation Analysis</option>
-                                <option value="classification">Classification</option>
-                                <option value="feature_selection">Feature Selection</option>
-                                <option value="feature_statistics">Feature Statistics</option>
-                            </select>
+                    <form id="experimentForm">
+                        <!-- Basic Information -->
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="experiment_type" class="form-label">Experiment Type <span class="text-danger">*</span></label>
+                                <select class="form-select" name="experiment_type" required onchange="generateParameterForm(this.value)">
+                                    <option value="">Select experiment type...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="dataset_id" class="form-label">Dataset <span class="text-danger">*</span></label>
+                                <select class="form-select" name="dataset_id" required>
+                                    <option value="">Select dataset...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="feature_set_id" class="form-label">Feature Set <span class="text-danger">*</span></label>
+                                <select class="form-select" name="feature_set_id" required>
+                                    <option value="">Select feature set...</option>
+                                </select>
+                            </div>
                         </div>
+                        
+                        <!-- Experiment Description -->
                         <div class="mb-3">
-                            <label class="form-label"><span style="color:red">*</span> Dataset</label>
-                            <select name="dataset_id" class="form-select" required>
-                                <option value="">Select dataset...</option>
-                            </select>
+                            <div id="experimentDescription" class="alert alert-info" style="display: none;">
+                                <!-- Experiment description will be loaded here -->
+                            </div>
                         </div>
+                        
+                        <!-- Parameters Section -->
                         <div class="mb-3">
-                            <label class="form-label"><span style="color:red">*</span> Feature Set</label>
-                            <select name="feature_set_id" class="form-select" required>
-                                <option value="">Select feature set...</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Experiment Name (Optional)</label>
-                            <input name="experiment_name" class="form-control" placeholder="Enter experiment name...">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Notes (Optional)</label>
-                            <textarea name="notes" class="form-control" rows="3" placeholder="Enter experiment notes..."></textarea>
-                        </div>
-                        <!-- 动态参数配置区域 -->
-                        <div id="experimentParamsContainer">
-                            <!-- 根据实验类型动态加载参数 -->
+                            <h6>Experiment Parameters</h6>
+                            <div id="parameterForm">
+                                <p class="text-muted">Select an experiment type to configure parameters</p>
+                            </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="submitAddExperimentBtn">Run Experiment</button>
+                    <button type="button" class="btn btn-primary" onclick="submitExperiment()">
+                        <i class="bi bi-play-circle"></i> Start Experiment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Details Modal -->
+    <div class="modal fade" id="taskDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Task Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Task Information</h6>
+                            <table class="table table-sm">
+                                <tr><td><strong>Task ID:</strong></td><td id="taskDetailId"></td></tr>
+                                <tr><td><strong>Type:</strong></td><td id="taskDetailType"></td></tr>
+                                <tr><td><strong>Status:</strong></td><td id="taskDetailStatus"></td></tr>
+                                <tr><td><strong>Created:</strong></td><td id="taskDetailCreated"></td></tr>
+                                <tr><td><strong>Started:</strong></td><td id="taskDetailStarted"></td></tr>
+                                <tr><td><strong>Completed:</strong></td><td id="taskDetailCompleted"></td></tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Parameters</h6>
+                            <pre id="taskDetailParams" class="bg-light p-2 rounded"></pre>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h6>Result</h6>
+                            <pre id="taskDetailResult" class="bg-light p-2 rounded"></pre>
+                        </div>
+                    </div>
+                    <div class="row mt-3" id="taskDetailError" style="display: none;">
+                        <div class="col-12">
+                            <h6>Error</h6>
+                            <div id="taskDetailErrorMessage" class="alert alert-danger"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger" id="cancelTaskBtn" style="display: none;">Cancel Task</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Extraction Task Details Modal -->
+    <div class="modal fade" id="extractionTaskModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Feature Extraction Task Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Task Information</h6>
+                            <table class="table table-sm">
+                                <tr><td><strong>Task ID:</strong></td><td id="extractionTaskId">-</td></tr>
+                                <tr><td><strong>Task Type:</strong></td><td id="extractionTaskType">-</td></tr>
+                                <tr><td><strong>Status:</strong></td><td id="extractionTaskStatus">-</td></tr>
+                                <tr><td><strong>Dataset:</strong></td><td id="extractionTaskDataset">-</td></tr>
+                                <tr><td><strong>Feature Set:</strong></td><td id="extractionTaskFeatureSet">-</td></tr>
+                                <tr><td><strong>Created:</strong></td><td id="extractionTaskCreated">-</td></tr>
+                                <tr><td><strong>Started:</strong></td><td id="extractionTaskStarted">-</td></tr>
+                                <tr><td><strong>Completed:</strong></td><td id="extractionTaskCompleted">-</td></tr>
+                                <tr><td><strong>Duration:</strong></td><td id="extractionTaskDuration">-</td></tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Progress</h6>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <span>Progress</span>
+                                    <span id="extractionTaskProgressText">0%</span>
+                                </div>
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar" id="extractionTaskProgressBar" role="progressbar" style="width: 0%">
+                                        0%
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Processed:</strong> <span id="extractionTaskProcessed">0</span> / <span id="extractionTaskTotal">0</span> recordings
+                            </div>
+                            <div class="mb-3">
+                                <strong>Failed:</strong> <span id="extractionTaskFailed">0</span> recordings
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h6>Parameters</h6>
+                            <pre id="extractionTaskParams" class="bg-light p-3 rounded" style="max-height: 200px; overflow-y: auto;">-</pre>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3" id="extractionTaskResultSection" style="display: none;">
+                        <div class="col-12">
+                            <h6>Result</h6>
+                            <pre id="extractionTaskResult" class="bg-light p-3 rounded" style="max-height: 200px; overflow-y: auto;">-</pre>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3" id="extractionTaskErrorSection" style="display: none;">
+                        <div class="col-12">
+                            <h6>Error Message</h6>
+                            <div id="extractionTaskError" class="alert alert-danger">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3" id="extractionTaskNotesSection" style="display: none;">
+                        <div class="col-12">
+                            <h6>Notes</h6>
+                            <p id="extractionTaskNotes" class="text-muted">-</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="extractionTaskRefreshBtn" onclick="refreshExtractionTaskDetails()">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-success" id="extractionTaskDownloadBtn" style="display: none;" onclick="downloadExtractionResult()">
+                        <i class="bi bi-download"></i> Download Result
+                    </button>
                 </div>
             </div>
         </div>
@@ -756,5 +936,8 @@
             }
         });
     </script>
+    
+    <!-- 添加模块化的主脚本 -->
+    <script type="module" src="/static/js/app.js"></script>
 </body>
 </html> 

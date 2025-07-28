@@ -3,32 +3,101 @@ import sqlite3
 import mne
 import pandas as pd
 from logging_config import logger
+import json
+import numpy as np
 
 # Base directory for metadata (original location)
-# BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "harvard_EEG"))
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "harvard_EEG"))
 METADATA_BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "harvard_EEG"))
 DB_PATH = os.path.join(os.path.dirname(__file__), "eeg2go.db")
 
-BIDS_DIR = "/rds/general/user/zj724/ephemeral"
-# BIDS_DIR = os.path.join(BASE_DIR, "bids")
+# BIDS_DIR = "/rds/general/user/zj724/ephemeral"
+BIDS_DIR = os.path.join(BASE_DIR, "bids")
 METADATA_DIR = os.path.join(METADATA_BASE_DIR, "HEEDB_Metadata")
 PATIENT_CSV = os.path.join(METADATA_DIR, "HEEDB_patients.csv")
 
-MAX_MEMORY_GB = 8  # Set the memory usage limit for a single recording file (GB)
+MAX_MEMORY_GB = 1  # Set the memory usage limit for a single recording file (GB)
 mne.utils.set_log_level('WARNING')
 
 def make_subject_id(hospital_id, bdsp_id):
     return f"sub-{hospital_id}{bdsp_id}"
 
+def detect_events(raw):
+    """
+    检测EEG文件中的事件信息
+    
+    Parameters:
+        raw : mne.io.Raw
+            EEG数据对象
+    
+    Returns:
+        tuple : (has_events, event_types, events_data)
+            has_events: 是否有事件
+            event_types: 事件类型列表的JSON字符串
+            events_data: 详细事件数据列表，用于插入recording_events表
+    """
+    try:
+        # 尝试多种方式检测事件
+        events = None
+        
+        # 方法1: 自动检测
+        try:
+            events = mne.find_events(raw, verbose='ERROR')
+        except:
+            pass
+        
+        # 方法2: 如果有STIM通道，手动指定
+        if events is None or len(events) == 0:
+            stim_channels = [ch for ch in raw.ch_names if 'STI' in ch.upper() or 'TRIG' in ch.upper()]
+            if stim_channels:
+                try:
+                    events = mne.find_events(raw, stim_channel=stim_channels[0], verbose='ERROR')
+                    logger.info(f"Found events using stim channel: {stim_channels[0]}")
+                except:
+                    pass
+        
+        # 方法3: 检查所有通道是否有事件标记
+        if events is None or len(events) == 0:
+            # 检查是否有任何通道包含事件信息
+            for ch_name in raw.ch_names:
+                if any(keyword in ch_name.upper() for keyword in ['STIM', 'TRIG', 'EVENT', 'MARKER']):
+                    try:
+                        events = mne.find_events(raw, stim_channel=ch_name, verbose='ERROR')
+                        if len(events) > 0:
+                            logger.info(f"Found events using channel: {ch_name}")
+                            break
+                    except:
+                        continue
+        
+        if events is not None and len(events) > 0:
+            event_ids = np.unique(events[:, 2])
+            event_types = event_ids.tolist()
+            
+            # 准备详细事件数据
+            events_data = []
+            for event in events:
+                onset = event[0] / raw.info['sfreq']  # 转换为秒
+                event_type = str(event[2])  # 事件ID作为类型
+                events_data.append({
+                    'event_type': event_type,
+                    'onset': onset,
+                    'duration': 0.0,  # 默认持续时间
+                    'value': str(event[2])  # 事件值
+                })
+            
+            logger.info(f"Found {len(events)} events with IDs: {event_types}")
+            return True, json.dumps(event_types), events_data
+        else:
+            logger.info("No events found in recording")
+            return False, None, []
+            
+    except Exception as e:
+        logger.warning(f"Error detecting events: {e}")
+        return False, None, []
+
 def import_harvard_edf_for_hospital(conn, hospital_id, dataset_name, max_import_count=None):
     """
     Import EDF files for a specified hospital ID into a specified dataset
-    
-    Args:
-        conn: Database connection
-        hospital_id: Hospital ID (e.g., 'S0001')
-        dataset_name: Name of the dataset
-        max_import_count: Maximum number of recordings to import. If None, import all available.
     """
     c = conn.cursor()
     
@@ -47,8 +116,6 @@ def import_harvard_edf_for_hospital(conn, hospital_id, dataset_name, max_import_
     else:
         dataset_id = row[0]
 
-    # BIDS_DIR now points to /rds/general/user/zj724/ephemeral
-    # We need to look for hospital-specific subdirectories (e.g., S0001)
     hospital_path = os.path.join(BIDS_DIR, hospital_id)
     if not os.path.exists(hospital_path):
         logger.warning(f"Hospital directory {hospital_path} does not exist, skipping.")
@@ -59,7 +126,6 @@ def import_harvard_edf_for_hospital(conn, hospital_id, dataset_name, max_import_
         if not subj_folder.startswith("sub-"):
             continue
         
-        # Check if we've reached the import limit (only if max_import_count is set)
         if max_import_count is not None and imported_count >= max_import_count:
             logger.info(f"Reached import limit of {max_import_count}, stopping import.")
             break
@@ -89,19 +155,16 @@ def import_harvard_edf_for_hospital(conn, hospital_id, dataset_name, max_import_
                     eeg_paths.append(ses_path)
 
         for eeg_path in eeg_paths:
-            # Check if we've reached the import limit (only if max_import_count is set)
             if max_import_count is not None and imported_count >= max_import_count:
                 logger.info(f"Reached import limit of {max_import_count}, stopping import.")
                 break
                 
-            # Show progress differently based on whether limit is set
             if max_import_count is not None:
                 logger.info(f"Processing {subject_id} - {eeg_path} ... (imported: {imported_count}/{max_import_count})")
             else:
                 logger.info(f"Processing {subject_id} - {eeg_path} ... (imported: {imported_count})")
                 
             for fname in os.listdir(eeg_path):
-                # Check if we've reached the import limit (only if max_import_count is set)
                 if max_import_count is not None and imported_count >= max_import_count:
                     logger.info(f"Reached import limit of {max_import_count}, stopping import.")
                     break
@@ -110,41 +173,68 @@ def import_harvard_edf_for_hospital(conn, hospital_id, dataset_name, max_import_
                     continue
                 fpath = os.path.join(eeg_path, fname)
                 
-                c.execute("SELECT id FROM recordings WHERE filename = ? AND path = ?", (fname, fpath))
-                if c.fetchone():
-                    logger.info(f"SKIPPING (already exists): {fname}")
-                    continue
+                # 1. 读取BIDS JSON文件
+                json_fname = fname.replace("_eeg.edf", "_eeg.json")
+                json_fpath = os.path.join(eeg_path, json_fname)
+                json_info = {}
+                if os.path.exists(json_fpath):
+                    with open(json_fpath, "r", encoding="utf-8") as f:
+                        json_info = json.load(f)
+                else:
+                    logger.warning(f"JSON sidecar not found for {fname}, using defaults.")
 
+                # 2. 提取字段（有则用，无则用默认）
+                original_reference   = json_info.get("EEGReference", "n/a")
+                recording_type       = json_info.get("RecordingType", "n/a")
+                eeg_ground           = json_info.get("EEGGround", "n/a")
+                placement_scheme     = json_info.get("EEGPlacementScheme", "n/a")
+                manufacturer         = json_info.get("Manufacturer", "n/a")
+                powerline_frequency  = json_info.get("PowerLineFrequency", "n/a")
+                software_filters     = json_info.get("SoftwareFilters", "n/a")
+
+                # 3. 读取EDF获取其他信息
                 try:
                     raw = mne.io.read_raw_edf(fpath, preload=False, verbose='ERROR')
                     sfreq = raw.info['sfreq']
                     channels = len(raw.info['ch_names'])
                     duration = raw.n_times / sfreq
-                    
-                    # --- Memory usage pre-check ---
-                    estimated_mb = (channels * raw.n_times * 8) / (1024**2)
-                    if estimated_mb > (MAX_MEMORY_GB * 1024):
-                        logger.warning(f"SKIPPING (too large): {fname} ({estimated_mb:.1f}MB > {MAX_MEMORY_GB}GB)")
-                        continue # If the file is too large, skip this file
-
                 except Exception as e:
                     logger.error(f"SKIPPING (cannot read): {fname}: {e}")
                     continue
 
+                # 4. 检测事件信息
+                has_events, event_types, events_data = detect_events(raw)
+                
+                # 5. 插入recordings表
                 c.execute("""INSERT INTO recordings
-                    (dataset_id, subject_id, filename, path, duration, channels, sampling_rate)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                    (dataset_id, subject_id, fname, fpath, duration, channels, sfreq))
+                    (dataset_id, subject_id, filename, path, duration, channels, sampling_rate,
+                     original_reference, recording_type, eeg_ground, placement_scheme, manufacturer, 
+                     powerline_frequency, software_filters, has_events, event_types)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (dataset_id, subject_id, fname, fpath, duration, channels, sfreq,
+                     original_reference, recording_type, eeg_ground, placement_scheme, manufacturer, 
+                     powerline_frequency, software_filters, has_events, event_types))
+                
+                recording_id = c.lastrowid
+                
+                # 6. 如果有事件，插入recording_events表
+                if has_events and events_data:
+                    for event in events_data:
+                        c.execute("""INSERT INTO recording_events
+                            (recording_id, event_type, onset, duration, value)
+                            VALUES (?, ?, ?, ?, ?)""",
+                            (recording_id, event['event_type'], event['onset'], 
+                             event['duration'], event['value']))
+                    
+                    logger.info(f"Inserted {len(events_data)} events for recording {recording_id}")
                 
                 imported_count += 1
-                # Show progress differently based on whether limit is set
                 if max_import_count is not None:
                     logger.info(f"Imported: {fname} ({imported_count}/{max_import_count})")
                 else:
                     logger.info(f"Imported: {fname} (total: {imported_count})")
 
     conn.commit()
-    # Show final message differently based on whether limit was set
     if max_import_count is not None:
         logger.info(f"EDF import complete for {hospital_id}: {imported_count} recordings imported (limit: {max_import_count}).")
     else:
@@ -279,7 +369,7 @@ def main():
     conn = sqlite3.connect(DB_PATH)
     
     # Set import limit (set to None for unlimited import, or a number like 2000 for limited import)
-    IMPORT_LIMIT = 2000  # Change this to None for unlimited import
+    IMPORT_LIMIT = 50  # Change this to None for unlimited import
     
     # Import the S0001 dataset
     logger.info("============================================================")

@@ -4,10 +4,8 @@ import json
 import gc
 from collections import deque
 import inspect
-from eeg2fx.featureset_grouping import build_feature_dag, load_fxdefs_for_set
-from eeg2fx.pipeline_executor import resolve_function
-from eeg2fx.pipeline_executor import toposort
-from eeg2fx.featureset_grouping import load_pipeline_structure
+from eeg2fx.featureset_grouping import load_fxdefs_for_set
+from eeg2fx.pipeline_executor import resolve_function, run_pipeline
 from eeg2fx.feature_saver import save_feature_values
 from eeg2fx.steps import RecordingTooLargeError, load_recording
 import numpy as np
@@ -51,49 +49,6 @@ def load_cached_feature_value(fxid, recording_id):
             
         return result
     return None
-
-@auto_gc
-def run_pipeline_with_cache(pipeid, recording_id, value_cache, node_output):
-    """
-    Execute one pipeline, use shared value_cache to avoid redoing nodes.
-    Return all intermediate results for this pipeline.
-    """
-    dag = load_pipeline_structure(pipeid)
-    execution_order = toposort(dag)
-
-    for nid in execution_order:
-        node = dag[nid]
-        func_name = node["func"]
-        params = node["params"]
-        input_ids = node["inputnodes"]
-        inputs = [node_output[i] for i in input_ids]
-
-        cache_key = (
-            func_name,
-            json.dumps(params, sort_keys=True),
-            tuple(input_ids)
-        )
-
-        if cache_key in value_cache:
-            output = value_cache[cache_key]
-            # print(f"[CACHE HIT] func={func_name} | key={cache_key}")
-        else:
-            func = resolve_function(func_name)
-            # print(f"[EXECUTE] func={func_name} | input_nodes={input_ids} | params={params}")
-
-            if func_name == "raw":
-                output = func(recording_id, **params)
-            else:
-                if "chans" in node:
-                    output = func(*inputs, chans=node["chans"], **params)
-                else:
-                    output = func(*inputs, **params)
-            value_cache[cache_key] = output
-            # print(f"[RESULT] node={nid} → output_type={type(output)} | shape={getattr(output, 'shape', 'N/A') or getattr(output, 'get_data', lambda: 'no get_data')()}")
-
-        node_output[nid] = output
-
-    return node_output
 
 @auto_gc
 def check_all_features_cached(feature_set_id: str, recording_id: int) -> tuple[bool, dict]:
@@ -188,7 +143,7 @@ def run_feature_set(feature_set_id: str, recording_id: int):
 
         try:
             # Run pipeline and release node_output after use
-            run_pipeline_with_cache(pipeid, recording_id, value_cache, node_output)
+            run_pipeline(pipeid, recording_id, value_cache, node_output)
             output_node = get_pipeline_output_node(pipeid)
             fx_input = node_output[output_node]
             fx_func = resolve_function(func)
@@ -360,7 +315,7 @@ def prepare_feature_output(vals):
         }
 
 if __name__ == "__main__":
-    feature_set_id = 3
+    feature_set_id = 2
     recording_id = 7
 
     print(f"Running feature set '{feature_set_id}' on recording {recording_id}")

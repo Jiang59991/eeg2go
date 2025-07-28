@@ -17,7 +17,7 @@ def create_default_pipelines():
             "sample_rating": 8.0,
             "steps": [
                 ["flt", "filter", ["raw"], {"hp": 1.0, "lp": 40.0}],
-                ["reref", "reref", ["flt"], {}],
+                ["reref", "reref", ["flt"], {"method": "average"}],
                 ["epoch", "epoch", ["reref"], {"duration": 5.0}]
             ]
         },
@@ -35,14 +35,13 @@ def create_default_pipelines():
             "sample_rating": 9.0,
             "steps": [
                 ["flt", "filter", ["raw"], {"hp": 1.0, "lp": 30.0}],
-                ["notch", "notch_filter", ["flt"], {"freq": 50}],
-                ["resample", "resample", ["notch"], {"sfreq": 128}],
-                ["reref", "reref", ["resample"], {}],
-                ["pick", "pick_channels", ["reref"], {"include": ["C3", "C4", "Pz"]}],
-                ["ica", "ica", ["pick"], {}],
-                ["z", "zscore", ["ica"], {}],
-                ["epoch", "epoch", ["z"], {"duration": 4.0}],
-                ["rej", "reject_high_amplitude", ["epoch"], {"threshold": 150e-6}]
+                ["notch", "notch_filter", ["flt"], {"freq": 50.0}],
+                ["resample", "resample", ["notch"], {"sfreq": 128.0}],
+                ["reref", "reref", ["resample"], {"method": "average"}],
+                ["ica", "ica", ["reref"], {"n_components": 20, "detect_artifacts": "none"}],
+                ["epoch", "epoch", ["ica"], {"duration": 4.0}],
+                ["rej", "reject_high_amplitude", ["epoch"], {"threshold_uv": 150}],
+                ["z", "zscore", ["rej"], {"mode": "per_epoch"}]
             ]
         },
 
@@ -75,7 +74,7 @@ def create_default_pipelines():
             "epoch": 3.0,
             "sample_rating": 5.0,
             "steps": [
-                ["reref", "reref", ["raw"], {}],
+                ["reref", "reref", ["raw"], {"method": "average"}],
                 ["epoch", "epoch", ["reref"], {"duration": 3.0}]
             ]
         },

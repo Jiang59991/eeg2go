@@ -21,7 +21,9 @@ STEP_REGISTRY = {
         "output_type": "raw"
     },
     "reref": {
-        "params": {},
+        "params": {
+            "method": {"type": "str", "required": True, "default": "average", "options": ["average", "linked_mastoid"]}
+        },
         "input_type": "raw",
         "output_type": "raw"
     },
@@ -47,14 +49,19 @@ STEP_REGISTRY = {
     #     "output_type": "raw"
     # },
     "ica": {
-        "params": {},
+        "params": {
+            "n_components": {"type": "int", "min": 1, "max": 100, "default": 20, "required": True},
+            "detect_artifacts": {"type": "str", "required": True, "default": "none", "options": ["eog", "ecg", "none"]}
+        },
         "input_type": "raw",
         "output_type": "raw"
     },
     "zscore": {
-        "params": {},
-        "input_type": "raw",
-        "output_type": "raw"
+        "params": {
+            "mode": {"type": "str", "required": True, "default": "per_epoch", "options": ["per_epoch", "global"]}
+        },
+        "input_type": "epochs",
+        "output_type": "epochs"
     },
     "epoch": {
         "params": {
@@ -63,9 +70,18 @@ STEP_REGISTRY = {
         "input_type": "raw",
         "output_type": "epochs"
     },
+    "epoch_by_event": {
+        "params": {
+            "event_type": {"type": "str", "required": True, "description": "Event type to use for epoching, e.g., 'seizure', 'spindle', 'normal'"},
+            "tmin": {"type": "float", "min": -5.0, "max": 0.0, "default": -0.2, "required": True},
+            "tmax": {"type": "float", "min": 0.1, "max": 10.0, "default": 1.0, "required": True}
+        },
+        "input_type": "raw",
+        "output_type": "epochs"
+    },
     "reject_high_amplitude": {
         "params": {
-            "threshold": {"type": "float", "min": 1e-9, "max": 1e-3, "default": 150e-6, "required": True}
+            "threshold_uv": {"type": "int", "min": 5, "max": 1000, "default": 150, "required": True}
         },
         "input_type": "epochs",
         "output_type": "epochs"
@@ -83,17 +99,50 @@ def validate_pipeline(pipeline_steps, step_registry=STEP_REGISTRY):
             raise ValueError(f"Invalid step format: {step}")
     
     # 2. 检查步骤顺序和唯一性
+    # 2.1 检查步骤顺序：根据注册表的input_type和output_type检查步骤顺序
+    # 只检查主链路（即每一步的第一个输入），确保数据类型流转正确
+    prev_output_type = "raw"
+    for idx, step in enumerate(pipeline_steps):
+        step_name, func, inputnames, params = step
+        if func not in step_registry:
+            raise ValueError(f"Unknown step: {func}")
+        expected_input_type = step_registry[func]["input_type"]
+        # 主链路：第一个输入
+        if idx == 0:
+            # 第一节点的输入类型必须为raw，且inputnames应为["raw"]
+            if expected_input_type != "raw":
+                raise ValueError(f"Step {step_name} ({func}) must have input_type 'raw' as the first step.")
+            if inputnames != ["raw"]:
+                raise ValueError(f"First step '{step_name}' inputnames must be ['raw']")
+        else:
+            # 检查主链路输入类型
+            # 取inputnames[0]，找到其output_type
+            main_input = inputnames[0]
+            # 找到main_input对应的上一步
+            prev_step = None
+            for s in pipeline_steps:
+                if s[0] == main_input:
+                    prev_step = s
+                    break
+            if prev_step is None:
+                raise ValueError(f"Step '{step_name}' input '{main_input}' not found in previous steps.")
+            prev_func = prev_step[1]
+            prev_output_type = step_registry[prev_func]["output_type"]
+            if expected_input_type != prev_output_type:
+                raise ValueError(
+                    f"Step '{step_name}' ({func}) input_type '{expected_input_type}' does not match previous output_type '{prev_output_type}' (from '{main_input}')."
+                )
+    # 2.2 其它顺序和唯一性检查
     func_list = [step[1] for step in pipeline_steps]
-    # 检查 filter 必须在 epoch 之前
-    if "epoch" in func_list and "filter" in func_list:
-        if func_list.index("epoch") < func_list.index("filter"):
-            raise ValueError("'filter' step must appear before 'epoch' step in pipeline.")
+
     # 检查 epoch 必须存在且唯一
     if func_list.count("epoch") == 0:
         raise ValueError("Pipeline must contain an 'epoch' step.")
     if func_list.count("epoch") > 1:
         raise ValueError("Pipeline can only contain one 'epoch' step.")
-    # 可扩展其它顺序/唯一性规则
+    
+    if "reject_high_amplitude" in func_list and "zscore" in func_list and func_list.index("reject_high_amplitude") > func_list.index("zscore"):
+        raise ValueError("'reject_high_amplitude' step is recommended to appear before 'zscore' step in pipeline.")
 
     # 3. 检查参数
     for step in pipeline_steps:
@@ -101,6 +150,7 @@ def validate_pipeline(pipeline_steps, step_registry=STEP_REGISTRY):
         # 检查func是否在注册表
         if func not in step_registry:
             raise ValueError(f"Unknown step: {func}")
+        
         # 检查参数
         for pname, pinfo in step_registry[func]["params"].items():
             if pinfo.get("required") and pname not in params:
@@ -113,6 +163,15 @@ def validate_pipeline(pipeline_steps, step_registry=STEP_REGISTRY):
                         raise ValueError(f"Param '{pname}' for step '{func}' too small")
                     if "max" in pinfo and v > pinfo["max"]:
                         raise ValueError(f"Param '{pname}' for step '{func}' too large")
+                    
+        # 特殊检查：filter步骤的lp和hp参数大小关系
+        if func == "filter":
+            if "lp" in params and "hp" in params:
+                lp_val = float(params["lp"])
+                hp_val = float(params["hp"])
+                if lp_val <= hp_val:
+                    raise ValueError(f"Filter step: low-pass frequency ({lp_val}) must be greater than high-pass frequency ({hp_val})")
+        
     return True
 
 def make_nodeid(func, params):
@@ -243,7 +302,7 @@ if __name__ == "__main__":
         "sample_rating": 8.0,
         "steps": [
             ["flt", "filter", ["raw"], {"hp": 1.0, "lp": 40.0}],
-            ["reref", "reref", ["flt"], {}],
+            ["reref", "reref", ["flt"], {"method": "average"}],
             ["epoch", "epoch", ["reref"], {"duration": 5.0}]
         ]
     }

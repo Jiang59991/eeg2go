@@ -1,4 +1,0 @@
-[2025-06-29 12:29:36] [INFO] [eeg2go] [load_recording] Recording 1: 85441.0s, 30 channels, 200.0 Hz
-[2025-06-29 12:29:36] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1955.6 MB
-[2025-06-29 12:29:36] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
-[2025-06-29 12:32:53] [INFO] [eeg2go] Saved 103 feature values for recording 1 (successful: 103, failed: 0)

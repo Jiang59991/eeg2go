@@ -86,29 +86,106 @@ def load_recording(recording_id):
     return raw
 
 @auto_gc
-def filter(raw, hp=1.0, lp=40.0):
-    raw_copy = raw.copy()
-    raw_copy.filter(hp, lp, fir_design='firwin', verbose='ERROR')
-    return raw_copy
+def filter(raw, hp, lp):
+    if hp is None or lp is None:
+        raise ValueError("High-pass and low-pass cutoff frequencies must be explicitly provided.")
+    if lp <= hp:
+        raise ValueError(f"Low-pass frequency ({lp}) must be greater than high-pass ({hp}).")
+    return raw.copy().filter(l_freq=hp, h_freq=lp, fir_design='firwin', verbose='ERROR')
 
 @auto_gc
-def notch_filter(raw, freq=50.0, sfreq=None):
+def notch_filter(raw, freq):
+    if freq is None:
+        raise ValueError("Notch filter frequency must be specified.")
+    sfreq = raw.info.get('sfreq')
+    if freq >= sfreq / 2:
+        raise ValueError(f"Notch frequency {freq} is above Nyquist frequency.")
     return raw.copy().notch_filter(freqs=[freq])
 
 @auto_gc
-def reref(raw, sfreq=None):
-    raw_ref = raw.copy().set_eeg_reference('average')
-    return raw_ref
+def reref(raw, method, original_reference=None):
+    """
+    Apply EEG re-referencing strategy.
+
+    Parameters:
+        raw: mne.io.Raw
+            The raw EEG recording.
+        method: str
+            The re-reference strategy. Options: 'average', 'linked_mastoid', 'none'.
+        original_reference: str or None
+            The original reference used at recording time. Can be 'Cz', 'average', 'CMS/DRL', etc.
+
+    Returns:
+        raw_ref: mne.io.Raw
+            The re-referenced raw object.
+    """
+
+    original_reference = (original_reference or "").lower()
+    method = method.lower()
+
+    # Catch dangerous or nonsensical combinations
+    if method == "average" and original_reference == "average":
+        raise ValueError("Recording is already average referenced; do not apply average again.")
+
+    raw_copy = raw.copy()
+
+    if method == "average":
+        raw_copy.set_eeg_reference('average')
+    elif method == "linked_mastoid":
+        try:
+            raw_copy.set_eeg_reference(['M1', 'M2'])
+        except ValueError:
+            raise ValueError("M1/M2 not found in channel list; cannot apply linked mastoid reference.")
+    else:
+        raise ValueError(f"Unknown re-reference method: {method}")
+
+    return raw_copy
+
 
 @auto_gc
-def resample(raw, sfreq=128.0):
+def resample(raw, sfreq):
+    if sfreq is None:
+        raise ValueError("Target sampling rate must be explicitly specified.")
+    original_sfreq = raw.info.get('sfreq')
+    if np.isclose(sfreq, original_sfreq):
+        return raw.copy()  # Skip if already at target sfreq
     return raw.copy().resample(sfreq=sfreq)
 
 @auto_gc
-def ica(raw, n_components=20, sfreq=None):
+def ica(raw, n_components, detect_artifacts):
+    """
+    Fully automated ICA step for EEG pipelines. No manual interaction allowed.
+
+    Parameters:
+        raw : mne.io.Raw
+            Continuous EEG recording.
+        n_components : int or float
+            Number of components to retain (int or PCA variance ratio).
+        detect_artifacts : str
+            Artifact detection strategy: 'eog', 'ecg', or 'none'.
+        random_state : int
+            For reproducibility of ICA.
+
+    Returns:
+        raw_clean : mne.io.Raw
+            EEG data after ICA cleaning (if any components excluded).
+    """
+
+    if isinstance(n_components, int) and n_components > raw.info['nchan']:
+        raise ValueError(f"n_components={n_components} exceeds number of channels.")
+    
     ica_inst = mne.preprocessing.ICA(n_components=n_components, random_state=97, max_iter='auto')
     ica_inst.fit(raw)
-    return ica_inst.apply(raw.copy())
+
+    exclude = []
+    if detect_artifacts == "eog":
+        exclude, _ = ica_inst.find_bads_eog(raw)
+    elif detect_artifacts == "ecg":
+        exclude, _ = ica_inst.find_bads_ecg(raw)
+
+    raw_clean = ica_inst.apply(raw.copy(), exclude=exclude)
+
+    return raw_clean
 
 @auto_gc
 def epoch(raw, duration=5.0):
@@ -120,20 +197,126 @@ def epoch(raw, duration=5.0):
     return epochs
 
 @auto_gc
-def reject_high_amplitude(epochs, threshold=150e-6, sfreq=None):
-    return epochs.copy().drop_bad(reject=dict(eeg=threshold))
+def epoch_by_event(raw, event_type, tmin, tmax, recording_id):
+    if recording_id is None:
+        raise ValueError("recording_id must be provided")
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute(
+        "SELECT DISTINCT value FROM recording_events WHERE recording_id = ? AND event_type = ?",
+        (recording_id, event_type)
+    )
+    rows = c.fetchall()
+    conn.close()
+
+    if not rows:
+        raise ValueError(f"No events of type '{event_type}' found for recording {recording_id}")
+
+    event_values = [row[0] for row in rows]
+    try:
+        event_ids = [int(v) for v in event_values]
+    except Exception:
+        raise ValueError(f"Event values must be convertible to int: {event_values}")
+
+    event_id_map = {f"{event_type}_{v}": v for v in event_ids}
+
+    events = mne.find_events(raw, verbose='ERROR')
+    if len(events) == 0:
+        raise ValueError("No events found in the recording.")
+
+    # 检查 event_id 是否存在
+    available_event_ids = np.unique(events[:, 2])
+    for name, val in event_id_map.items():
+        if val not in available_event_ids:
+            logger.warning(f"Event ID {val} ({name}) not found in recording. Available: {available_event_ids}")
+
+    # 创建 epochs（不进行 baseline 或 reject）
+    epochs = mne.Epochs(
+        raw,
+        events,
+        event_id=event_id_map,
+        tmin=tmin,
+        tmax=tmax,
+        baseline=None,
+        reject=None,
+        flat=None,
+        preload=True,
+        verbose='ERROR'
+    )
+
+    logger.info(f"Created {len(epochs)} epochs from {len(events)} events using event_ids={event_id_map}")
+
+    return epochs
 
 @auto_gc
-def zscore(epochs):
+def reject_high_amplitude(epochs, threshold_uv):
+    """
+    Reject epochs with any EEG channel exceeding the given amplitude.
+
+    Parameters:
+        epochs : mne.Epochs
+            Input EEG epochs.
+        threshold_uv : float
+            Absolute amplitude threshold (in microvolts). Default is 150 µV.
+
+    Returns:
+        clean_epochs : mne.Epochs
+            Epochs after rejecting high-amplitude artifacts.
+    """
+    threshold_v = threshold_uv * 1e-6  # convert µV to V
+    clean_epochs = epochs.copy().drop_bad(reject={"eeg": threshold_v})
+    return clean_epochs
+
+@auto_gc
+def zscore(epochs, mode):
     """
     Standardize epochs across time for each channel.
+
+    Parameters:
+        epochs : mne.Epochs
+            Input EEG epochs.
+        mode : str
+            Normalization strategy. 
+            'per_epoch': normalize each epoch × channel individually (default).
+            'global': normalize across all epochs per channel.
     """
     data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
-    mean = np.mean(data, axis=2, keepdims=True)
-    std = np.std(data, axis=2, keepdims=True)
-    std[std == 0] = 1e-6  
+    
+    if mode == "per_epoch":
+        mean = np.mean(data, axis=2, keepdims=True)
+        std = np.std(data, axis=2, keepdims=True)
+    elif mode == "global":
+        mean = np.mean(data, axis=(0, 2), keepdims=True)
+        std = np.std(data, axis=(0, 2), keepdims=True)
+    else:
+        raise ValueError(f"Unsupported mode '{mode}'. Choose from 'per_epoch' or 'global'.")
+
+    std[std == 0] = 1e-6  # floor to prevent divide-by-zero
     data_z = (data - mean) / std
 
     zscored = epochs.copy()
     zscored._data = data_z
     return zscored
+
+@auto_gc
+def detect_bad_channels(raw, flat_thresh=1e-7, noisy_thresh=1e-4, correlation_thresh=0.4):
+    data, _ = raw.get_data(picks="eeg", return_times=False)
+    ch_names = raw.ch_names
+    n_channels = data.shape[0]
+
+    bads = set()
+    stds = np.std(data, axis=1)
+
+    for i, std in enumerate(stds):
+        if std < flat_thresh or std > noisy_thresh:
+            bads.add(ch_names[i])
+
+    corr_matrix = np.corrcoef(data)
+    for i in range(n_channels):
+        corrs = np.delete(corr_matrix[i], i)
+        if np.nanmean(np.abs(corrs)) < correlation_thresh:
+            bads.add(ch_names[i])
+
+    raw.info['bads'] = list(bads)
+    return list(bads)

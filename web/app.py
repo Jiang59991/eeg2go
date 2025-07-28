@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, jsonify, send_file, send_from_directory
 import sqlite3
 import os
 import json
@@ -6,6 +6,7 @@ import pandas as pd
 from datetime import datetime
 import tempfile
 import zipfile
+import logging
 from eeg2fx.featureset_fetcher import run_feature_set
 from eeg2fx.featureset_grouping import load_fxdefs_for_set
 from .utils.pipeline_visualizer import get_pipeline_visualization_data
@@ -13,8 +14,102 @@ from .config import DATABASE_PATH
 from database.add_pipeline import add_pipeline, STEP_REGISTRY, validate_pipeline
 from database.add_fxdef import add_fxdefs
 from database.add_featureset import add_featureset
+from web.api.task_api import task_api
+
+# 设置日志
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+
+# 注册任务API蓝图
+app.register_blueprint(task_api)
+
+# 移除全局任务工作器变量，因为现在使用独立进程
+# task_worker = None
+
+# ====== 静态文件路由和 MIME 类型设置 ======
+@app.route('/static/js/<path:filename>')
+def serve_js(filename):
+    """Serve JavaScript files with correct MIME type for ES6 modules"""
+    return send_from_directory('static/js', filename, mimetype='application/javascript')
+
+@app.route('/static/js/modules/<path:filename>')
+def serve_js_modules(filename):
+    """Serve JavaScript module files with correct MIME type"""
+    return send_from_directory('static/js/modules', filename, mimetype='application/javascript')
+
+@app.route('/static/css/<path:filename>')
+def serve_css(filename):
+    """Serve CSS files with correct MIME type"""
+    return send_from_directory('static/css', filename, mimetype='text/css')
+
+@app.route('/static/images/<path:filename>')
+def serve_images(filename):
+    """Serve image files with correct MIME type"""
+    import os
+    _, ext = os.path.splitext(filename)
+    mime_types = {
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.gif': 'image/gif',
+        '.svg': 'image/svg+xml',
+        '.ico': 'image/x-icon'
+    }
+    mimetype = mime_types.get(ext.lower(), 'image/png')
+    return send_from_directory('static/images', filename, mimetype=mimetype)
+
+@app.route('/static/<path:filename>')
+def serve_static(filename):
+    """Serve static files with correct MIME types"""
+    import os
+    _, ext = os.path.splitext(filename)
+    mime_types = {
+        '.js': 'application/javascript',
+        '.css': 'text/css',
+        '.html': 'text/html',
+        '.htm': 'text/html',
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.gif': 'image/gif',
+        '.svg': 'image/svg+xml',
+        '.ico': 'image/x-icon',
+        '.json': 'application/json',
+        '.xml': 'application/xml',
+        '.pdf': 'application/pdf',
+        '.txt': 'text/plain',
+        '.woff': 'font/woff',
+        '.woff2': 'font/woff2',
+        '.ttf': 'font/ttf',
+        '.eot': 'application/vnd.ms-fontobject'
+    }
+    
+    mimetype = mime_types.get(ext.lower(), 'application/octet-stream')
+    
+    return send_from_directory('static', filename, mimetype=mimetype)
+
+# ====== 其他现有代码 ======
+# 移除任务工作器初始化函数，因为现在使用独立进程
+# def initialize_task_worker():
+#     """初始化任务工作器"""
+#     global task_worker
+#     from web.api.task_api import task_manager
+#     from task_queue.task_worker import TaskWorker
+#     
+#     task_worker = TaskWorker(task_manager)
+#     task_worker.start()
+#     print("Task worker initialized and started")
+
+def init_app():
+    """初始化应用"""
+    # 移除任务工作器初始化
+    # initialize_task_worker()
+    pass
+
+# 在应用启动时初始化
+init_app()
 
 def get_db_connection():
     """Get database connection"""
@@ -46,6 +141,9 @@ def infer_pipeline_params(steps):
             params["epoch"] = float(step_params["duration"])
             params["output_type"] = "epochs"
     return params
+
+# 在 app = Flask(__name__) 之后，其他路由之前添加
+
 
 @app.route('/')
 def index():
@@ -880,128 +978,88 @@ def get_file_sort_order(file_type):
 import threading
 import time
 
+@app.route('/api/experiment_types')
+def get_experiment_types():
+    """Get available experiment types with parameter definitions"""
+    try:
+        from feature_mill.experiments import AVAILABLE_EXPERIMENTS
+        
+        experiment_types = []
+        for exp_type, exp_info in AVAILABLE_EXPERIMENTS.items():
+            experiment_types.append({
+                'type': exp_type,
+                'name': exp_info['name'],
+                'description': exp_info['description'],
+                'parameters': exp_info.get('parameters', {})
+            })
+        
+        return jsonify(experiment_types)
+    except Exception as e:
+        import logging
+        logging.error(f"Failed to get experiment types: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/experiment_parameters/<experiment_type>')
+def get_experiment_parameters(experiment_type):
+    """Get parameter definitions for a specific experiment type"""
+    try:
+        from feature_mill.experiments import get_experiment_parameters
+        
+        parameters = get_experiment_parameters(experiment_type)
+        return jsonify(parameters)
+    except Exception as e:
+        import logging
+        logging.error(f"Failed to get experiment parameters: {e}")
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/run_experiment', methods=['POST'])
 def run_experiment_api():
-    """Start a new experiment asynchronously"""
+    """Run an experiment with parameters"""
     try:
-        data = request.json
+        data = request.get_json()
         
-        # 验证必需参数
-        required_fields = ['experiment_type', 'dataset_id', 'feature_set_id']
-        for field in required_fields:
-            if not data.get(field):
-                return jsonify({'error': f'Missing required field: {field}'}), 400
+        experiment_type = data.get('experiment_type')
+        dataset_id = data.get('dataset_id')
+        feature_set_id = data.get('feature_set_id')
+        parameters = data.get('parameters', {})
         
-        experiment_type = data['experiment_type']
-        dataset_id = int(data['dataset_id'])
-        feature_set_id = int(data['feature_set_id'])
-        experiment_name = data.get('experiment_name', '')
-        notes = data.get('notes', '')
+        if not all([experiment_type, dataset_id, feature_set_id]):
+            return jsonify({'error': 'Missing required parameters'}), 400
         
-        # 获取额外参数
-        extra_args = {}
-        if 'parameters' in data:
-            extra_args.update(data['parameters'])
+        # 确保数据类型正确
+        dataset_id = int(dataset_id)
+        feature_set_id = int(feature_set_id)
         
-        # 创建输出目录
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        output_dir = f"logs/experiments/{experiment_type}_{dataset_id}_{feature_set_id}_{timestamp}"
+        # 导入必要的模块
+        from web.api.task_api import task_manager
+        from task_queue.models import Task
         
-        # 先在数据库中创建实验记录（状态为running）
-        conn = get_db_connection()
-        cursor = conn.execute('''
-            INSERT INTO experiment_results (
-                experiment_type, experiment_name, dataset_id, feature_set_id,
-                parameters, output_dir, status, notes, run_time
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            experiment_type, experiment_name, dataset_id, feature_set_id,
-            json.dumps(extra_args), output_dir, 'running', notes, datetime.now()
-        ))
-        experiment_id = cursor.lastrowid
-        conn.commit()
-        conn.close()
+        # Create task for experiment execution
+        task = Task(
+            task_type='experiment',
+            parameters={
+                'experiment_type': experiment_type,
+                'dataset_id': dataset_id,
+                'feature_set_id': feature_set_id,
+                'parameters': parameters
+            },
+            dataset_id=dataset_id,
+            feature_set_id=feature_set_id,
+            experiment_type=experiment_type
+        )
         
-        # 在后台线程中运行实验
-        def run_experiment_async():
-            try:
-                # 导入实验引擎
-                from feature_mill.experiment_engine import run_experiment
-                
-                # 运行实验
-                result = run_experiment(
-                    experiment_type=experiment_type,
-                    dataset_id=dataset_id,
-                    feature_set_id=feature_set_id,
-                    output_dir=output_dir,
-                    extra_args=extra_args
-                )
-                
-                # 更新实验状态为完成
-                conn = get_db_connection()
-                conn.execute('''
-                    UPDATE experiment_results 
-                    SET status = 'completed', duration_seconds = ?, result_summary = ?
-                    WHERE id = ?
-                ''', (result['duration'], result['summary'], experiment_id))
-                conn.commit()
-                conn.close()
-                
-                logger.info(f"Experiment {experiment_id} completed successfully")
-                
-            except Exception as e:
-                # 更新实验状态为失败
-                conn = get_db_connection()
-                conn.execute('''
-                    UPDATE experiment_results 
-                    SET status = 'failed', notes = ?
-                    WHERE id = ?
-                ''', (f"Experiment failed: {str(e)}", experiment_id))
-                conn.commit()
-                conn.close()
-                
-                logger.error(f"Experiment {experiment_id} failed: {e}")
-        
-        # 启动后台线程
-        thread = threading.Thread(target=run_experiment_async)
-        thread.daemon = True
-        thread.start()
+        task_id = task_manager.create_task(task)
         
         return jsonify({
-            'status': 'started',
-            'message': f'Experiment {experiment_type} started successfully',
-            'experiment_id': experiment_id,
-            'output_dir': output_dir
+            'success': True,
+            'task_id': task_id,
+            'message': f'Experiment task created with ID: {task_id}'
         })
         
     except Exception as e:
-        logger.error(f"Failed to start experiment: {e}")
-        return jsonify({'error': f'Failed to start experiment: {str(e)}'}), 500
-
-@app.route('/api/experiment_types')
-def get_experiment_types():
-    """Get available experiment types and their parameters"""
-    try:
-        from feature_mill.experiment_engine import list_experiments, get_experiment_info
-        
-        experiment_types = []
-        available_types = list_experiments()
-        
-        for exp_type in available_types:
-            info = get_experiment_info(exp_type)
-            if 'error' not in info:
-                experiment_types.append({
-                    'type': exp_type,
-                    'name': info.get('name', exp_type),
-                    'description': info.get('docstring', 'No description available'),
-                    'has_run_function': info.get('has_run_function', False)
-                })
-        
-        return jsonify(experiment_types)
-        
-    except Exception as e:
-        logger.error(f"Failed to get experiment types: {e}")
-        return jsonify({'error': f'Failed to get experiment types: {str(e)}'}), 500
+        import logging
+        logging.error(f"Failed to create experiment task: {e}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/experiment_status/<int:experiment_id>')
 def get_experiment_status(experiment_id):
@@ -1041,126 +1099,50 @@ def get_experiment_status(experiment_id):
         })
         
     except Exception as e:
-        logger.error(f"Failed to get experiment status: {e}")
+        import logging
+        logging.error(f"Failed to get experiment status: {e}")
         return jsonify({'error': f'Failed to get experiment status: {str(e)}'}), 500
 
 @app.route('/api/start_feature_extraction', methods=['POST'])
 def start_feature_extraction_api():
-    """Start a new feature extraction task asynchronously"""
+    """异步特征提取API - 创建任务而不是直接执行"""
     try:
-        data = request.json
+        data = request.get_json()
+        dataset_id = data.get('dataset_id')
+        feature_set_id = data.get('feature_set_id')
         
-        # 验证必需参数
-        required_fields = ['dataset_id', 'feature_set_id']
-        for field in required_fields:
-            if not data.get(field):
-                return jsonify({'error': f'Missing required field: {field}'}), 400
+        if not dataset_id or not feature_set_id:
+            return jsonify({'error': 'Missing required parameters'}), 400
         
-        dataset_id = int(data['dataset_id'])
-        feature_set_id = int(data['feature_set_id'])
-        task_name = data.get('task_name', '')
+        # 确保数据类型正确
+        dataset_id = int(dataset_id)
+        feature_set_id = int(feature_set_id)
         
-        # 获取数据集中的recording数量
-        conn = get_db_connection()
-        recording_count = conn.execute('''
-            SELECT COUNT(*) as count FROM recordings WHERE dataset_id = ?
-        ''', (dataset_id,)).fetchone()['count']
+        print(f"Creating feature extraction task with dataset_id={dataset_id}, feature_set_id={feature_set_id}")
         
-        # 创建提取任务记录
-        cursor = conn.execute('''
-            INSERT INTO feature_extraction_tasks (
-                dataset_id, feature_set_id, task_name, status, 
-                total_recordings, processed_recordings, start_time
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            dataset_id, feature_set_id, task_name, 'running',
-            recording_count, 0, datetime.now()
-        ))
-        task_id = cursor.lastrowid
-        conn.commit()
-        conn.close()
+        # 创建任务而不是直接执行
+        from web.api.task_api import task_manager
+        from task_queue.models import Task
         
-        # 在后台线程中运行特征提取
-        def run_extraction_async():
-            try:
-                from eeg2fx.featureset_fetcher import run_feature_set
-                
-                conn = get_db_connection()
-                recordings = conn.execute('''
-                    SELECT id FROM recordings WHERE dataset_id = ?
-                ''', (dataset_id,)).fetchall()
-                conn.close()
-                
-                processed_count = 0
-                failed_count = 0
-                
-                for recording in recordings:
-                    recording_id = recording['id']
-                    try:
-                        # 运行特征提取
-                        result = run_feature_set(feature_set_id, recording_id)
-                        
-                        # 更新进度
-                        processed_count += 1
-                        conn = get_db_connection()
-                        conn.execute('''
-                            UPDATE feature_extraction_tasks 
-                            SET processed_recordings = ?
-                            WHERE id = ?
-                        ''', (processed_count, task_id))
-                        conn.commit()
-                        conn.close()
-                        
-                    except Exception as e:
-                        failed_count += 1
-                        logger.warning(f"Failed to extract features for recording {recording_id}: {e}")
-                
-                # 更新任务状态为完成
-                conn = get_db_connection()
-                conn.execute('''
-                    UPDATE feature_extraction_tasks 
-                    SET status = 'completed', end_time = ?, duration_seconds = ?,
-                        failed_recordings = ?, result_file = ?
-                    WHERE id = ?
-                ''', (
-                    datetime.now(),
-                    (datetime.now() - datetime.fromisoformat(conn.execute('SELECT start_time FROM feature_extraction_tasks WHERE id = ?', (task_id,)).fetchone()['start_time'])).total_seconds(),
-                    failed_count,
-                    f"logs/extractions/extraction_{task_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
-                ))
-                conn.commit()
-                conn.close()
-                
-                logger.info(f"Feature extraction task {task_id} completed successfully")
-                
-            except Exception as e:
-                # 更新任务状态为失败
-                conn = get_db_connection()
-                conn.execute('''
-                    UPDATE feature_extraction_tasks 
-                    SET status = 'failed', notes = ?
-                    WHERE id = ?
-                ''', (f"Extraction failed: {str(e)}", task_id))
-                conn.commit()
-                conn.close()
-                
-                logger.error(f"Feature extraction task {task_id} failed: {e}")
+        task = Task('feature_extraction', {
+            'dataset_id': dataset_id,
+            'feature_set_id': feature_set_id
+        }, dataset_id=dataset_id, feature_set_id=feature_set_id)
         
-        # 启动后台线程
-        thread = threading.Thread(target=run_extraction_async)
-        thread.daemon = True
-        thread.start()
+        task_id = task_manager.create_task(task)
+        
+        print(f"Task created with ID: {task_id}")
         
         return jsonify({
-            'status': 'started',
-            'message': f'Feature extraction started successfully',
             'task_id': task_id,
-            'total_recordings': recording_count
-        })
+            'status': 'pending',
+            'message': 'Feature extraction task created successfully'
+        }), 202
         
     except Exception as e:
-        logger.error(f"Failed to start feature extraction: {e}")
-        return jsonify({'error': f'Failed to start feature extraction: {str(e)}'}), 500
+        import logging
+        logging.error(f"Failed to create feature extraction task: {e}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/feature_extraction_tasks')
 def get_feature_extraction_tasks():
@@ -1169,66 +1151,115 @@ def get_feature_extraction_tasks():
         conn = get_db_connection()
         tasks = conn.execute('''
             SELECT t.*, d.name as dataset_name, fs.name as feature_set_name
-            FROM feature_extraction_tasks t
+            FROM tasks t
             LEFT JOIN datasets d ON t.dataset_id = d.id
             LEFT JOIN feature_sets fs ON t.feature_set_id = fs.id
-            ORDER BY t.start_time DESC
+            WHERE t.task_type = 'feature_extraction'
+            ORDER BY t.created_at DESC
         ''').fetchall()
         conn.close()
         
         return jsonify([dict(task) for task in tasks])
         
     except Exception as e:
-        logger.error(f"Failed to get feature extraction tasks: {e}")
+        import logging
+        logging.error(f"Failed to get feature extraction tasks: {e}")
         return jsonify({'error': f'Failed to get feature extraction tasks: {str(e)}'}), 500
 
 @app.route('/api/feature_extraction_status/<int:task_id>')
 def get_feature_extraction_status(task_id):
     """Get feature extraction task status"""
     try:
+        print(f"Getting feature extraction status for task ID: {task_id}")
+        
         conn = get_db_connection()
-        task = conn.execute('''
-            SELECT * FROM feature_extraction_tasks WHERE id = ?
-        ''', (task_id,)).fetchone()
+        
+        # 简化查询，先只获取基本信息
+        task = conn.execute('SELECT * FROM tasks WHERE id = ?', (task_id,)).fetchone()
         conn.close()
         
         if not task:
+            print(f"Task {task_id} not found")
             return jsonify({'error': 'Task not found'}), 404
         
-        # 计算进度
-        progress = 0
-        if task['total_recordings'] > 0:
-            progress = (task['processed_recordings'] / task['total_recordings']) * 100
+        print(f"Task found, ID: {task[0]}, Type: {task[1]}, Status: {task[2]}")
         
-        # 计算运行时间
-        start_time = datetime.fromisoformat(task['start_time']) if task['start_time'] else None
-        duration = None
-        if start_time:
-            if task['status'] == 'running':
-                duration = (datetime.now() - start_time).total_seconds()
-            else:
-                duration = task['duration_seconds']
+        # 安全地处理JSON字段
+        def safe_json_loads(json_str):
+            """安全地解析JSON字符串"""
+            if not json_str:
+                return None
+            try:
+                parsed = json.loads(json_str)
+                
+                # 如果结果太大，创建摘要
+                if isinstance(parsed, dict) and len(json_str) > 10000:  # 超过10KB
+                    print(f"JSON对象过大 ({len(json_str)} 字符)，创建摘要")
+                    summary = {}
+                    for key, value in parsed.items():
+                        if isinstance(value, dict):
+                            summary[key] = {
+                                "type": "object",
+                                "size": len(str(value)),
+                                "keys": list(value.keys()) if isinstance(value, dict) else None
+                            }
+                        elif isinstance(value, list):
+                            summary[key] = {
+                                "type": "array",
+                                "length": len(value),
+                                "size": len(str(value))
+                            }
+                        else:
+                            summary[key] = {
+                                "type": type(value).__name__,
+                                "value": str(value)[:100] if len(str(value)) > 100 else value
+                            }
+                    return {
+                        "summary": summary,
+                        "original_size": len(json_str),
+                        "note": "Large object, showing summary only"
+                    }
+                else:
+                    return parsed
+                    
+            except Exception as e:
+                print(f"JSON解析失败: {e}")
+                # 只显示前200个字符
+                preview = str(json_str)[:200] + "..." if len(str(json_str)) > 200 else str(json_str)
+                return {"parse_error": str(e), "raw_content_preview": preview}
         
-        return jsonify({
-            'id': task['id'],
-            'dataset_id': task['dataset_id'],
-            'feature_set_id': task['feature_set_id'],
-            'task_name': task['task_name'],
-            'status': task['status'],
-            'total_recordings': task['total_recordings'],
-            'processed_recordings': task['processed_recordings'],
-            'failed_recordings': task['failed_recordings'],
-            'progress': progress,
-            'start_time': task['start_time'],
-            'end_time': task['end_time'],
-            'duration': duration,
-            'result_file': task['result_file'],
-            'notes': task['notes']
-        })
+        # 构建基本响应
+        response_data = {
+            'id': task[0],
+            'task_type': task[1],
+            'status': task[2],
+            'parameters': safe_json_loads(task[3]),
+            'result': safe_json_loads(task[4]),
+            'error_message': task[5],
+            'created_at': task[6],
+            'started_at': task[7],
+            'completed_at': task[8],
+            'priority': task[9],
+            'dataset_id': task[10],
+            'feature_set_id': task[11],
+            'experiment_type': task[12],
+            'progress': task[13],
+            'processed_count': task[14],
+            'total_count': task[15],
+            'notes': task[16]
+        }
+        
+        print(f"Response data prepared successfully")
+        return jsonify(response_data)
         
     except Exception as e:
-        logger.error(f"Failed to get feature extraction status: {e}")
-        return jsonify({'error': f'Failed to get feature extraction status: {str(e)}'}), 500
+        import logging
+        import traceback
+        error_msg = f"Failed to get feature extraction status: {str(e)}"
+        print(error_msg)
+        print(f"Traceback: {traceback.format_exc()}")
+        logging.error(error_msg)
+        return jsonify({'error': error_msg}), 500
 
 @app.route('/api/download_extraction_result/<int:task_id>')
 def download_extraction_result(task_id):
@@ -1236,21 +1267,36 @@ def download_extraction_result(task_id):
     try:
         conn = get_db_connection()
         task = conn.execute('''
-            SELECT result_file FROM feature_extraction_tasks WHERE id = ?
+            SELECT result FROM tasks WHERE id = ?
         ''', (task_id,)).fetchone()
         conn.close()
         
-        if not task or not task['result_file']:
+        if not task or not task['result']:
             return jsonify({'error': 'Result file not found'}), 404
         
-        result_file = task['result_file']
-        if not os.path.exists(result_file):
-            return jsonify({'error': 'Result file does not exist'}), 404
+        result_data = json.loads(task['result'])
+        if not result_data.get('output_dir'):
+            return jsonify({'error': 'Output directory not found in result'}), 404
         
-        return send_file(result_file, as_attachment=True, download_name=f"extraction_{task_id}.csv")
+        output_dir = result_data['output_dir']
+        if not os.path.exists(output_dir):
+            return jsonify({'error': 'Output directory does not exist'}), 404
+        
+        # 尝试查找CSV文件，如果没有则返回所有文件
+        csv_files = [f for f in os.listdir(output_dir) if f.endswith('.csv')]
+        
+        if not csv_files:
+            return jsonify({'error': 'No CSV file found in output directory'}), 404
+        
+        # 假设只有一个CSV文件，或者选择第一个
+        filename = csv_files[0]
+        file_path = os.path.join(output_dir, filename)
+        
+        return send_file(file_path, as_attachment=True, download_name=f"extraction_{task_id}.csv")
         
     except Exception as e:
-        logger.error(f"Failed to download extraction result: {e}")
+        import logging
+        logging.error(f"Failed to download extraction result: {e}")
         return jsonify({'error': f'Failed to download extraction result: {str(e)}'}), 500
 
 if __name__ == '__main__':
