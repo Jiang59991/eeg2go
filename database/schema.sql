@@ -319,6 +319,9 @@ CREATE TABLE tasks (
     processed_count INTEGER DEFAULT 0, -- Number of processed items
     total_count INTEGER DEFAULT 0,     -- Total number of items to process
     notes TEXT,                        -- Additional notes
+    execution_mode TEXT DEFAULT 'local', -- 'local' or 'pbs' execution mode
+    pbs_job_id TEXT,                   -- PBS job ID for PBS-executed tasks
+    queue_name TEXT,                   -- PBS queue name used for the task
     FOREIGN KEY (dataset_id) REFERENCES datasets(id),
     FOREIGN KEY (feature_set_id) REFERENCES feature_sets(id)
 );

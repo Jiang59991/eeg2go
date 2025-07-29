@@ -5,6 +5,7 @@ import sqlite3
 from datetime import datetime
 from typing import Dict, Any
 from task_queue.models import TaskManager, TaskStatus
+from task_queue.pbs_executor import get_pbs_executor
 from eeg2fx.featureset_fetcher import run_feature_set
 from feature_mill.experiment_engine import run_experiment
 from logging_config import logger
@@ -14,6 +15,7 @@ class TaskWorker:
         self.task_manager = task_manager
         self.running = False
         self.worker_thread = None
+        self.pbs_executor = get_pbs_executor(task_manager)
     
     def start(self):
         """启动工作线程 - 在独立进程中不需要"""
@@ -57,21 +59,31 @@ class TaskWorker:
         feature_set_id = task_info.get('feature_set_id')
         experiment_type = task_info.get('experiment_type')
         
+        # 检查执行模式
+        execution_mode = parameters.get('execution_mode', 'local') if parameters else 'local'
+        
         try:
-            # 更新任务状态为运行中
-            self.task_manager.update_task_status(task_id, TaskStatus.RUNNING)
-            
-            # 根据任务类型执行相应的处理
-            if task_type == 'feature_extraction':
-                result = self._execute_feature_extraction(task_id, parameters, dataset_id, feature_set_id)
-            elif task_type == 'experiment':
-                result = self._execute_experiment(task_id, parameters, dataset_id, feature_set_id, experiment_type)
+            if execution_mode == 'pbs':
+                # PBS模式：提交到PBS系统
+                logger.info(f"任务 {task_id} 使用PBS模式执行")
+                success = self.pbs_executor.submit_task_to_pbs(task_info)
+                if not success:
+                    raise Exception("PBS任务提交失败")
             else:
-                raise ValueError(f"Unknown task type: {task_type}")
-            
-            # 更新任务状态为完成
-            self.task_manager.update_task_status(task_id, TaskStatus.COMPLETED, result=result)
-            logger.info(f"Task {task_id} completed successfully")
+                # 本地模式：直接执行
+                logger.info(f"任务 {task_id} 使用本地模式执行")
+                self.task_manager.update_task_status(task_id, TaskStatus.RUNNING)
+                
+                if task_type == 'feature_extraction':
+                    result = self._execute_feature_extraction(task_id, parameters, dataset_id, feature_set_id)
+                elif task_type == 'experiment':
+                    result = self._execute_experiment(task_id, parameters, dataset_id, feature_set_id, experiment_type)
+                else:
+                    raise ValueError(f"Unknown task type: {task_type}")
+                
+                # 更新任务状态为完成
+                self.task_manager.update_task_status(task_id, TaskStatus.COMPLETED, result=result)
+                logger.info(f"Task {task_id} completed successfully")
             
         except Exception as e:
             error_message = str(e)

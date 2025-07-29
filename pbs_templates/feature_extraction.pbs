@@ -1,0 +1,53 @@
+#!/bin/bash
+#PBS -N eeg_feature_extraction_${RECORDING_ID}
+#PBS -l nodes=1:ppn=4
+#PBS -l walltime=02:00:00
+#PBS -q ${QUEUE_NAME}
+#PBS -j oe
+#PBS -o logs/feature_extraction_${RECORDING_ID}.log
+
+cd $PBS_O_WORKDIR
+
+echo "=== EEG特征提取任务开始 ==="
+echo "时间: $(date)"
+echo "录音ID: ${RECORDING_ID}"
+echo "特征集ID: ${FEATURE_SET_ID}"
+echo "数据集ID: ${DATASET_ID}"
+
+# 激活conda环境
+source /rds/general/user/zj724/home/miniconda3/etc/profile.d/conda.sh
+conda activate eeg2go
+
+# 执行特征提取
+python3 -c "
+import sys
+import os
+sys.path.append('/rds/general/user/zj724/home/eeg2go')
+
+from eeg2fx.featureset_fetcher import run_feature_set
+
+try:
+    recording_id = int(os.environ['RECORDING_ID'])
+    feature_set_id = int(os.environ['FEATURE_SET_ID'])
+    dataset_id = int(os.environ['DATASET_ID'])
+    
+    print(f'开始特征提取: 录音{recording_id}, 特征集{feature_set_id}')
+    
+    result = run_feature_set(
+        recording_id=recording_id,
+        feature_set_id=feature_set_id,
+        dataset_id=dataset_id
+    )
+    
+    print(f'特征提取完成: {result}')
+    
+except Exception as e:
+    print(f'特征提取失败: {e}')
+    import traceback
+    traceback.print_exc()
+    sys.exit(1)
+"
+
+echo "=== EEG特征提取任务结束 ==="
+echo "时间: $(date)"
+echo "退出码: $?"

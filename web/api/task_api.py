@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from task_queue.models import TaskManager, Task, TaskStatus
 from task_queue.task_worker import TaskWorker
+from config.execution_mode import EXECUTION_MODE
 import threading
 
 task_api = Blueprint('task_api', __name__)
@@ -28,14 +29,19 @@ def create_task():
         if not task_type:
             return jsonify({'error': 'task_type is required'}), 400
         
+        # 使用全局执行模式
+        if parameters is None:
+            parameters = {}
+        parameters['execution_mode'] = EXECUTION_MODE
+        
         # 创建任务
-        task = Task(task_type, parameters, dataset_id, feature_set_id, experiment_type, priority)
+        task = Task(task_type, parameters, dataset_id, feature_set_id, experiment_type, priority, EXECUTION_MODE)
         task_id = task_manager.create_task(task)
         
         return jsonify({
             'task_id': task_id,
             'status': 'pending',
-            'message': 'Task created successfully'
+            'message': f'Task created successfully (mode: {EXECUTION_MODE})'
         }), 201
         
     except Exception as e:

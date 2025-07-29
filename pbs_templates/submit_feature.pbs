@@ -1,0 +1,78 @@
+#!/bin/bash
+#PBS -N eeg_feature_extraction
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=01:00:00
+#PBS -q v1_small24
+#PBS -j oe
+#PBS -o logs/feature_extraction_${RECORDING_ID}.log
+
+# Set working directory
+cd $PBS_O_WORKDIR
+
+# Load required modules
+module load python/3.8
+module load anaconda3
+
+# Activate conda environment
+source /rds/general/user/zj724/home/miniconda3/etc/profile.d/conda.sh
+conda activate eeg2go
+
+# Set environment variables
+export RECORDING_ID=${RECORDING_ID}
+export FEATURE_SET_ID=${FEATURE_SET_ID}
+export DATASET_ID=${DATASET_ID}
+
+# Record start time
+echo "=== EEG Feature Extraction Task Started ==="
+echo "Time: $(date)"
+echo "Recording ID: $RECORDING_ID"
+echo "Feature Set ID: $FEATURE_SET_ID"
+echo "Dataset ID: $DATASET_ID"
+echo "Node: $PBS_NODEFILE"
+echo "Queue: $PBS_QUEUE"
+echo "Job ID: $PBS_JOBID"
+
+# Run feature extraction
+python3 -c "
+import sys
+import os
+sys.path.append('/rds/general/user/zj724/home/eeg2go')
+
+from eeg2fx.featureset_fetcher import run_feature_set
+
+try:
+    recording_id = int(os.environ['RECORDING_ID'])
+    feature_set_id = int(os.environ['FEATURE_SET_ID'])
+    
+    print(f'Start processing recording {recording_id}, feature set {feature_set_id}')
+    
+    # Run feature extraction
+    results = run_feature_set(feature_set_id, recording_id)
+    
+    # Count results
+    successful_features = sum(1 for result in results.values() if result and result.get('value') is not None)
+    total_features = len(results)
+    
+    print(f'Feature extraction completed: {successful_features}/{total_features} features extracted successfully')
+    
+    # Save results to file
+    import json
+    output_file = f'results/features_{recording_id}_{feature_set_id}.json'
+    os.makedirs('results', exist_ok=True)
+    
+    with open(output_file, 'w') as f:
+        json.dump(results, f, indent=2)
+    
+    print(f'Results saved to: {output_file}')
+    
+except Exception as e:
+    print(f'Feature extraction failed: {e}')
+    import traceback
+    traceback.print_exc()
+    sys.exit(1)
+"
+
+# Record end time
+echo "=== EEG Feature Extraction Task Finished ==="
+echo "Time: $(date)"
+echo "Exit code: $?" 

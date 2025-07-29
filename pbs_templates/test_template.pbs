@@ -1,0 +1,22 @@
+#!/bin/bash
+#PBS -N test_eeg_task
+#PBS -l nodes=1:ppn=4
+#PBS -l walltime=01:00:00
+#PBS -q ${QUEUE_NAME}
+#PBS -j oe
+#PBS -o logs/test_${RECORDING_ID}.log
+
+cd $PBS_O_WORKDIR
+
+echo "=== 测试任务开始 ==="
+echo "时间: $(date)"
+echo "任务ID: ${RECORDING_ID}"
+echo "特征集ID: ${FEATURE_SET_ID}"
+echo "数据集ID: ${DATASET_ID}"
+
+# 模拟任务执行
+sleep 10
+
+echo "=== 测试任务完成 ==="
+echo "时间: $(date)"
+echo "退出码: $?"

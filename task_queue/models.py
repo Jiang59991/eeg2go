@@ -13,13 +13,15 @@ class TaskStatus(Enum):
 class Task:
     def __init__(self, task_type: str, parameters: Dict[str, Any], 
                  dataset_id: Optional[int] = None, feature_set_id: Optional[int] = None,
-                 experiment_type: Optional[str] = None, priority: int = 0):
+                 experiment_type: Optional[str] = None, priority: int = 0,
+                 execution_mode: str = "local"):
         self.task_type = task_type
         self.parameters = parameters
         self.dataset_id = dataset_id
         self.feature_set_id = feature_set_id
         self.experiment_type = experiment_type
         self.priority = priority
+        self.execution_mode = execution_mode  # "local" 或 "pbs"
         self.status = TaskStatus.PENDING
         self.result = None
         self.error_message = None
@@ -29,6 +31,9 @@ class Task:
         self.progress = 0.0
         self.processed_count = 0
         self.total_count = 0
+        # PBS相关字段
+        self.pbs_job_id = None
+        self.queue_name = None
 
 class TaskManager:
     def __init__(self, db_path: str = "database/eeg2go.db"):
@@ -48,8 +53,9 @@ class TaskManager:
             
             c.execute("""
                 INSERT INTO tasks (task_type, status, parameters, dataset_id, feature_set_id, 
-                                  experiment_type, priority, created_at, progress, processed_count, total_count)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                  experiment_type, priority, created_at, progress, processed_count, total_count,
+                                  execution_mode, pbs_job_id, queue_name)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 task.task_type,
                 task.status.value,
@@ -61,7 +67,10 @@ class TaskManager:
                 task.created_at,
                 task.progress,
                 task.processed_count,
-                task.total_count
+                task.total_count,
+                task.execution_mode,
+                task.pbs_job_id,
+                task.queue_name
             ))
             
             task_id = c.lastrowid
@@ -104,7 +113,10 @@ class TaskManager:
                 'progress': row[13],
                 'processed_count': row[14],
                 'total_count': row[15],
-                'notes': row[16]
+                'notes': row[16],
+                'execution_mode': row[17] if len(row) > 17 else 'local',
+                'pbs_job_id': row[18] if len(row) > 18 else None,
+                'queue_name': row[19] if len(row) > 19 else None
             }
         return None
     
@@ -141,6 +153,18 @@ class TaskManager:
         conn.commit()
         conn.close()
     
+    def update_pbs_info(self, task_id: int, pbs_job_id: str, queue_name: str):
+        """更新PBS任务信息"""
+        conn = sqlite3.connect(self.db_path)
+        c = conn.cursor()
+        
+        c.execute("""
+            UPDATE tasks SET pbs_job_id = ?, queue_name = ? WHERE id = ?
+        """, (pbs_job_id, queue_name, task_id))
+        
+        conn.commit()
+        conn.close()
+    
     def get_pending_tasks(self, limit: int = 10) -> list:
         """获取待处理任务"""
         conn = sqlite3.connect(self.db_path)
@@ -163,7 +187,10 @@ class TaskManager:
             'dataset_id': row[10],
             'feature_set_id': row[11],
             'experiment_type': row[12],
-            'priority': row[9]
+            'priority': row[9],
+            'execution_mode': row[17] if len(row) > 17 else 'local',
+            'pbs_job_id': row[18] if len(row) > 18 else None,
+            'queue_name': row[19] if len(row) > 19 else None
         } for row in rows]
     
     def get_all_tasks(self) -> list:
