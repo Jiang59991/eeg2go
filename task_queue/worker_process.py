@@ -18,12 +18,15 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
+# 获取Worker ID和PID文件名
+worker_id = os.getenv('WORKER_ID', '1')
+pid_file = os.getenv('WORKER_PID_FILE', f"task_worker_{worker_id}.pid")
+
 # 立即写入PID文件，确保管理器知道进程已启动
-pid_file = "task_worker.pid"
 try:
     with open(pid_file, 'w') as f:
         f.write(str(os.getpid()))
-    print(f"PID file written immediately: {os.getpid()}")
+    print(f"Worker {worker_id} PID file written: {os.getpid()}")
 except Exception as e:
     print(f"Failed to write PID file: {e}")
     sys.exit(1)
@@ -42,9 +45,10 @@ class WorkerProcess:
     def __init__(self, db_path="database/eeg2go.db"):
         self.db_path = db_path
         self.pid_file = pid_file
+        self.worker_id = worker_id
         self.running = False
         
-        logger.info(f"Initializing worker process with db_path: {db_path}")
+        logger.info(f"Initializing worker {self.worker_id} with db_path: {db_path}")
         
         try:
             logger.info("Creating TaskManager...")
@@ -67,52 +71,51 @@ class WorkerProcess:
     
     def signal_handler(self, signum, frame):
         """处理退出信号"""
-        logger.info(f"Received signal {signum}, shutting down...")
+        logger.info(f"Worker {self.worker_id} received signal {signum}, shutting down...")
         self.stop()
     
     def start(self):
         """启动工作器进程"""
-        logger.info("Starting task worker process...")
+        logger.info(f"Starting task worker {self.worker_id}...")
         
         try:
-            # PID文件已经在模块级别写入，这里不需要再写
-            logger.info(f"PID file already exists: {os.getpid()}")
+            logger.info(f"Worker {self.worker_id} PID file exists: {os.getpid()}")
             
             self.running = True
             logger.info("Starting task worker...")
             self.task_worker.start()
             logger.info("Task worker started successfully")
             
-            logger.info(f"Task worker process started with PID: {os.getpid()}")
+            logger.info(f"Task worker {self.worker_id} started with PID: {os.getpid()}")
             logger.info("Entering main loop...")
             
             while self.running:
                 try:
                     # 检查是否有待处理的任务
-                    logger.debug("Checking for pending tasks...")
+                    logger.debug(f"Worker {self.worker_id} checking for pending tasks...")
                     pending_tasks = self.task_manager.get_pending_tasks()
                     
                     if pending_tasks:
-                        logger.info(f"Found {len(pending_tasks)} pending tasks")
+                        logger.info(f"Worker {self.worker_id} found {len(pending_tasks)} pending tasks")
                         for task in pending_tasks:
                             if self.running:
                                 # 直接调用 _process_task 方法
-                                logger.info(f"Processing task {task['id']}")
+                                logger.info(f"Worker {self.worker_id} processing task {task['id']}")
                                 self.task_worker._process_task(task)
                     else:
-                        logger.debug("No pending tasks found")
+                        logger.debug(f"Worker {self.worker_id} no pending tasks found")
                     
                     # 休眠一段时间再检查
                     time.sleep(5)
                     
                 except Exception as e:
-                    logger.error(f"Error in main loop: {e}")
+                    logger.error(f"Worker {self.worker_id} error in main loop: {e}")
                     time.sleep(10)  # 出错后等待更长时间
                     
         except KeyboardInterrupt:
-            logger.info("Received keyboard interrupt")
+            logger.info(f"Worker {self.worker_id} received keyboard interrupt")
         except Exception as e:
-            logger.error(f"Worker process error: {e}")
+            logger.error(f"Worker {self.worker_id} error: {e}")
             import traceback
             logger.error(f"Traceback: {traceback.format_exc()}")
         finally:
@@ -120,7 +123,7 @@ class WorkerProcess:
     
     def stop(self):
         """停止工作器进程"""
-        logger.info("Stopping task worker process...")
+        logger.info(f"Stopping task worker {self.worker_id}...")
         self.running = False
         
         if hasattr(self, 'task_worker') and self.task_worker:
@@ -133,11 +136,11 @@ class WorkerProcess:
         if os.path.exists(self.pid_file):
             try:
                 os.remove(self.pid_file)
-                logger.info("PID file removed")
+                logger.info(f"Worker {self.worker_id} PID file removed")
             except Exception as e:
                 logger.error(f"Error removing PID file: {e}")
         
-        logger.info("Task worker process stopped")
+        logger.info(f"Task worker {self.worker_id} stopped")
 
 def main():
     """主函数"""
@@ -148,7 +151,7 @@ def main():
     
     args = parser.parse_args()
     
-    logger.info("Worker process main function started")
+    logger.info(f"Worker {worker_id} main function started")
     logger.info(f"Arguments: {args}")
     
     try:
