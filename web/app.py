@@ -25,9 +25,6 @@ app = Flask(__name__)
 # 注册任务API蓝图
 app.register_blueprint(task_api)
 
-# 移除全局任务工作器变量，因为现在使用独立进程
-# task_worker = None
-
 # ====== 静态文件路由和 MIME 类型设置 ======
 @app.route('/static/js/<path:filename>')
 def serve_js(filename):
@@ -91,21 +88,11 @@ def serve_static(filename):
     return send_from_directory('static', filename, mimetype=mimetype)
 
 # ====== 其他现有代码 ======
-# 移除任务工作器初始化函数，因为现在使用独立进程
-# def initialize_task_worker():
-#     """初始化任务工作器"""
-#     global task_worker
-#     from web.api.task_api import task_manager
-#     from task_queue.task_worker import TaskWorker
-#     
-#     task_worker = TaskWorker(task_manager)
-#     task_worker.start()
-#     print("Task worker initialized and started")
+# 任务处理现在由Celery Worker处理，不需要在Web应用中初始化
 
 def init_app():
     """初始化应用"""
-    # 移除任务工作器初始化
-    # initialize_task_worker()
+    # 任务处理由Celery Worker处理
     pass
 
 # 在应用启动时初始化

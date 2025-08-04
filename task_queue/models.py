@@ -4,6 +4,9 @@ from datetime import datetime
 from enum import Enum
 from typing import Dict, Any, Optional
 
+# 导入Celery任务
+from .tasks import feature_extraction_task, experiment_task
+
 class TaskStatus(Enum):
     PENDING = "pending"
     RUNNING = "running"
@@ -69,6 +72,10 @@ class TaskManager:
             conn.close()
             
             print(f"Task created successfully with ID: {task_id}")
+            
+            # 调度Celery任务
+            self._schedule_celery_task(task_id, task)
+            
             return task_id
             
         except Exception as e:
@@ -77,6 +84,70 @@ class TaskManager:
                 conn.close()
             raise e
     
+    def _schedule_celery_task(self, task_id: int, task: Task):
+        """调度Celery任务"""
+        try:
+            if task.task_type == 'feature_extraction':
+                if not task.dataset_id or not task.feature_set_id:
+                    raise ValueError("Missing required parameters: dataset_id and feature_set_id")
+                
+                # 异步执行特征提取任务
+                celery_task = feature_extraction_task.delay(
+                    task_id=task_id,
+                    parameters=task.parameters,
+                    dataset_id=task.dataset_id,
+                    feature_set_id=task.feature_set_id
+                )
+                
+                # 保存Celery任务ID到数据库（可选）
+                self._save_celery_task_id(task_id, celery_task.id)
+                
+            elif task.task_type == 'experiment':
+                if not task.dataset_id or not task.feature_set_id or not task.experiment_type:
+                    raise ValueError("Missing required parameters: dataset_id, feature_set_id, and experiment_type")
+                
+                # 异步执行实验任务
+                celery_task = experiment_task.delay(
+                    task_id=task_id,
+                    parameters=task.parameters,
+                    dataset_id=task.dataset_id,
+                    feature_set_id=task.feature_set_id,
+                    experiment_type=task.experiment_type
+                )
+                
+                # 保存Celery任务ID到数据库（可选）
+                self._save_celery_task_id(task_id, celery_task.id)
+                
+            else:
+                raise ValueError(f"Unknown task type: {task.task_type}")
+                
+        except Exception as e:
+            print(f"Error scheduling Celery task: {e}")
+            # 如果调度失败，更新任务状态为失败
+            self.update_task_status(task_id, TaskStatus.FAILED, error_message=str(e))
+            raise
+    
+    def _save_celery_task_id(self, task_id: int, celery_task_id: str):
+        """保存Celery任务ID到数据库（可选功能）"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            c = conn.cursor()
+            
+            # 检查是否已经有celery_task_id列，如果没有则添加
+            c.execute("PRAGMA table_info(tasks)")
+            columns = [column[1] for column in c.fetchall()]
+            
+            if 'celery_task_id' not in columns:
+                c.execute("ALTER TABLE tasks ADD COLUMN celery_task_id TEXT")
+            
+            c.execute("UPDATE tasks SET celery_task_id = ? WHERE id = ?", (celery_task_id, task_id))
+            conn.commit()
+            conn.close()
+            
+        except Exception as e:
+            print(f"Error saving Celery task ID: {e}")
+            # 这个错误不应该影响主要功能，所以只记录不抛出
+
     def get_task(self, task_id: int) -> Optional[Dict[str, Any]]:
         """获取任务信息"""
         conn = sqlite3.connect(self.db_path)

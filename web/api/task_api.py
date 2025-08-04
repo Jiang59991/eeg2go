@@ -1,17 +1,10 @@
 from flask import Blueprint, request, jsonify
 from task_queue.models import TaskManager, Task, TaskStatus
-from task_queue.task_worker import TaskWorker
-import threading
 
 task_api = Blueprint('task_api', __name__)
 
 # 全局任务管理器
 task_manager = TaskManager()
-
-# 移除全局工作器变量和启动函数
-# task_worker = TaskWorker(task_manager)
-# def start_task_worker():
-#     task_worker.start()
 
 @task_api.route('/api/tasks', methods=['POST'])
 def create_task():
