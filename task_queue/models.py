@@ -1,17 +1,10 @@
 import json
 import sqlite3
 from datetime import datetime
-from enum import Enum
 from typing import Dict, Any, Optional
 
-# 导入Celery任务
-from .tasks import feature_extraction_task, experiment_task
-
-class TaskStatus(Enum):
-    PENDING = "pending"
-    RUNNING = "running"
-    COMPLETED = "completed"
-    FAILED = "failed"
+# Import shared enum
+from .common import TaskStatus
 
 class Task:
     def __init__(self, task_type: str, parameters: Dict[str, Any], 
@@ -38,16 +31,19 @@ class TaskManager:
         self.db_path = db_path
     
     def create_task(self, task: Task) -> int:
-        """创建新任务并返回任务ID"""
+        """Create a new task and return the task ID"""
         try:
+            from logging_config import logger
+            logger.info(f"TaskManager.create_task called, task_type={task.task_type}")
+            
             conn = sqlite3.connect(self.db_path)
             c = conn.cursor()
             
-            # 确保数据类型正确
+            # Ensure correct data types
             dataset_id = int(task.dataset_id) if task.dataset_id is not None else None
             feature_set_id = int(task.feature_set_id) if task.feature_set_id is not None else None
             
-            print(f"Creating task with dataset_id={dataset_id}, feature_set_id={feature_set_id}")
+            logger.info(f"Creating task: dataset_id={dataset_id}, feature_set_id={feature_set_id}")
             
             c.execute("""
                 INSERT INTO tasks (task_type, status, parameters, dataset_id, feature_set_id, 
@@ -71,27 +67,38 @@ class TaskManager:
             conn.commit()
             conn.close()
             
-            print(f"Task created successfully with ID: {task_id}")
+            logger.info(f"Task created successfully, ID: {task_id}")
             
-            # 调度Celery任务
+            # Schedule Celery task
+            logger.info(f"Start scheduling Celery task, task_id={task_id}")
             self._schedule_celery_task(task_id, task)
             
             return task_id
             
         except Exception as e:
-            print(f"Error creating task: {e}")
+            logger.error(f"Failed to create task: {e}")
+            import traceback
+            logger.error(f"Exception details: {traceback.format_exc()}")
             if 'conn' in locals():
                 conn.close()
             raise e
     
     def _schedule_celery_task(self, task_id: int, task: Task):
-        """调度Celery任务"""
+        """Schedule a Celery task"""
         try:
+            from logging_config import logger
+            logger.info(f"_schedule_celery_task called, task_id={task_id}, task_type={task.task_type}")
+            
+            # Delayed import to avoid circular import
+            from .tasks import feature_extraction_task, experiment_task
+            
             if task.task_type == 'feature_extraction':
                 if not task.dataset_id or not task.feature_set_id:
                     raise ValueError("Missing required parameters: dataset_id and feature_set_id")
                 
-                # 异步执行特征提取任务
+                logger.info(f"Scheduling feature extraction task, task_id={task_id}")
+                
+                # Asynchronously execute feature extraction task
                 celery_task = feature_extraction_task.delay(
                     task_id=task_id,
                     parameters=task.parameters,
@@ -99,14 +106,18 @@ class TaskManager:
                     feature_set_id=task.feature_set_id
                 )
                 
-                # 保存Celery任务ID到数据库（可选）
+                logger.info(f"Celery task scheduled successfully: {celery_task.id}")
+                
+                # Save Celery task ID to database (optional)
                 self._save_celery_task_id(task_id, celery_task.id)
                 
             elif task.task_type == 'experiment':
                 if not task.dataset_id or not task.feature_set_id or not task.experiment_type:
                     raise ValueError("Missing required parameters: dataset_id, feature_set_id, and experiment_type")
                 
-                # 异步执行实验任务
+                logger.info(f"Scheduling experiment task, task_id={task_id}")
+                
+                # Asynchronously execute experiment task
                 celery_task = experiment_task.delay(
                     task_id=task_id,
                     parameters=task.parameters,
@@ -115,25 +126,29 @@ class TaskManager:
                     experiment_type=task.experiment_type
                 )
                 
-                # 保存Celery任务ID到数据库（可选）
+                logger.info(f"Celery task scheduled successfully: {celery_task.id}")
+                
+                # Save Celery task ID to database (optional)
                 self._save_celery_task_id(task_id, celery_task.id)
                 
             else:
                 raise ValueError(f"Unknown task type: {task.task_type}")
                 
         except Exception as e:
-            print(f"Error scheduling Celery task: {e}")
-            # 如果调度失败，更新任务状态为失败
+            logger.error(f"Failed to schedule Celery task: {e}")
+            import traceback
+            logger.error(f"Exception details: {traceback.format_exc()}")
+            # If scheduling fails, update task status to FAILED
             self.update_task_status(task_id, TaskStatus.FAILED, error_message=str(e))
             raise
     
     def _save_celery_task_id(self, task_id: int, celery_task_id: str):
-        """保存Celery任务ID到数据库（可选功能）"""
+        """Save Celery task ID to database (optional feature)"""
         try:
             conn = sqlite3.connect(self.db_path)
             c = conn.cursor()
             
-            # 检查是否已经有celery_task_id列，如果没有则添加
+            # Check if celery_task_id column exists, add if not
             c.execute("PRAGMA table_info(tasks)")
             columns = [column[1] for column in c.fetchall()]
             
@@ -146,10 +161,10 @@ class TaskManager:
             
         except Exception as e:
             print(f"Error saving Celery task ID: {e}")
-            # 这个错误不应该影响主要功能，所以只记录不抛出
+            # This error should not affect main functionality, so just log and do not raise
 
     def get_task(self, task_id: int) -> Optional[Dict[str, Any]]:
-        """获取任务信息"""
+        """Get task information"""
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
         
@@ -181,7 +196,7 @@ class TaskManager:
     
     def update_task_status(self, task_id: int, status: TaskStatus, 
                           result: Optional[Dict] = None, error_message: Optional[str] = None):
-        """更新任务状态"""
+        """Update task status"""
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
         
@@ -201,7 +216,7 @@ class TaskManager:
         conn.close()
     
     def update_task_progress(self, task_id: int, progress: float, processed_count: int, total_count: int):
-        """更新任务进度"""
+        """Update task progress"""
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
         
@@ -213,7 +228,7 @@ class TaskManager:
         conn.close()
     
     def get_pending_tasks(self, limit: int = 10) -> list:
-        """获取待处理任务"""
+        """Get pending tasks"""
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
         
@@ -238,19 +253,19 @@ class TaskManager:
         } for row in rows]
     
     def get_all_tasks(self) -> list:
-        """获取所有任务"""
+        """Get all tasks"""
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
         
         try:
-            # 检查表是否存在
+            # Check if table exists
             c.execute("""
                 SELECT name FROM sqlite_master 
                 WHERE type='table' AND name='tasks'
             """)
             
             if not c.fetchone():
-                # 如果表不存在，返回空列表
+                # If table does not exist, return empty list
                 return []
             
             c.execute("""

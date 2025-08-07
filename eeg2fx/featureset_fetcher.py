@@ -4,16 +4,16 @@ import json
 import gc
 from collections import deque
 import inspect
-from eeg2fx.featureset_grouping import load_fxdefs_for_set
-from eeg2fx.pipeline_executor import resolve_function, run_pipeline
-from eeg2fx.feature_saver import save_feature_values
-from eeg2fx.steps import RecordingTooLargeError, load_recording
+from .featureset_grouping import load_fxdefs_for_set
+from .pipeline_executor import resolve_function, run_pipeline
+from .feature_saver import save_feature_values
+from .steps import RecordingTooLargeError, load_recording
 import numpy as np
 from logging_config import logger
-from eeg2fx.feature.common import wrap_structured_result, auto_gc
+from .feature.common import wrap_structured_result, auto_gc
 
 DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "database", "eeg2go.db"))
-MAX_MEMORY_GB = 3  # Set the memory usage limit for a single recording file (GB)
+MAX_MEMORY_GB = 1  # Set the memory usage limit for a single recording file (GB)
 
 @auto_gc
 def load_cached_feature_value(fxid, recording_id):
@@ -209,6 +209,20 @@ def run_feature_set(feature_set_id: str, recording_id: int):
     del value_cache
     gc.collect()
 
+    return results
+
+def _create_error_result(feature_set_id: str, recording_id: int, error_msg: str):
+    """创建错误结果"""
+    fxdefs = load_fxdefs_for_set(feature_set_id)
+    results = {}
+    for fx in fxdefs:
+        fxid = fx["id"]
+        results[fxid] = {
+            "value": None,
+            "dim": "unknown",
+            "shape": [],
+            "notes": f"Task execution failed: {error_msg}"
+        }
     return results
 
 @auto_gc

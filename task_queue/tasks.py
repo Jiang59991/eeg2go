@@ -1,8 +1,9 @@
 """
-Celery任务定义模块
-将原有的任务处理逻辑转换为Celery任务
+Celery task definition module
+Convert the original task processing logic into Celery tasks
 """
 import os
+import sys
 import sqlite3
 import json
 from datetime import datetime
@@ -10,15 +11,22 @@ from typing import Dict, Any, Optional
 from celery import current_task
 from celery.utils.log import get_task_logger
 
+# Add project root directory to Python path
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
 from .celery_app import celery_app
-from .models import TaskManager, TaskStatus
+from .common import TaskStatus
+from .models import TaskManager
 from eeg2fx.featureset_fetcher import run_feature_set
 from feature_mill.experiment_engine import run_experiment
 
-logger = get_task_logger(__name__)
+# Use global logging config instead of Celery's task logger
+from logging_config import logger
 
 def get_task_manager():
-    """获取任务管理器实例"""
+    """Get task manager instance"""
     db_path = os.getenv('DATABASE_PATH', 'database/eeg2go.db')
     return TaskManager(db_path)
 
@@ -26,22 +34,28 @@ def get_task_manager():
 def feature_extraction_task(self, task_id: int, parameters: Dict[str, Any], 
                            dataset_id: int, feature_set_id: int):
     """
-    特征提取任务
+    Feature extraction task
     """
-    logger.info(f"开始执行特征提取任务 {task_id}")
+    logger.info(f"=== Start executing feature extraction task {task_id} ===")
+    logger.info(f"Task parameters: dataset_id={dataset_id}, feature_set_id={feature_set_id}")
+    logger.info(f"Parameter details: {parameters}")
     
     try:
-        # 更新任务状态为运行中
+        # Update task status to running
+        logger.info(f"Updating task status to running...")
         task_manager = get_task_manager()
         task_manager.update_task_status(task_id, TaskStatus.RUNNING)
         
-        # 获取数据集中的所有录音ID
+        # Get all recording IDs in the dataset
+        logger.info(f"Getting all recording IDs in dataset {dataset_id}...")
         recording_ids = _get_recording_ids_for_dataset(dataset_id)
         
         if not recording_ids:
             raise ValueError(f"No recordings found for dataset {dataset_id}")
         
-        # 更新任务总数
+        logger.info(f"Found {len(recording_ids)} recordings to process")
+        
+        # Update task total count
         task_manager.update_task_progress(task_id, 0.0, 0, len(recording_ids))
         
         results = {
@@ -54,71 +68,83 @@ def feature_extraction_task(self, task_id: int, parameters: Dict[str, Any],
             'errors': []
         }
         
-        # 处理每个录音
-        for i, recording_id in enumerate(recording_ids):
-            try:
-                # 更新进度
-                progress = (i / len(recording_ids)) * 100
-                task_manager.update_task_progress(task_id, progress, i, len(recording_ids))
-                
-                # 执行特征提取
-                result = run_feature_set(
-                    recording_id=recording_id,
-                    feature_set_id=feature_set_id,
-                    **parameters
-                )
-                
-                results['successful_recordings'] += 1
-                logger.info(f"录音 {recording_id} 特征提取成功")
-                
-            except Exception as e:
-                error_msg = f"录音 {recording_id} 处理失败: {str(e)}"
-                results['errors'].append(error_msg)
-                results['failed_recordings'] += 1
-                logger.error(error_msg)
-            
-            results['processed_recordings'] += 1
+        # Schedule all recording tasks for parallel processing
+        logger.info(f"Scheduling {len(recording_ids)} recording tasks for parallel processing...")
         
-        # 更新最终进度
-        task_manager.update_task_progress(task_id, 100.0, len(recording_ids), len(recording_ids))
+        # 使用Celery的group功能来并行执行任务
+        from celery import group
         
-        # 更新任务状态为完成
-        task_manager.update_task_status(task_id, TaskStatus.COMPLETED, result=results)
-        logger.info(f"特征提取任务 {task_id} 完成")
+        # 创建任务组
+        job = group([
+            run_feature_set_task.s(feature_set_id, recording_id)
+            for recording_id in recording_ids
+        ])
         
-        return results
+        logger.info(f"All {len(recording_ids)} recording tasks scheduled, waiting for completion...")
+        
+        # 执行任务组并等待结果 - 修复：不在任务中等待结果
+        result_group = job.apply_async(queue='recordings')
+        
+        # 不在这里等待结果，而是立即返回任务组ID
+        # 让外部监控器来处理结果收集
+        
+        logger.info(f"Task group created with ID: {result_group.id}")
+        
+        # 更新任务状态为运行中，但标记为需要外部监控
+        task_manager.update_task_status(task_id, TaskStatus.RUNNING, result={
+            'task_group_id': result_group.id,
+            'total_recordings': len(recording_ids),
+            'status': 'scheduled'
+        })
+        
+        logger.info(f"=== Feature extraction task {task_id} scheduled successfully ===")
+        return {
+            'task_group_id': result_group.id,
+            'total_recordings': len(recording_ids),
+            'status': 'scheduled'
+        }
         
     except Exception as e:
         error_message = str(e)
+        logger.error(f"Exception occurred during feature extraction task {task_id}: {error_message}")
         task_manager = get_task_manager()
         task_manager.update_task_status(task_id, TaskStatus.FAILED, error_message=error_message)
-        logger.error(f"特征提取任务 {task_id} 失败: {error_message}")
+        logger.error(f"=== Feature extraction task {task_id} failed ===")
         raise
 
 @celery_app.task(bind=True, name='task_queue.tasks.experiment_task')
 def experiment_task(self, task_id: int, parameters: Dict[str, Any], 
                    dataset_id: int, feature_set_id: int, experiment_type: str):
     """
-    实验任务
+    Experiment task
     """
-    logger.info(f"开始执行实验任务 {task_id}")
+    logger.info(f"Start executing experiment task {task_id}")
     
     try:
-        # 更新任务状态为运行中
+        # Update task status to running
         task_manager = get_task_manager()
         task_manager.update_task_status(task_id, TaskStatus.RUNNING)
         
-        # 执行实验
+        # Execute experiment
+        # 从parameters中提取output_dir和其他参数
+        output_dir = parameters.get('output_dir', f'experiments/experiment_{task_id}')
+        extra_args = parameters.copy()
+        
+        # 移除已明确传递的参数
+        for key in ['dataset_id', 'feature_set_id', 'experiment_type', 'output_dir']:
+            extra_args.pop(key, None)
+        
         result = run_experiment(
+            experiment_type=experiment_type,
             dataset_id=dataset_id,
             feature_set_id=feature_set_id,
-            experiment_type=experiment_type,
-            **parameters
+            output_dir=output_dir,
+            extra_args=extra_args
         )
         
-        # 更新任务状态为完成
+        # Update task status to completed
         task_manager.update_task_status(task_id, TaskStatus.COMPLETED, result=result)
-        logger.info(f"实验任务 {task_id} 完成")
+        logger.info(f"Experiment task {task_id} completed")
         
         return result
         
@@ -126,12 +152,14 @@ def experiment_task(self, task_id: int, parameters: Dict[str, Any],
         error_message = str(e)
         task_manager = get_task_manager()
         task_manager.update_task_status(task_id, TaskStatus.FAILED, error_message=error_message)
-        logger.error(f"实验任务 {task_id} 失败: {error_message}")
+        logger.error(f"Experiment task {task_id} failed: {error_message}")
         raise
 
 def _get_recording_ids_for_dataset(dataset_id: int) -> list:
-    """获取数据集中的所有录音ID"""
+    """Get all recording IDs in the dataset"""
     db_path = os.getenv('DATABASE_PATH', 'database/eeg2go.db')
+    
+    logger.info(f"Getting recording IDs for dataset {dataset_id} from database...")
     
     try:
         conn = sqlite3.connect(db_path)
@@ -141,8 +169,49 @@ def _get_recording_ids_for_dataset(dataset_id: int) -> list:
         recording_ids = [row[0] for row in c.fetchall()]
         
         conn.close()
+        
+        logger.info(f"Successfully got {len(recording_ids)} recording IDs for dataset {dataset_id}")
         return recording_ids
         
     except Exception as e:
-        logger.error(f"获取数据集 {dataset_id} 录音ID失败: {e}")
+        logger.error(f"Failed to get recording IDs for dataset {dataset_id}: {e}")
         return [] 
+
+@celery_app.task(bind=True, name='task_queue.tasks.run_feature_set_task')
+def run_feature_set_task(self, feature_set_id: int, recording_id: int):
+    """
+    包装run_feature_set函数的Celery任务
+    将整个run_feature_set函数作为任务执行
+    """
+    logger.info(f"=== Start run_feature_set task: feature_set_id={feature_set_id}, recording_id={recording_id} ===")
+    
+    try:
+        # 设置环境变量，标识当前在Celery worker中运行
+        import os
+        os.environ['CELERY_WORKER_RUNNING'] = '1'
+        
+        # 直接调用run_feature_set函数
+        from eeg2fx.featureset_fetcher import run_feature_set
+        result = run_feature_set(feature_set_id, recording_id)
+        
+        logger.info(f"=== run_feature_set task completed: feature_set_id={feature_set_id}, recording_id={recording_id} ===")
+        return {
+            'feature_set_id': feature_set_id,
+            'recording_id': recording_id,
+            'success': True,
+            'result': result
+        }
+        
+    except Exception as e:
+        error_message = str(e)
+        logger.error(f"run_feature_set task failed: feature_set_id={feature_set_id}, recording_id={recording_id}, error={error_message}")
+        return {
+            'feature_set_id': feature_set_id,
+            'recording_id': recording_id,
+            'success': False,
+            'error': error_message
+        }
+    finally:
+        # 清理环境变量
+        import os
+        os.environ.pop('CELERY_WORKER_RUNNING', None) 

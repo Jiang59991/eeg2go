@@ -8,12 +8,8 @@
 import os
 import sqlite3
 import random
-import logging
 from datetime import datetime
-
-# 设置日志
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+from logging_config import logger
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "eeg2go.db")
 SOURCE_DATASET_ID = 1  # Harvard_S0001_demo

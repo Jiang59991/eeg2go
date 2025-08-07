@@ -7,7 +7,7 @@ LOG_DIR = os.path.join(os.path.dirname(__file__), 'logs')
 os.makedirs(LOG_DIR, exist_ok=True)
 
 # 默认使用固定的日志文件名
-DEFAULT_LOG_FILE = os.path.join(LOG_DIR, 'correlation_test.log')
+DEFAULT_LOG_FILE = os.path.join(LOG_DIR, 'eeg2go_default.log')
 
 # 日志格式
 LOG_FORMAT = '[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s'
@@ -50,9 +50,9 @@ def create_new_log_file(suffix=None):
     
     new_log_file = os.path.join(LOG_DIR, f'eeg2go_{suffix}.log')
     
-    # 移除现有的文件handler
+    # 移除所有现有的文件handler
     for handler in logger.handlers[:]:
-        if isinstance(handler, logging.FileHandler) and handler.baseFilename != new_log_file:
+        if isinstance(handler, logging.FileHandler):
             logger.removeHandler(handler)
             handler.close()
     

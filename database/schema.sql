@@ -171,7 +171,7 @@ CREATE TABLE experiment_definitions (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Experiment run record table (new version, replaces old experiments table)
+-- Experiment results table (只用于存储最终结果，不用于任务管理)
 CREATE TABLE experiment_results (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     experiment_type TEXT NOT NULL,
@@ -182,11 +182,13 @@ CREATE TABLE experiment_results (
     duration_seconds REAL,
     parameters TEXT,  -- Experiment parameters in JSON format
     output_dir TEXT,
-    status TEXT DEFAULT 'completed',  -- 'running', 'completed', 'failed'
+    status TEXT DEFAULT 'completed',  -- 'completed', 'failed'
     summary TEXT,
     notes TEXT,
+    task_id INTEGER,  -- 关联到tasks表的ID
     FOREIGN KEY (dataset_id) REFERENCES datasets(id),
-    FOREIGN KEY (feature_set_id) REFERENCES feature_sets(id)
+    FOREIGN KEY (feature_set_id) REFERENCES feature_sets(id),
+    FOREIGN KEY (task_id) REFERENCES tasks(id)
 );
 
 -- Experiment metadata table (stores detailed experiment metadata)
@@ -220,11 +222,37 @@ CREATE TABLE experiment_feature_results (
     FOREIGN KEY (fxdef_id) REFERENCES fxdef(id)
 );
 
+-- 统一的任务表 (支持所有任务类型)
+CREATE TABLE tasks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    task_type TEXT NOT NULL,           -- 'feature_extraction', 'experiment', 'pipeline', etc.
+    status TEXT DEFAULT 'pending',     -- 'pending', 'running', 'completed', 'failed'
+    parameters TEXT,                   -- Store task parameters in JSON format
+    result TEXT,                       -- Store results in JSON format (for completed tasks)
+    error_message TEXT,                -- Error message
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    started_at TIMESTAMP,
+    completed_at TIMESTAMP,
+    priority INTEGER DEFAULT 0,        -- Task priority
+    dataset_id INTEGER,                -- Associated dataset ID
+    feature_set_id INTEGER,            -- Associated feature set ID
+    experiment_type TEXT,              -- Experiment type (for experiment tasks)
+    progress REAL DEFAULT 0.0,         -- Task progress (0-100)
+    processed_count INTEGER DEFAULT 0, -- Number of processed items
+    total_count INTEGER DEFAULT 0,     -- Total number of items to process
+    notes TEXT,                        -- Additional notes
+    output_dir TEXT,                   -- Output directory for results
+    duration_seconds REAL,             -- Task duration in seconds
+    FOREIGN KEY (dataset_id) REFERENCES datasets(id),
+    FOREIGN KEY (feature_set_id) REFERENCES feature_sets(id)
+);
+
 -- Create indexes to improve query performance
 CREATE INDEX idx_experiment_results_type ON experiment_results(experiment_type);
 CREATE INDEX idx_experiment_results_dataset ON experiment_results(dataset_id);
 CREATE INDEX idx_experiment_results_feature_set ON experiment_results(feature_set_id);
 CREATE INDEX idx_experiment_results_time ON experiment_results(run_time);
+CREATE INDEX idx_experiment_results_task ON experiment_results(task_id);
 
 CREATE INDEX idx_experiment_feature_results_experiment ON experiment_feature_results(experiment_result_id);
 CREATE INDEX idx_experiment_feature_results_fxdef ON experiment_feature_results(fxdef_id);
@@ -232,6 +260,14 @@ CREATE INDEX idx_experiment_feature_results_feature ON experiment_feature_result
 CREATE INDEX idx_experiment_feature_results_target ON experiment_feature_results(target_variable);
 CREATE INDEX idx_experiment_feature_results_type ON experiment_feature_results(result_type);
 CREATE INDEX idx_experiment_feature_results_metric ON experiment_feature_results(metric_name);
+
+-- Tasks表索引
+CREATE INDEX IF NOT EXISTS idx_tasks_type ON tasks(task_type);
+CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
+CREATE INDEX IF NOT EXISTS idx_tasks_dataset ON tasks(dataset_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_feature_set ON tasks(feature_set_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_created ON tasks(created_at);
+CREATE INDEX IF NOT EXISTS idx_tasks_experiment_type ON tasks(experiment_type);
 
 -- Insert default experiment definitions
 INSERT INTO experiment_definitions (name, type, description, default_parameters) VALUES
@@ -300,50 +336,3 @@ FROM experiment_feature_results efr
 JOIN experiment_results er ON efr.experiment_result_id = er.id
 WHERE efr.result_type IN ('classification_importance', 'selection_score')
 ORDER BY er.run_time DESC;
-
-CREATE TABLE tasks (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    task_type TEXT NOT NULL,           -- 'feature_extraction', 'experiment', etc.
-    status TEXT DEFAULT 'pending',     -- 'pending', 'running', 'completed', 'failed'
-    parameters TEXT,                   -- Store task parameters in JSON format
-    result TEXT,                       -- Store results in JSON format
-    error_message TEXT,                -- Error message
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    started_at TIMESTAMP,
-    completed_at TIMESTAMP,
-    priority INTEGER DEFAULT 0,        -- Task priority
-    dataset_id INTEGER,                -- Associated dataset ID (instead of recording_id)
-    feature_set_id INTEGER,            -- Associated feature set ID (for feature extraction)
-    experiment_type TEXT,              -- Experiment type (for experiment tasks)
-    progress REAL DEFAULT 0.0,         -- Task progress (0-100)
-    processed_count INTEGER DEFAULT 0, -- Number of processed items
-    total_count INTEGER DEFAULT 0,     -- Total number of items to process
-    notes TEXT,                        -- Additional notes
-    FOREIGN KEY (dataset_id) REFERENCES datasets(id),
-    FOREIGN KEY (feature_set_id) REFERENCES feature_sets(id)
-);
-
-CREATE INDEX IF NOT EXISTS idx_tasks_type ON tasks(task_type);
-CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
-CREATE INDEX IF NOT EXISTS idx_tasks_dataset ON tasks(dataset_id);
-CREATE INDEX IF NOT EXISTS idx_tasks_feature_set ON tasks(feature_set_id);
-CREATE INDEX IF NOT EXISTS idx_tasks_created ON tasks(created_at);
-
-
-CREATE TABLE feature_extraction_tasks (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    dataset_id INTEGER,
-    feature_set_id INTEGER,
-    task_name TEXT,
-    status TEXT DEFAULT 'pending',
-    total_recordings INTEGER DEFAULT 0,
-    processed_recordings INTEGER DEFAULT 0,
-    failed_recordings INTEGER DEFAULT 0,
-    start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    end_time TIMESTAMP,
-    duration_seconds REAL,
-    result_file TEXT,
-    notes TEXT,
-    FOREIGN KEY (dataset_id) REFERENCES datasets(id),
-    FOREIGN KEY (feature_set_id) REFERENCES feature_sets(id)
-);

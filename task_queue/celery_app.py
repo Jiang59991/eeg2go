@@ -24,22 +24,23 @@ celery_app.conf.update(
     timezone="UTC",
     enable_utc=True,
     
-    # 任务配置
+    # 任务配置 - 增加超时时间
     task_track_started=True,
-    task_time_limit=3600,  # 1小时超时
-    task_soft_time_limit=3000,  # 50分钟软超时
+    task_time_limit=7200,  # 2小时超时（从1小时增加到2小时）
+    task_soft_time_limit=6000,  # 100分钟软超时（从50分钟增加到100分钟）
     
     # Worker配置
     worker_prefetch_multiplier=1,
     worker_max_tasks_per_child=1000,
     
     # 结果配置
-    result_expires=3600,  # 结果保存1小时
+    result_expires=7200,  # 结果保存2小时（从1小时增加到2小时）
     
     # 路由配置
     task_routes={
         'task_queue.tasks.feature_extraction_task': {'queue': 'feature_extraction'},
         'task_queue.tasks.experiment_task': {'queue': 'experiments'},
+        'task_queue.tasks.run_feature_set_task': {'queue': 'recordings'},
         'task_queue.tasks.*': {'queue': 'default'},
     },
     

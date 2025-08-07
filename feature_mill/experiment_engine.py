@@ -71,19 +71,75 @@ def extract_feature_matrix_direct(dataset_id: int, feature_set_id: int, db_path:
         logger.error(f"Failed to load feature set definitions: {e}")
         raise
     
-    # Extract features
+    # Schedule all recording tasks for parallel processing
+    logger.info(f"Scheduling {len(recording_ids)} recording tasks for parallel processing...")
+    
+    # 调度所有recording任务
+    recording_tasks = []
+    for recording_id in recording_ids:
+        logger.info(f"Scheduling run_feature_set task for recording {recording_id}")
+        
+        try:
+            from task_queue.tasks import run_feature_set_task
+            
+            # 调度run_feature_set任务
+            task = run_feature_set_task.apply_async(
+                args=[feature_set_id, recording_id],
+                queue='recordings'
+            )
+            recording_tasks.append((recording_id, task))
+            
+        except ImportError:
+            logger.warning(f"Celery not available, using direct run_feature_set for recording {recording_id}")
+            # 如果Celery不可用，直接执行
+            fx_values = run_feature_set(feature_set_id, recording_id)
+            recording_tasks.append((recording_id, fx_values))
+    
+    logger.info(f"All {len(recording_tasks)} recording tasks scheduled, waiting for completion...")
+    
+    # 等待所有任务完成并收集结果
     feature_rows = []
     failed_count = 0
     failed_features_count = 0
     successful_features_count = 0
     
-    for i, recording_id in enumerate(recording_ids):
-        try:
-            logger.info(f"Processing recording {i+1}/{len(recording_ids)}: recording_id={recording_id}")
+    completed_count = 0
+    while completed_count < len(recording_tasks):
+        # 检查已完成的任务
+        for i, (recording_id, task_or_result) in enumerate(recording_tasks):
+            if hasattr(task_or_result, 'ready') and task_or_result.ready() and not hasattr(task_or_result, '_counted'):
+                # 这是Celery任务
+                completed_count += 1
+                task_or_result._counted = True
+                
+                try:
+                    # 使用result属性而不是get()方法，避免死锁
+                    result = task_or_result.result
+                    if result.get('success'):
+                        logger.info(f"run_feature_set task completed for recording {recording_id}")
+                        fx_values = result.get('result', {})
+                    else:
+                        error_msg = result.get('error', 'Unknown error')
+                        logger.error(f"run_feature_set task failed for recording {recording_id}: {error_msg}")
+                        failed_count += 1
+                        continue
+                except Exception as e:
+                    logger.error(f"Task execution failed for recording {recording_id}: {e}")
+                    failed_count += 1
+                    continue
+                    
+            elif not hasattr(task_or_result, 'ready') and not hasattr(task_or_result, '_counted'):
+                # 这是直接执行的结果
+                completed_count += 1
+                task_or_result._counted = True
+                fx_values = task_or_result
+                
+            else:
+                # 任务还未完成或已处理
+                continue
             
-            # Get all feature values for this recording
-            fx_values = run_feature_set(feature_set_id, recording_id)
-            logger.info(f"Recording {recording_id}: got {len(fx_values)} feature values")
+            # 处理recording结果
+            logger.info(f"Processing results for recording {recording_id}: got {len(fx_values)} feature values")
             
             # Build feature row with recording-level aggregation
             feature_row = {"recording_id": recording_id}
@@ -198,12 +254,12 @@ def extract_feature_matrix_direct(dataset_id: int, feature_set_id: int, db_path:
                 logger.warning(f"Recording {recording_id} had no successful features")
             
             failed_features_count += recording_failed_features
-            
-        except Exception as e:
-            failed_count += 1
-            logger.error(f"Failed to process recording {recording_id}: {e}")
-            continue
+        
+        # 短暂休眠，避免过度占用CPU
+        import time
+        time.sleep(0.1)
     
+    logger.info(f"All {len(recording_tasks)} recording tasks completed.")
     logger.info(f"Feature extraction completed:")
     logger.info(f"  Successful recordings: {len(feature_rows)}")
     logger.info(f"  Failed recordings: {failed_count}")

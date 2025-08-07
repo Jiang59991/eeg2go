@@ -4,12 +4,12 @@ import numpy as np
 import sqlite3
 import os
 import gc
-from eeg2fx.feature.common import auto_gc
+from .feature.common import auto_gc
 from logging_config import logger
 import csv
 
 DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "database", "eeg2go.db"))
-MAX_MEMORY_GB = 1  # 统一内存限制常量
+MAX_MEMORY_GB = 1  # 统一内存限制常量 (1GB)
 
 class RecordingTooLargeError(Exception):
     """当录音文件过大时抛出的异常"""

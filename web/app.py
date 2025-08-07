@@ -16,14 +16,19 @@ from database.add_fxdef import add_fxdefs
 from database.add_featureset import add_featureset
 from web.api.task_api import task_api
 
-# 设置日志
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# 使用全局日志配置
+from logging_config import logger
 
 app = Flask(__name__)
 
 # 注册任务API蓝图
 app.register_blueprint(task_api)
+
+# 打印所有注册的路由
+print("=== Registered routes ===")
+for rule in app.url_map.iter_rules():
+    print(f"  {rule.rule} -> {rule.endpoint}")
+print("=== End of routes ===")
 
 # ====== 静态文件路由和 MIME 类型设置 ======
 @app.route('/static/js/<path:filename>')
@@ -87,17 +92,6 @@ def serve_static(filename):
     
     return send_from_directory('static', filename, mimetype=mimetype)
 
-# ====== 其他现有代码 ======
-# 任务处理现在由Celery Worker处理，不需要在Web应用中初始化
-
-def init_app():
-    """初始化应用"""
-    # 任务处理由Celery Worker处理
-    pass
-
-# 在应用启动时初始化
-init_app()
-
 def get_db_connection():
     """Get database connection"""
     conn = sqlite3.connect(DATABASE_PATH)
@@ -128,8 +122,6 @@ def infer_pipeline_params(steps):
             params["epoch"] = float(step_params["duration"])
             params["output_type"] = "epochs"
     return params
-
-# 在 app = Flask(__name__) 之后，其他路由之前添加
 
 
 @app.route('/')
@@ -688,161 +680,192 @@ def get_featureset_dag(feature_set_id):
 
 @app.route('/api/experiments')
 def get_experiments():
-    """Get all experiment results"""
+    """Get all experiment tasks from unified tasks table"""
     conn = get_db_connection()
     
-    # 获取实验列表，包含数据集和特征集信息
+    # 获取所有experiment任务（包括进行中和已完成的）
     experiments = conn.execute('''
-        SELECT er.*, 
-               d.name as dataset_name,
-               fs.name as feature_set_name
-        FROM experiment_results er
-        LEFT JOIN datasets d ON er.dataset_id = d.id
-        LEFT JOIN feature_sets fs ON er.feature_set_id = fs.id
-        ORDER BY er.run_time DESC
+        SELECT t.id, t.experiment_type, t.parameters, t.status, t.created_at as run_time,
+               t.duration_seconds, t.notes, t.output_dir, t.progress, t.processed_count, t.total_count,
+               t.error_message, t.result, t.completed_at,
+               d.name as dataset_name, fs.name as feature_set_name
+        FROM tasks t
+        LEFT JOIN datasets d ON t.dataset_id = d.id
+        LEFT JOIN feature_sets fs ON t.feature_set_id = fs.id
+        WHERE t.task_type = 'experiment'
+        ORDER BY t.created_at DESC
     ''').fetchall()
     
     conn.close()
     
-    return jsonify([dict(exp) for exp in experiments])
+    # 处理结果
+    processed_experiments = []
+    for task in experiments:
+        task_dict = dict(task)
+        
+        # 从parameters中提取experiment_name
+        try:
+            if task_dict['parameters']:
+                params = json.loads(task_dict['parameters'])
+                task_dict['experiment_name'] = params.get('experiment_type', 'N/A')
+        except:
+            task_dict['experiment_name'] = 'N/A'
+        
+        # 计算持续时间
+        if task_dict['run_time']:
+            created_time = datetime.fromisoformat(task_dict['run_time'])
+            if task_dict['status'] == 'running':
+                duration = (datetime.now() - created_time).total_seconds()
+            elif task_dict['status'] == 'completed' and task_dict['completed_at']:
+                completed_time = datetime.fromisoformat(task_dict['completed_at'])
+                duration = (completed_time - created_time).total_seconds()
+            else:
+                duration = 0
+            task_dict['duration_seconds'] = duration
+        
+        # 添加summary字段（从result中提取）
+        if task_dict['result']:
+            try:
+                result_data = json.loads(task_dict['result'])
+                task_dict['summary'] = result_data.get('summary', '')
+            except:
+                task_dict['summary'] = ''
+        else:
+            task_dict['summary'] = ''
+        
+        processed_experiments.append(task_dict)
+    
+    return jsonify(processed_experiments)
 
 @app.route('/api/experiment_details/<int:experiment_id>')
 def get_experiment_details(experiment_id):
-    """Get detailed experiment results"""
+    """Get detailed experiment task from unified tasks table"""
     conn = get_db_connection()
     
-    # 获取实验基本信息
-    experiment = conn.execute('''
-        SELECT er.*, 
+    # 从tasks表获取experiment任务
+    task = conn.execute('''
+        SELECT t.*, 
                d.name as dataset_name,
                fs.name as feature_set_name
-        FROM experiment_results er
-        LEFT JOIN datasets d ON er.dataset_id = d.id
-        LEFT JOIN feature_sets fs ON er.feature_set_id = fs.id
-        WHERE er.id = ?
+        FROM tasks t
+        LEFT JOIN datasets d ON t.dataset_id = d.id
+        LEFT JOIN feature_sets fs ON t.feature_set_id = fs.id
+        WHERE t.id = ? AND t.task_type = 'experiment'
     ''', (experiment_id,)).fetchone()
     
-    if not experiment:
+    if not task:
         conn.close()
         return jsonify({'error': 'Experiment not found'}), 404
     
-    # 获取特征级别的结果
-    feature_results = conn.execute('''
-        SELECT efr.*, fd.shortname as feature_shortname, fd.chans as feature_channels
-        FROM experiment_feature_results efr
-        LEFT JOIN fxdef fd ON efr.fxdef_id = fd.id
-        WHERE efr.experiment_result_id = ?
-        ORDER BY efr.rank_position ASC, efr.metric_value DESC
-    ''', (experiment_id,)).fetchall()
+    # 处理任务数据
+    task_dict = dict(task)
     
-    # 获取实验元数据
-    metadata = conn.execute('''
-        SELECT key, value, value_type
-        FROM experiment_metadata
-        WHERE experiment_result_id = ?
-        ORDER BY key
-    ''', (experiment_id,)).fetchall()
+    # 从parameters中提取experiment_name
+    try:
+        if task_dict['parameters']:
+            params = json.loads(task_dict['parameters'])
+            task_dict['experiment_name'] = params.get('experiment_type', 'N/A')
+    except:
+        task_dict['experiment_name'] = 'N/A'
+    
+    # 计算持续时间
+    if task_dict['created_at']:
+        created_time = datetime.fromisoformat(task_dict['created_at'])
+        if task_dict['status'] == 'running':
+            duration = (datetime.now() - created_time).total_seconds()
+        elif task_dict['status'] == 'completed' and task_dict['completed_at']:
+            completed_time = datetime.fromisoformat(task_dict['completed_at'])
+            duration = (completed_time - created_time).total_seconds()
+        else:
+            duration = 0
+        task_dict['duration_seconds'] = duration
+        task_dict['run_time'] = task_dict['created_at']
+    
+    # 处理result字段
+    feature_results = []
+    metadata = []
+    output_files = []
+    
+    if task_dict['result']:
+        try:
+            result_data = json.loads(task_dict['result'])
+            # 从result中提取feature_results和metadata
+            feature_results = result_data.get('feature_results', [])
+            metadata = result_data.get('metadata', [])
+            
+            # 检查输出目录
+            if task_dict['output_dir'] and os.path.exists(task_dict['output_dir']):
+                try:
+                    for filename in os.listdir(task_dict['output_dir']):
+                        file_path = os.path.join(task_dict['output_dir'], filename)
+                        if os.path.isfile(file_path):
+                            stat = os.stat(file_path)
+                            file_info = {
+                                'name': filename,
+                                'size': stat.st_size,
+                                'modified': datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                                'type': get_file_type(filename)
+                            }
+                            output_files.append(file_info)
+                    
+                    # 按文件类型排序
+                    output_files.sort(key=lambda x: get_file_sort_order(x['type']))
+                except Exception as e:
+                    print(f"Error listing output files: {e}")
+        except Exception as e:
+            print(f"Error parsing result data: {e}")
     
     conn.close()
     
-    # 检查输出目录是否存在文件
-    output_files = []
-    if experiment['output_dir'] and os.path.exists(experiment['output_dir']):
-        try:
-            for filename in os.listdir(experiment['output_dir']):
-                file_path = os.path.join(experiment['output_dir'], filename)
-                if os.path.isfile(file_path):
-                    stat = os.stat(file_path)
-                    file_info = {
-                        'name': filename,
-                        'size': stat.st_size,
-                        'modified': datetime.fromtimestamp(stat.st_mtime).isoformat(),
-                        'type': get_file_type(filename)
-                    }
-                    output_files.append(file_info)
-            
-            # 按文件类型排序
-            output_files.sort(key=lambda x: get_file_sort_order(x['type']))
-        except Exception as e:
-            print(f"Error listing output files: {e}")
-    
     return jsonify({
-        'experiment': dict(experiment),
-        'feature_results': [dict(fr) for fr in feature_results],
-        'metadata': [dict(md) for md in metadata],
-        'output_files': output_files
+        'experiment': task_dict,
+        'feature_results': feature_results,
+        'metadata': metadata,
+        'output_files': output_files,
+        'source': 'task'
     })
+    
+
 
 @app.route('/api/experiment_summary/<int:experiment_id>')
 def get_experiment_summary(experiment_id):
-    """Get experiment summary statistics"""
+    """Get experiment summary statistics from tasks table"""
     conn = get_db_connection()
     
-    # 获取实验基本信息
-    experiment = conn.execute('SELECT * FROM experiment_results WHERE id = ?', (experiment_id,)).fetchone()
+    # 从tasks表获取实验基本信息
+    task = conn.execute('''
+        SELECT * FROM tasks 
+        WHERE id = ? AND task_type = 'experiment'
+    ''', (experiment_id,)).fetchone()
     
-    if not experiment:
+    if not task:
         conn.close()
         return jsonify({'error': 'Experiment not found'}), 404
     
-    # 根据实验类型获取不同的统计信息
-    if experiment['experiment_type'] == 'correlation':
-        # 相关性实验统计
-        stats = conn.execute('''
-            SELECT 
-                COUNT(*) as total_features,
-                COUNT(CASE WHEN metric_value >= 0.3 THEN 1 END) as significant_correlations,
-                COUNT(CASE WHEN significance_level IN ('p<0.001', 'p<0.01', 'p<0.05') THEN 1 END) as significant_features,
-                AVG(metric_value) as avg_correlation,
-                MAX(metric_value) as max_correlation,
-                MIN(metric_value) as min_correlation
-            FROM experiment_feature_results
-            WHERE experiment_result_id = ? AND metric_name = 'correlation_coefficient'
-        ''', (experiment_id,)).fetchone()
-        
-    elif experiment['experiment_type'] == 'classification':
-        # 分类实验统计
-        stats = conn.execute('''
-            SELECT 
-                COUNT(*) as total_features,
-                COUNT(CASE WHEN metric_value > 0.5 THEN 1 END) as important_features,
-                AVG(metric_value) as avg_importance,
-                MAX(metric_value) as max_importance,
-                MIN(metric_value) as min_importance
-            FROM experiment_feature_results
-            WHERE experiment_result_id = ? AND metric_name = 'importance_score'
-        ''', (experiment_id,)).fetchone()
-        
-    elif experiment['experiment_type'] == 'feature_statistics':
-        # 特征统计实验统计
-        stats = conn.execute('''
-            SELECT 
-                COUNT(*) as total_features,
-                COUNT(CASE WHEN metric_name = 'importance_score' THEN 1 END) as important_features,
-                AVG(CASE WHEN metric_name = 'importance_score' THEN metric_value END) as avg_importance,
-                MAX(CASE WHEN metric_name = 'importance_score' THEN metric_value END) as max_importance,
-                MIN(CASE WHEN metric_name = 'importance_score' THEN metric_value END) as min_importance
-            FROM experiment_feature_results
-            WHERE experiment_result_id = ?
-        ''', (experiment_id,)).fetchone()
-        
-    else:
-        # 其他类型实验的通用统计
-        stats = conn.execute('''
-            SELECT 
-                COUNT(*) as total_features,
-                AVG(metric_value) as avg_metric,
-                MAX(metric_value) as max_metric,
-                MIN(metric_value) as min_metric
-            FROM experiment_feature_results
-            WHERE experiment_result_id = ?
-        ''', (experiment_id,)).fetchone()
+    # 从result字段中提取统计信息
+    stats = {}
+    if task['result']:
+        try:
+            result_data = json.loads(task['result'])
+            stats = result_data.get('statistics', {})
+        except:
+            stats = {}
+    
+    # 如果没有统计信息，提供基本统计
+    if not stats:
+        stats = {
+            'total_features': 0,
+            'status': task['status'],
+            'progress': task['progress'],
+            'processed_count': task['processed_count'],
+            'total_count': task['total_count']
+        }
     
     conn.close()
     
     return jsonify({
-        'experiment': dict(experiment),
-        'statistics': dict(stats)
+        'experiment': dict(task),
+        'statistics': stats
     })
 
 @app.route('/api/experiment_files/<int:experiment_id>')
@@ -850,14 +873,17 @@ def get_experiment_files(experiment_id):
     """Get list of files generated by an experiment"""
     conn = get_db_connection()
     
-    # 获取实验的输出目录
-    experiment = conn.execute('SELECT output_dir FROM experiment_results WHERE id = ?', (experiment_id,)).fetchone()
+    # 从tasks表获取实验的输出目录
+    task = conn.execute('''
+        SELECT output_dir FROM tasks 
+        WHERE id = ? AND task_type = 'experiment'
+    ''', (experiment_id,)).fetchone()
     conn.close()
     
-    if not experiment or not experiment['output_dir']:
+    if not task or not task['output_dir']:
         return jsonify({'error': 'Experiment output directory not found'}), 404
     
-    output_dir = experiment['output_dir']
+    output_dir = task['output_dir']
     
     if not os.path.exists(output_dir):
         return jsonify({'error': 'Output directory does not exist'}), 404
@@ -894,14 +920,17 @@ def get_experiment_file(experiment_id, filename):
     """Download or view a specific experiment file"""
     conn = get_db_connection()
     
-    # 获取实验的输出目录
-    experiment = conn.execute('SELECT output_dir FROM experiment_results WHERE id = ?', (experiment_id,)).fetchone()
+    # 从tasks表获取实验的输出目录
+    task = conn.execute('''
+        SELECT output_dir FROM tasks 
+        WHERE id = ? AND task_type = 'experiment'
+    ''', (experiment_id,)).fetchone()
     conn.close()
     
-    if not experiment or not experiment['output_dir']:
+    if not task or not task['output_dir']:
         return jsonify({'error': 'Experiment output directory not found'}), 404
     
-    output_dir = experiment['output_dir']
+    output_dir = task['output_dir']
     file_path = os.path.join(output_dir, filename)
     
     if not os.path.exists(file_path):
@@ -1050,39 +1079,50 @@ def run_experiment_api():
 
 @app.route('/api/experiment_status/<int:experiment_id>')
 def get_experiment_status(experiment_id):
-    """Get experiment status and progress"""
+    """Get experiment status and progress from tasks table"""
     try:
         conn = get_db_connection()
-        experiment = conn.execute('''
-            SELECT id, experiment_type, experiment_name, status, run_time, 
-                   duration_seconds, result_summary, notes, output_dir
-            FROM experiment_results 
-            WHERE id = ?
+        task = conn.execute('''
+            SELECT id, experiment_type, parameters, status, created_at, 
+                   duration_seconds, notes, output_dir, progress, processed_count, total_count
+            FROM tasks 
+            WHERE id = ? AND task_type = 'experiment'
         ''', (experiment_id,)).fetchone()
         conn.close()
         
-        if not experiment:
+        if not task:
             return jsonify({'error': 'Experiment not found'}), 404
         
+        # 从parameters中提取experiment_name
+        experiment_name = 'N/A'
+        try:
+            if task['parameters']:
+                params = json.loads(task['parameters'])
+                experiment_name = params.get('experiment_type', 'N/A')
+        except:
+            pass
+        
         # 计算运行时间
-        run_time = datetime.fromisoformat(experiment['run_time']) if experiment['run_time'] else None
+        created_time = datetime.fromisoformat(task['created_at']) if task['created_at'] else None
         duration = None
-        if run_time:
-            if experiment['status'] == 'running':
-                duration = (datetime.now() - run_time).total_seconds()
+        if created_time:
+            if task['status'] == 'running':
+                duration = (datetime.now() - created_time).total_seconds()
             else:
-                duration = experiment['duration_seconds']
+                duration = task['duration_seconds']
         
         return jsonify({
-            'id': experiment['id'],
-            'experiment_type': experiment['experiment_type'],
-            'experiment_name': experiment['experiment_name'],
-            'status': experiment['status'],
-            'run_time': experiment['run_time'],
+            'id': task['id'],
+            'experiment_type': task['experiment_type'],
+            'experiment_name': experiment_name,
+            'status': task['status'],
+            'run_time': task['created_at'],
             'duration': duration,
-            'result_summary': experiment['result_summary'],
-            'notes': experiment['notes'],
-            'output_dir': experiment['output_dir']
+            'progress': task['progress'],
+            'processed_count': task['processed_count'],
+            'total_count': task['total_count'],
+            'notes': task['notes'],
+            'output_dir': task['output_dir']
         })
         
     except Exception as e:
@@ -1105,7 +1145,8 @@ def start_feature_extraction_api():
         dataset_id = int(dataset_id)
         feature_set_id = int(feature_set_id)
         
-        print(f"Creating feature extraction task with dataset_id={dataset_id}, feature_set_id={feature_set_id}")
+        logger.info(f"=== 开始创建特征提取任务 ===")
+        logger.info(f"请求参数: dataset_id={dataset_id}, feature_set_id={feature_set_id}")
         
         # 创建任务而不是直接执行
         from web.api.task_api import task_manager
@@ -1116,9 +1157,21 @@ def start_feature_extraction_api():
             'feature_set_id': feature_set_id
         }, dataset_id=dataset_id, feature_set_id=feature_set_id)
         
+        logger.info(f"任务对象已创建: task_type={task.task_type}, parameters={task.parameters}")
+        
         task_id = task_manager.create_task(task)
         
-        print(f"Task created with ID: {task_id}")
+        logger.info(f"任务已创建，ID: {task_id}")
+        
+        # 验证任务是否真的被创建了
+        created_task = task_manager.get_task(task_id)
+        if created_task:
+            logger.info(f"任务验证成功: ID={created_task['id']}, Status={created_task['status']}")
+        else:
+            logger.error("警告: 任务创建后未在数据库中找到!")
+        
+        logger.info(f"=== 特征提取任务创建完成 ===")
+        logger.info(f"返回响应: task_id={task_id}, status=pending")
         
         return jsonify({
             'task_id': task_id,
@@ -1127,9 +1180,18 @@ def start_feature_extraction_api():
         }), 202
         
     except Exception as e:
-        import logging
-        logging.error(f"Failed to create feature extraction task: {e}")
+        import traceback
+        logger.error(f"创建特征提取任务失败: {e}")
+        logger.error(f"异常详情: {traceback.format_exc()}")
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/test')
+def test_api():
+    """Test API endpoint"""
+    print("=== /api/test called ===")
+    return jsonify({'message': 'API is working', 'status': 'ok'})
+
+# 删除重复的路由，因为task_api蓝图已经处理了/api/tasks
 
 @app.route('/api/feature_extraction_tasks')
 def get_feature_extraction_tasks():
@@ -1146,7 +1208,42 @@ def get_feature_extraction_tasks():
         ''').fetchall()
         conn.close()
         
-        return jsonify([dict(task) for task in tasks])
+        # 只返回必要的基本信息，避免大数据传输
+        processed_tasks = []
+        for task in tasks:
+            # 只选择必要的字段，确保所有值都是可序列化的
+            task_dict = {
+                'id': int(task['id']) if task['id'] is not None else None,
+                'task_type': str(task['task_type']) if task['task_type'] is not None else None,
+                'status': str(task['status']) if task['status'] is not None else None,
+                'dataset_id': int(task['dataset_id']) if task['dataset_id'] is not None else None,
+                'dataset_name': str(task['dataset_name']) if task['dataset_name'] is not None else None,
+                'feature_set_id': int(task['feature_set_id']) if task['feature_set_id'] is not None else None,
+                'feature_set_name': str(task['feature_set_name']) if task['feature_set_name'] is not None else None,
+                'created_at': str(task['created_at']) if task['created_at'] is not None else None,
+                'started_at': str(task['started_at']) if task['started_at'] is not None else None,
+                'completed_at': str(task['completed_at']) if task['completed_at'] is not None else None,
+                'progress': float(task['progress']) if task['progress'] is not None else 0.0,
+                'processed_count': int(task['processed_count']) if task['processed_count'] is not None else 0,
+                'total_count': int(task['total_count']) if task['total_count'] is not None else 0,
+                'error_message': str(task['error_message']) if task['error_message'] is not None else None,
+                'priority': int(task['priority']) if task['priority'] is not None else 0
+            }
+            
+            # 如果有result且很大，添加下载链接
+            if hasattr(task, 'result') and task['result'] and len(str(task['result'])) > 1000:  # 超过1KB就认为很大
+                task_dict['has_large_result'] = True
+                task_dict['result_size'] = len(str(task['result']))
+                task_dict['download_url'] = f'/api/download_extraction_result/{task["id"]}'
+            else:
+                task_dict['has_large_result'] = False
+            
+            processed_tasks.append(task_dict)
+        
+        # 设置正确的响应头
+        response = jsonify(processed_tasks)
+        response.headers['Content-Type'] = 'application/json; charset=utf-8'
+        return response
         
     except Exception as e:
         import logging

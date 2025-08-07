@@ -1,7 +1,7 @@
 import json
-from eeg2fx.feature.common import auto_gc
-from eeg2fx.function_registry import PREPROCESSING_FUNCS, FEATURE_FUNCS, UTILITY_FUNCS, EPOCH_BY_EVENT_FUNCS
-from eeg2fx.featureset_grouping import load_pipeline_structure
+from .feature.common import auto_gc
+from .function_registry import PREPROCESSING_FUNCS, FEATURE_FUNCS, UTILITY_FUNCS, EPOCH_BY_EVENT_FUNCS
+from .featureset_grouping import load_pipeline_structure
 
 
 def resolve_function(func_name, context=None):

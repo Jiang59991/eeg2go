@@ -8,6 +8,16 @@ import sys
 import argparse
 from celery.bin.celery import main as celery_main
 
+# 添加项目根目录到Python路径
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+from logging_config import logger
+
+# 确保任务模块被导入
+import task_queue.tasks
+
 def start_worker(queue_name='default', concurrency=1, hostname=None):
     """启动Celery Worker"""
     
@@ -16,8 +26,7 @@ def start_worker(queue_name='default', concurrency=1, hostname=None):
     
     # 构建celery worker命令参数
     cmd = [
-        'celery', 'worker',
-        '--app=task_queue.celery_app:celery_app',
+        'celery', '--app=task_queue.celery_app:celery_app', 'worker',
         '--loglevel=INFO',
         f'--concurrency={concurrency}',
         '--pool=prefork',  # 使用prefork池，适合CPU密集型任务
@@ -38,7 +47,7 @@ def start_worker(queue_name='default', concurrency=1, hostname=None):
         '--without-heartbeat', # 禁用心跳，减少网络开销
     ])
     
-    print(f"启动Celery Worker: {' '.join(cmd)}")
+    logger.info(f"Starting Celery Worker: {' '.join(cmd)}")
     
     # 执行celery worker命令
     sys.argv = cmd
@@ -57,10 +66,10 @@ def main():
     args = parser.parse_args()
     
     # 验证队列名称
-    valid_queues = ['default', 'feature_extraction', 'experiments']
+    valid_queues = ['default', 'feature_extraction', 'experiments', 'recordings']
     if args.queue not in valid_queues:
-        print(f"错误: 无效的队列名称 '{args.queue}'")
-        print(f"有效的队列名称: {', '.join(valid_queues)}")
+        logger.error(f"Error: Invalid queue name '{args.queue}'")
+        logger.error(f"Valid queue names: {', '.join(valid_queues)}")
         sys.exit(1)
     
     try:
@@ -70,9 +79,9 @@ def main():
             hostname=args.hostname
         )
     except KeyboardInterrupt:
-        print("\nWorker已停止")
+        logger.info("Worker stopped")
     except Exception as e:
-        print(f"启动Worker失败: {e}")
+        logger.error(f"Failed to start Worker: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":

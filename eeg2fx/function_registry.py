@@ -1,5 +1,5 @@
-from eeg2fx.steps import load_recording, filter, reref, zscore, epoch, reref, notch_filter, resample, ica, epoch_by_event
-from eeg2fx.feature import (
+from .steps import load_recording, filter, reref, zscore, epoch, reref, notch_filter, resample, ica, epoch_by_event
+from .feature import (
     feature_time,
     feature_freq,
     feature_nonlinear,

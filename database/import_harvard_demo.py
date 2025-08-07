@@ -7,12 +7,12 @@ import json
 import numpy as np
 
 # Base directory for metadata (original location)
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "harvard_EEG"))
+# BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "harvard_EEG"))
 METADATA_BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "harvard_EEG"))
 DB_PATH = os.path.join(os.path.dirname(__file__), "eeg2go.db")
 
-# BIDS_DIR = "/rds/general/user/zj724/ephemeral"
-BIDS_DIR = os.path.join(BASE_DIR, "bids")
+BIDS_DIR = "/rds/general/user/zj724/ephemeral"
+# BIDS_DIR = os.path.join(BASE_DIR, "bids")
 METADATA_DIR = os.path.join(METADATA_BASE_DIR, "HEEDB_Metadata")
 PATIENT_CSV = os.path.join(METADATA_DIR, "HEEDB_patients.csv")
 
