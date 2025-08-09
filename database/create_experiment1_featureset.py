@@ -7,9 +7,10 @@ from logging_config import logger
 from database.add_fxdef import add_fxdefs
 from database.add_featureset import add_featureset
 
-# 项目根目录下的数据库路径
-DB_PATH = os.path.join(os.path.dirname(__file__), "database", "eeg2go.db")
 
+DB_PATH = os.path.join(os.path.dirname(__file__), "eeg2go.db")
+
+# Pipeline shortnames required (must already exist in pipedef)
 PIPE_SHORTNAMES = [
     "P0_minimal_hp",
     "P1_hp_avg_reref",
@@ -17,7 +18,8 @@ PIPE_SHORTNAMES = [
     "P3_hp_ica_auto",
 ]
 
-BANDS = ["delta", "theta", "alpha", "beta"]  # 1–4, 4–8, 8–13, 13–30
+# Bands and channels for Experiment 1 (relative bandpower)
+BANDS = ["delta", "theta", "alpha", "beta"]
 CHANS = ["F3", "F4", "C3", "C4", "O1", "O2"]
 
 
@@ -28,7 +30,7 @@ def get_pipeline_id_by_shortname(shortname: str) -> int:
     row = c.fetchone()
     conn.close()
     if not row:
-        raise ValueError(f"Pipeline shortname '{shortname}' not found. 请先创建对应 pipeline。")
+        raise ValueError(f"Pipeline shortname '{shortname}' not found. 请先创建对应 pipeline（见 database/default_pipelines.py）。")
     return int(row[0])
 
 
@@ -37,7 +39,7 @@ def build_fxdefs_for_pipeline(pipe_id: int) -> List[int]:
     为一个 pipeline 构建相对功率（relative_power）特征：
     频段：delta/theta/alpha/beta
     通道：F3/F4/C3/C4/O1/O2
-    输出：按 epoch 的 1d 数组（聚合由下游完成）
+    输出：按 epoch 的 1d 数组（录波级聚合在下游完成）
     """
     all_fxids: List[int] = []
 
@@ -65,7 +67,7 @@ def create_experiment1_featuresets() -> Dict[str, int]:
       - exp1_bp_rel__P0_minimal_hp
       - exp1_bp_rel__P1_hp_avg_reref
       - exp1_bp_rel__P2_hp_notch50
-      - exp1_bp_rel__P3_bp_ica_auto
+      - exp1_bp_rel__P3_hp_ica_auto
     返回：{featureset_name: featureset_id}
     """
     results: Dict[str, int] = {}
@@ -83,7 +85,7 @@ def create_experiment1_featuresets() -> Dict[str, int]:
                 f"Experiment1 bandpower_rel (delta/theta/alpha/beta) × 6 chans "
                 f"for pipeline {shortname}; per-epoch 1d, downstream aggregate by median/IQR"
             ),
-            "fxdef_ids": fxids
+            "fxdef_ids": fxids,
         })
         logger.info(f"Created featureset '{fs_name}' (id={fs_id}) with {len(fxids)} fxdefs")
         results[fs_name] = fs_id
@@ -94,3 +96,5 @@ def create_experiment1_featuresets() -> Dict[str, int]:
 if __name__ == "__main__":
     results = create_experiment1_featuresets()
     print("Created featuresets:", results)
+
+

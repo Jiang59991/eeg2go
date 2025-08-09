@@ -45,56 +45,56 @@ def create_default_pipelines():
             ]
         },
 
-        # 3. 最小滤波路径（用于实验对照）
-        {
-            "shortname": "filter_only_epoch",
-            "description": "Minimal preprocessing: bandpass filter then epoch",
-            "source": "default",
-            "chanset": "10/20",
-            "fs": 200,
-            "hp": 1.0,
-            "lp": 30.0,
-            "epoch": 3.0,
-            "sample_rating": 6.0,
-            "steps": [
-                ["flt", "filter", ["raw"], {"hp": 1.0, "lp": 30.0}],
-                ["epoch", "epoch", ["flt"], {"duration": 3.0}]
-            ]
-        },
+        # # 3. 最小滤波路径（用于实验对照）
+        # {
+        #     "shortname": "filter_only_epoch",
+        #     "description": "Minimal preprocessing: bandpass filter then epoch",
+        #     "source": "default",
+        #     "chanset": "10/20",
+        #     "fs": 200,
+        #     "hp": 1.0,
+        #     "lp": 30.0,
+        #     "epoch": 3.0,
+        #     "sample_rating": 6.0,
+        #     "steps": [
+        #         ["flt", "filter", ["raw"], {"hp": 1.0, "lp": 30.0}],
+        #         ["epoch", "epoch", ["flt"], {"duration": 3.0}]
+        #     ]
+        # },
 
-        # 4. 最小参考路径（用于实验对照）
-        {
-            "shortname": "reref_only_epoch",
-            "description": "Minimal preprocessing: rereferencing then epoch",
-            "source": "default",
-            "chanset": "10/20",
-            "fs": 200,
-            "hp": 1.0,
-            "lp": 30.0,
-            "epoch": 3.0,
-            "sample_rating": 5.0,
-            "steps": [
-                ["reref", "reref", ["raw"], {"method": "average"}],
-                ["epoch", "epoch", ["reref"], {"duration": 3.0}]
-            ]
-        },
+        # # 4. 最小参考路径（用于实验对照）
+        # {
+        #     "shortname": "reref_only_epoch",
+        #     "description": "Minimal preprocessing: rereferencing then epoch",
+        #     "source": "default",
+        #     "chanset": "10/20",
+        #     "fs": 200,
+        #     "hp": 1.0,
+        #     "lp": 30.0,
+        #     "epoch": 3.0,
+        #     "sample_rating": 5.0,
+        #     "steps": [
+        #         ["reref", "reref", ["raw"], {"method": "average"}],
+        #         ["epoch", "epoch", ["reref"], {"duration": 3.0}]
+        #     ]
+        # },
 
-        # 5. 用于 entropy 提取的最小 pipeline（仅至 epoch）
-        {
-            "shortname": "entropy_eval_base",
-            "description": "Minimal pipeline ending with epochs (used for entropy fxdef)",
-            "source": "test",
-            "chanset": "10/20",
-            "fs": 250,
-            "hp": 1.0,
-            "lp": 35.0,
-            "epoch": 2.0,
-            "sample_rating": 7.0,
-            "steps": [
-                ["flt", "filter", ["raw"], {"hp": 1.0, "lp": 35.0}],
-                ["epoch", "epoch", ["flt"], {"duration": 2.0}]
-            ]
-        },
+        # # 5. 用于 entropy 提取的最小 pipeline（仅至 epoch）
+        # {
+        #     "shortname": "entropy_eval_base",
+        #     "description": "Minimal pipeline ending with epochs (used for entropy fxdef)",
+        #     "source": "test",
+        #     "chanset": "10/20",
+        #     "fs": 250,
+        #     "hp": 1.0,
+        #     "lp": 35.0,
+        #     "epoch": 2.0,
+        #     "sample_rating": 7.0,
+        #     "steps": [
+        #         ["flt", "filter", ["raw"], {"hp": 1.0, "lp": 35.0}],
+        #         ["epoch", "epoch", ["flt"], {"duration": 2.0}]
+        #     ]
+        # },
     ]
 
     for p in pipelines:

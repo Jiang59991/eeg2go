@@ -74,3 +74,4 @@ def add_featureset(featureset_spec):
     conn.close()
 
     logger.info(f"Feature set '{set_name}' (id={set_id}) registered with {len(fxdef_ids)} features.")
+    return set_id

@@ -268,15 +268,52 @@ def epoch(raw, duration=5.0):
     return epochs
 
 @auto_gc
-def epoch_by_event(raw, event_type, tmin, tmax, recording_id):
+def epoch_by_event(
+    raw,
+    event_type,
+    recording_id,
+    subepoch_len=10.0,
+    drop_partial=True,
+    min_overlap=0.8,
+    include_values=None,
+):
+    """
+    根据数据库 `recording_events` 中的事件区间，切分为定长子窗并返回 mne.Epochs。
+
+    典型用法：基于睡眠阶段（30s hypnogram），将每段阶段切成 10s 无重叠子窗。
+
+    Parameters
+    ----------
+    raw : mne.io.Raw
+        连续 EEG。
+    event_type : str
+        事件类型（如 'sleep_stage'）。
+    recording_id : int
+        对应 `recordings.id`。
+    subepoch_len : float
+        子窗长度（秒）。默认 10.0。
+    drop_partial : bool
+        True 时仅保留完全落入事件区间的子窗；False 时允许部分重叠，配合 `min_overlap` 使用。
+    min_overlap : float
+        当 `drop_partial=False` 时，子窗与事件区间的最小重叠比例阈值（0-1）。
+    include_values : list[str] or None
+        仅保留这些取值（例如 ['W','N1','N2','N3','REM']）。None 表示不过滤。
+
+    Returns
+    -------
+    mne.Epochs
+        每个子窗一个 epoch，`event_id` 对应事件 value 的枚举映射。
+    """
+
     if recording_id is None:
         raise ValueError("recording_id must be provided")
 
+    # 读取该 recording 的事件（包含 onset / duration / value）
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute(
-        "SELECT DISTINCT value FROM recording_events WHERE recording_id = ? AND event_type = ?",
-        (recording_id, event_type)
+        "SELECT onset, duration, value FROM recording_events WHERE recording_id = ? AND event_type = ? ORDER BY onset",
+        (recording_id, event_type),
     )
     rows = c.fetchall()
     conn.close()
@@ -284,39 +321,87 @@ def epoch_by_event(raw, event_type, tmin, tmax, recording_id):
     if not rows:
         raise ValueError(f"No events of type '{event_type}' found for recording {recording_id}")
 
-    event_values = [row[0] for row in rows]
-    try:
-        event_ids = [int(v) for v in event_values]
-    except Exception:
-        raise ValueError(f"Event values must be convertible to int: {event_values}")
+    sfreq = float(raw.info["sfreq"])
 
-    event_id_map = {f"{event_type}_{v}": v for v in event_ids}
+    # 可选按取值过滤（例如仅保留 AASM 五阶段）
+    if include_values is not None:
+        include_values_set = set([str(v) for v in include_values])
+        rows = [r for r in rows if str(r[2]) in include_values_set]
+        if not rows:
+            raise ValueError(
+                f"No events left after filtering include_values={include_values} for recording {recording_id}"
+            )
 
-    events = mne.find_events(raw, verbose='ERROR')
-    if len(events) == 0:
-        raise ValueError("No events found in the recording.")
+    # 生成子窗事件（样本点）
+    # events: (n_events, 3) 数组，第三列为整数标签；event_id 为 {label: code}
+    value_to_code = {}
+    events_list = []
 
-    # 检查 event_id 是否存在
-    available_event_ids = np.unique(events[:, 2])
-    for name, val in event_id_map.items():
-        if val not in available_event_ids:
-            logger.warning(f"Event ID {val} ({name}) not found in recording. Available: {available_event_ids}")
+    for onset, duration, value in rows:
+        try:
+            onset = float(onset)
+            duration = float(duration) if duration is not None else 0.0
+        except Exception:
+            continue
 
-    # 创建 epochs（不进行 baseline 或 reject）
+        if duration <= 0:
+            # 无持续时长就跳过（睡眠阶段通常有 duration=30s）
+            continue
+
+        window_start = onset
+        window_end = onset + duration
+
+        # 按 subepoch_len 滚动切分
+        t = window_start
+        while t + 1e-9 < window_end:  # 容忍浮点边界
+            candidate_start = t
+            candidate_end = t + subepoch_len
+
+            # 计算与事件区间的重叠
+            inter_start = max(candidate_start, window_start)
+            inter_end = min(candidate_end, window_end)
+            overlap = max(0.0, inter_end - inter_start)
+
+            keep = False
+            if drop_partial:
+                keep = (candidate_start >= window_start - 1e-9) and (candidate_end <= window_end + 1e-9)
+            else:
+                keep = (overlap / subepoch_len) >= float(min_overlap)
+
+            if keep:
+                if value not in value_to_code:
+                    value_to_code[value] = len(value_to_code) + 1  # 从1开始编码
+                code = value_to_code[value]
+
+                sample = int(round(candidate_start * sfreq))
+                events_list.append([sample, 0, code])
+
+            # 子窗无重叠滚动
+            t += subepoch_len
+
+    if len(events_list) == 0:
+        raise ValueError("No sub-epochs generated from events. Check parameters and event table.")
+
+    events = np.array(events_list, dtype=int)
+    event_id = {str(k): v for k, v in value_to_code.items()}
+
+    # 用 mne.Epochs 切分，tmin=0, tmax=subepoch_len
     epochs = mne.Epochs(
         raw,
         events,
-        event_id=event_id_map,
-        tmin=tmin,
-        tmax=tmax,
+        event_id=event_id,
+        tmin=0.0,
+        tmax=subepoch_len,
         baseline=None,
         reject=None,
         flat=None,
         preload=True,
-        verbose='ERROR'
+        verbose='ERROR',
     )
 
-    logger.info(f"Created {len(epochs)} epochs from {len(events)} events using event_ids={event_id_map}")
+    logger.info(
+        f"Created {len(epochs)} sub-epochs (len={subepoch_len}s) from {len(rows)} '{event_type}' events; labels={list(event_id.keys())}"
+    )
 
     return epochs
 

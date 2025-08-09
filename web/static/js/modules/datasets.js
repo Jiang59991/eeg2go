@@ -245,8 +245,192 @@ export function updateButtonStates() {
     // Button states are now handled by individual views
 }
 
+// 查看某条 recording 的特征值并显示到模态框
+export function viewFeatureValues(recordingId) {
+    if (!recordingId) {
+        console.error('viewFeatureValues called without recordingId');
+        return;
+    }
+
+    const reqFeatureValues = fetch(`/api/feature_values?recording_id=${recordingId}`).then(r => r.json());
+    const reqRecording = fetch(`/api/recording_details?recording_id=${recordingId}`).then(r => r.json());
+    const reqMetadata = fetch(`/api/recording_metadata?recording_id=${recordingId}`).then(r => r.json());
+    const reqEvents = fetch(`/api/recording_events?recording_id=${recordingId}`).then(r => r.json());
+
+    Promise.all([reqRecording, reqMetadata, reqEvents, reqFeatureValues])
+        .then(([rec, meta, events, data]) => {
+            if (data && data.error) {
+                showStatus(`Error: ${data.error}`, 'error');
+                return;
+            }
+
+            const container = document.getElementById('featureValuesContent');
+            if (!container) {
+                console.error('featureValuesContent element not found');
+                return;
+            }
+
+            const formatNum = (v, digits) => (typeof v === 'number' ? v.toFixed(digits) : (v ?? '-'));
+
+            // 概览
+            const overviewHtml = (rec && !rec.error) ? `
+                <div class="card mb-3">
+                    <div class="card-header"><strong>Recording Overview</strong></div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <table class="table table-sm">
+                                    <tr><td><strong>ID</strong></td><td>${rec.id ?? '-'}</td></tr>
+                                    <tr><td><strong>Dataset</strong></td><td>${rec.dataset_name ?? '-'}</td></tr>
+                                    <tr><td><strong>Subject</strong></td><td>${rec.subject_id ?? '-'}</td></tr>
+                                    <tr><td><strong>Filename</strong></td><td>${rec.filename ?? '-'}</td></tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <table class="table table-sm">
+                                    <tr><td><strong>Duration</strong></td><td>${formatNum(rec.duration, 2)} ${typeof rec.duration === 'number' ? 's' : ''}</td></tr>
+                                    <tr><td><strong>Channels</strong></td><td>${rec.channels ?? '-'}</td></tr>
+                                    <tr><td><strong>Sampling Rate</strong></td><td>${formatNum(rec.sampling_rate, 0)} ${typeof rec.sampling_rate === 'number' ? 'Hz' : ''}</td></tr>
+                                    <tr><td><strong>Age/Sex</strong></td><td>${rec.age ?? '-'} / ${rec.sex ?? '-'}</td></tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <small class="text-muted">Ref: ${rec.original_reference || '-'}; Type: ${rec.recording_type || '-'}; Manufacturer: ${rec.manufacturer || '-'}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ` : '';
+
+            // 元数据
+            const metaKeys = meta && typeof meta === 'object' ? Object.keys(meta) : [];
+            const metadataHtml = metaKeys.length > 0 ? `
+                <div class="card mb-3">
+                    <div class="card-header"><strong>Recording Metadata</strong></div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <tbody>
+                                    ${metaKeys.map(k => `<tr><td><strong>${k}</strong></td><td>${meta[k] ?? '-'}</td></tr>`).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            ` : '';
+
+            // 事件
+            const eventsArr = Array.isArray(events) ? events : [];
+            const eventsHtml = `
+                <div class="card mb-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <strong>Events</strong>
+                        <span class="text-muted">${eventsArr.length} event(s)</span>
+                    </div>
+                    <div class="card-body">
+                        ${eventsArr.length === 0 ? '<div class="text-muted">No events</div>' : `
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Onset (s)</th>
+                                        <th>Duration (s)</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${eventsArr.map(ev => `
+                                        <tr>
+                                            <td>${ev.event_type ?? '-'}</td>
+                                            <td>${ev.onset ?? '-'}</td>
+                                            <td>${ev.duration ?? '-'}</td>
+                                            <td>${ev.value ?? '-'}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>`}
+                    </div>
+                </div>
+            `;
+
+            // 特征值
+            const entries = data ? Object.entries(data) : [];
+            if (entries.length === 0) {
+                container.innerHTML = overviewHtml + metadataHtml + eventsHtml + '<div class="text-muted">No feature values available for this recording.</div>';
+            } else {
+                const rowsHtml = entries.map(([shortname, info]) => {
+                    const dim = info && info.dim ? info.dim : '-';
+                    const shape = info && Array.isArray(info.shape) && info.shape.length > 0 ? info.shape.join('×') : '-';
+                    const notes = info && info.notes ? info.notes : '';
+                    let valueRendered = '<span class="text-muted">None</span>';
+                    if (info && info.value !== undefined && info.value !== null) {
+                        if (typeof info.value === 'object') {
+                            try {
+                                valueRendered = `<pre class=\"mb-0\">${JSON.stringify(info.value, null, 2)}</pre>`;
+                            } catch (e) {
+                                valueRendered = String(info.value);
+                            }
+                        } else {
+                            valueRendered = String(info.value);
+                        }
+                    }
+                    return `
+                        <tr>
+                            <td><strong>${shortname}</strong></td>
+                            <td>${dim}</td>
+                            <td>${shape}</td>
+                            <td style=\"max-width: 600px;\">${valueRendered}</td>
+                            <td>${notes}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+                container.innerHTML = overviewHtml + metadataHtml + eventsHtml + `
+                    <div class=\"card\">
+                        <div class=\"card-header\"><strong>Feature Values Details</strong></div>
+                        <div class=\"card-body\">
+                        <div class=\"table-responsive\">
+                            <table class=\"table table-sm align-middle\">
+                                <thead>
+                                    <tr>
+                                        <th>Feature</th>
+                                        <th>Dim</th>
+                                        <th>Shape</th>
+                                        <th>Value</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${rowsHtml}
+                                </tbody>
+                            </table>
+                        </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            const modalEl = document.getElementById('featureValuesModal');
+            if (modalEl && window.bootstrap && typeof window.bootstrap.Modal === 'function') {
+                const modal = new window.bootstrap.Modal(modalEl);
+                modal.show();
+            } else if (modalEl) {
+                modalEl.style.display = 'block';
+            }
+        })
+        .catch(err => {
+            console.error('Failed to load feature values:', err);
+            showStatus('Failed to load feature values', 'error');
+        });
+}
+
 // 导出到全局作用域
 window.showDatasets = showDatasets;
 window.showRecordings = showRecordings;
 window.selectAllRecordings = selectAllRecordings;
 window.clearSelection = clearSelection;
+window.viewFeatureValues = viewFeatureValues;

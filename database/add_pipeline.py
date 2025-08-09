@@ -72,9 +72,11 @@ STEP_REGISTRY = {
     },
     "epoch_by_event": {
         "params": {
-            "event_type": {"type": "str", "required": True, "description": "Event type to use for epoching, e.g., 'seizure', 'spindle', 'normal'"},
-            "tmin": {"type": "float", "min": -5.0, "max": 0.0, "default": -0.2, "required": True},
-            "tmax": {"type": "float", "min": 0.1, "max": 10.0, "default": 1.0, "required": True}
+            "event_type": {"type": "str", "required": True, "description": "Event type (e.g. 'sleep_stage')"},
+            "subepoch_len": {"type": "float", "min": 1.0, "max": 60.0, "default": 10.0, "required": True},
+            "drop_partial": {"type": "bool", "default": True, "required": False},
+            "min_overlap": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.8, "required": False},
+            "include_values": {"type": "list", "required": False}
         },
         "input_type": "raw",
         "output_type": "epochs"
@@ -136,9 +138,10 @@ def validate_pipeline(pipeline_steps, step_registry=STEP_REGISTRY):
     func_list = [step[1] for step in pipeline_steps]
 
     # 检查 epoch 必须存在且唯一
-    if func_list.count("epoch") == 0:
+    num_epoch = func_list.count("epoch") + func_list.count("epoch_by_event")
+    if num_epoch == 0:
         raise ValueError("Pipeline must contain an 'epoch' step.")
-    if func_list.count("epoch") > 1:
+    if num_epoch > 1:
         raise ValueError("Pipeline can only contain one 'epoch' step.")
     
     if "reject_high_amplitude" in func_list and "zscore" in func_list and func_list.index("reject_high_amplitude") > func_list.index("zscore"):
@@ -163,6 +166,22 @@ def validate_pipeline(pipeline_steps, step_registry=STEP_REGISTRY):
                         raise ValueError(f"Param '{pname}' for step '{func}' too small")
                     if "max" in pinfo and v > pinfo["max"]:
                         raise ValueError(f"Param '{pname}' for step '{func}' too large")
+                elif pinfo["type"] == "int":
+                    v = int(v)
+                    if "min" in pinfo and v < pinfo["min"]:
+                        raise ValueError(f"Param '{pname}' for step '{func}' too small")
+                    if "max" in pinfo and v > pinfo["max"]:
+                        raise ValueError(f"Param '{pname}' for step '{func}' too large")
+                elif pinfo["type"] == "bool":
+                    if isinstance(v, str):
+                        if v.lower() in ("1", "true", "yes"):
+                            v = True
+                        elif v.lower() in ("0", "false", "no"):
+                            v = False
+                        else:
+                            raise ValueError(f"Param '{pname}' for step '{func}' expects bool")
+                    else:
+                        v = bool(v)
                     
         # 特殊检查：filter步骤的lp和hp参数大小关系
         if func == "filter":
@@ -284,6 +303,9 @@ def infer_pipeline_params(steps):
                 params["lp"] = float(step_params["lp"])
         if func == "epoch" and "duration" in step_params:
             params["epoch"] = float(step_params["duration"])
+            params["output_type"] = "epochs"
+        if func == "epoch_by_event" and "subepoch_len" in step_params:
+            params["epoch"] = float(step_params["subepoch_len"])
             params["output_type"] = "epochs"
     # 没有resample时fs为None（默认）
     return params

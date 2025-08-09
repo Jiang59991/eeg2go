@@ -89,11 +89,13 @@ except Exception as e:
 module_scripts = [
     "database.init_db",
     # "database.import_harvard_demo",
+    "database.import_sleep_edfx",
     "database.default_pipelines",
-    # "database.default_fxdefs",
-    # "database.default_featuresets",
+    "database.default_fxdefs",
+    "database.default_featuresets",
     # "setup_age_correlation",
-    "database.create_experiment1_featureset"
+    "database.create_experiment1_featureset",
+    "database.create_experiment2_featureset"
 ]
 
 for module in module_scripts:

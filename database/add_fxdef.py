@@ -171,7 +171,7 @@ def _add_single_fxdef(cursor, fxdef_spec, chan, feature_type):
     """Add a single feature definition"""
     func = fxdef_spec["func"]
     pipeid = fxdef_spec["pipeid"]
-    shortname = fxdef_spec["shortname"]
+    shortname = fxdef_spec["shortname"] + "_" + chan
     params = fxdef_spec.get("params", {})
     dim = fxdef_spec.get("dim", "1d")
     ver = fxdef_spec.get("ver", "v1")

@@ -160,6 +160,53 @@ def get_recordings():
     conn.close()
     return jsonify([dict(recording) for recording in recordings])
 
+@app.route('/api/recording_details')
+def get_recording_details():
+    """Get detailed info for a single recording"""
+    recording_id = request.args.get('recording_id', type=int)
+    if not recording_id:
+        return jsonify({'error': 'Missing required parameter: recording_id'}), 400
+    conn = get_db_connection()
+    recording = conn.execute('''
+        SELECT r.*, s.age, s.sex, d.name as dataset_name
+        FROM recordings r 
+        LEFT JOIN subjects s ON r.subject_id = s.subject_id 
+        LEFT JOIN datasets d ON r.dataset_id = d.id
+        WHERE r.id = ?
+    ''', (recording_id,)).fetchone()
+    conn.close()
+    if not recording:
+        return jsonify({'error': 'Recording not found'}), 404
+    return jsonify(dict(recording))
+
+@app.route('/api/recording_metadata')
+def get_recording_metadata():
+    """Get metadata for a recording (if available)"""
+    recording_id = request.args.get('recording_id', type=int)
+    if not recording_id:
+        return jsonify({'error': 'Missing required parameter: recording_id'}), 400
+    conn = get_db_connection()
+    meta = conn.execute('''
+        SELECT * FROM recording_metadata WHERE recording_id = ?
+    ''', (recording_id,)).fetchone()
+    conn.close()
+    return jsonify(dict(meta) if meta else {})
+
+@app.route('/api/recording_events')
+def get_recording_events():
+    """Get events for a recording (if any)"""
+    recording_id = request.args.get('recording_id', type=int)
+    if not recording_id:
+        return jsonify({'error': 'Missing required parameter: recording_id'}), 400
+    conn = get_db_connection()
+    events = conn.execute('''
+        SELECT * FROM recording_events 
+        WHERE recording_id = ?
+        ORDER BY onset ASC
+    ''', (recording_id,)).fetchall()
+    conn.close()
+    return jsonify([dict(e) for e in events])
+
 @app.route('/api/feature_sets')
 def get_feature_sets():
     """Get feature sets list"""

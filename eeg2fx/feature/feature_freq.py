@@ -54,17 +54,8 @@ def bandpower(epochs, chans=None, band="alpha"):
 
 @auto_gc
 def relative_power(epochs, chans=None, band="alpha"):
-    """
-    Compute relative band power: band power / total power (1–45Hz)
-    """
-    band_freqs = {
-        "delta": (1, 4),
-        "theta": (4, 8),
-        "alpha": (8, 13),
-        "beta": (13, 30),
-        "gamma": (30, 45)
-    }
-    fmin_band, fmax_band = band_freqs.get(band, (8, 13))
+    band_freqs = {"delta": (1,4), "theta": (4,8), "alpha": (8,13), "beta": (13,30)}
+    fmin_band, fmax_band = band_freqs.get(band, (8,13))
     fmin_total, fmax_total = 1, 45
 
     data = epochs.get_data()
@@ -74,40 +65,26 @@ def relative_power(epochs, chans=None, band="alpha"):
 
     if chans is None:
         chans = raw_ch_names
-    else:
-        # Ensure chans is in list format
-        if isinstance(chans, str):
-            chans = [chans]
+    elif isinstance(chans, str):
+        chans = [chans]
 
-    values = []
-    valid_chans = []
-
+    values, valid_chans = [], []
     for ch in chans:
         if ch in raw_ch_names:
             idx = raw_ch_names.index(ch)
-            
-            # Calculate PSD
-            psds, _ = psd_array_welch(data[:, idx, :], sfreq=sfreq, fmin=fmin_band, fmax=fmax_band, verbose='ERROR')
-            
-            # Calculate normalized PSD
-            psd_sum = np.sum(psds, axis=1, keepdims=True)
-            psd_sum[psd_sum == 0] = 1e-12
-            psds_norm = psds / psd_sum
-            
-            # Calculate entropy
-            ent = scipy_entropy(psds_norm, base=2, axis=1)
-            
-            values.append(ent)
+            psd_band, _ = psd_array_welch(data[:, idx, :], sfreq=sfreq, fmin=fmin_band, fmax=fmax_band, verbose='ERROR')
+            psd_total, _ = psd_array_welch(data[:, idx, :], sfreq=sfreq, fmin=fmin_total, fmax=fmax_total, verbose='ERROR')
+            p_band = np.sum(psd_band, axis=1)
+            p_total = np.sum(psd_total, axis=1)
+            rel = np.where(p_total > 0, p_band / p_total, np.nan)
+            values.append(rel)
             valid_chans.append(ch)
         else:
             values.append(np.full(n_epochs, np.nan))
             valid_chans.append(ch)
 
     values = np.stack(values, axis=1)
-    
-    result = wrap_structured_result(values, epochs, valid_chans)
-    
-    return result
+    return wrap_structured_result(values, epochs, valid_chans)
 
 @auto_gc
 def spectral_entropy(epochs, chans=None):
