@@ -321,37 +321,63 @@ export function viewFeatureValues(recordingId) {
                 </div>
             ` : '';
 
-            // 事件
+            // 事件（摘要 + 可展开详情）
             const eventsArr = Array.isArray(events) ? events : [];
+            const eventCounts = eventsArr.reduce((acc, ev) => {
+                const key = ev && ev.event_type ? ev.event_type : 'unknown';
+                acc[key] = (acc[key] || 0) + 1;
+                return acc;
+            }, {});
+            const onsetValues = eventsArr.map(e => Number(e.onset)).filter(v => Number.isFinite(v));
+            const durationValues = eventsArr.map(e => Number(e.duration)).filter(v => Number.isFinite(v));
+            const earliestOnset = onsetValues.length ? Math.min(...onsetValues) : null;
+            const latestOnset = onsetValues.length ? Math.max(...onsetValues) : null;
+            const totalDuration = durationValues.length ? durationValues.reduce((a, b) => a + b, 0) : null;
+            const typesSummary = Object.keys(eventCounts).length
+                ? Object.entries(eventCounts)
+                    .map(([t, c]) => `<span class=\"badge bg-secondary me-1\">${t}: ${c}</span>`)
+                    .join(' ')
+                : '<span class=\"text-muted\">No types</span>';
+
+            const eventsDetailsId = `events-details-${recordingId}`;
+            const eventsToggleId = `events-toggle-${recordingId}`;
             const eventsHtml = `
-                <div class="card mb-3">
-                    <div class="card-header d-flex justify-content-between align-items-center">
+                <div class=\"card mb-3\">
+                    <div class=\"card-header d-flex justify-content-between align-items-center\">
                         <strong>Events</strong>
-                        <span class="text-muted">${eventsArr.length} event(s)</span>
+                        <div>
+                            <span class=\"text-muted me-2\">${eventsArr.length} event(s)</span>
+                            ${eventsArr.length ? `<button id=\"${eventsToggleId}\" class=\"btn btn-sm btn-outline-secondary\" onclick=\"(function(btn){var el=document.getElementById('${eventsDetailsId}');if(el){var hidden=el.classList.toggle('d-none');btn.textContent=hidden?'Show details':'Hide details';}})(this)\">Show details</button>` : ''}
+                        </div>
                     </div>
-                    <div class="card-body">
-                        ${eventsArr.length === 0 ? '<div class="text-muted">No events</div>' : `
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Type</th>
-                                        <th>Onset (s)</th>
-                                        <th>Duration (s)</th>
-                                        <th>Value</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${eventsArr.map(ev => `
+                    <div class=\"card-body\">
+                        ${eventsArr.length === 0 ? '<div class=\"text-muted\">No events</div>' : `
+                        <div class=\"mb-2\"><strong>By Type:</strong> ${typesSummary}</div>
+                        <div class=\"mb-2\"><strong>Onset Range:</strong> ${earliestOnset !== null ? earliestOnset.toFixed(2) : '-'} ~ ${latestOnset !== null ? latestOnset.toFixed(2) : '-'}</div>
+                        <div class=\"mb-3\"><strong>Total Duration:</strong> ${totalDuration !== null ? totalDuration.toFixed(2) + ' s' : '-'}</div>
+                        <div id=\"${eventsDetailsId}\" class=\"d-none\">
+                            <div class=\"table-responsive\">
+                                <table class=\"table table-sm\">
+                                    <thead>
                                         <tr>
-                                            <td>${ev.event_type ?? '-'}</td>
-                                            <td>${ev.onset ?? '-'}</td>
-                                            <td>${ev.duration ?? '-'}</td>
-                                            <td>${ev.value ?? '-'}</td>
+                                            <th>Type</th>
+                                            <th>Onset (s)</th>
+                                            <th>Duration (s)</th>
+                                            <th>Value</th>
                                         </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        ${eventsArr.map(ev => `
+                                            <tr>
+                                                <td>${ev.event_type ?? '-'}</td>
+                                                <td>${Number.isFinite(Number(ev.onset)) ? Number(ev.onset).toFixed(2) : '-'}</td>
+                                                <td>${Number.isFinite(Number(ev.duration)) ? Number(ev.duration).toFixed(2) : '-'}</td>
+                                                <td>${ev.value ?? '-'}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>`}
                     </div>
                 </div>

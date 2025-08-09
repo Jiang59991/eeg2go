@@ -34,6 +34,11 @@ def main():
         default=None,
         help="Directory for PBS stdout/stderr (OU/ER). If not set, OU/ER go to default (cluster-managed).",
     )
+    parser.add_argument(
+        "--discard-output",
+        action="store_true",
+        help="Do not write PBS stdout/stderr files (submit with -o /dev/null -e /dev/null)",
+    )
     args = parser.parse_args()
 
     dataset_id = args.dataset
@@ -76,8 +81,10 @@ def main():
         ]
         if args.queue:
             cmd.extend(["-q", args.queue])
-        # 可选：控制PBS的stdout/stderr输出目录（避免产生过多文件时可不设置）
-        if args.pbs_stdout_dir:
+        # 可选：控制PBS的stdout/stderr输出目录
+        if args.discard_output:
+            cmd.extend(["-o", "/dev/null", "-e", "/dev/null"])
+        elif args.pbs_stdout_dir:
             cmd.extend(["-o", args.pbs_stdout_dir, "-e", args.pbs_stdout_dir])
 
         cmd.append("run_features.pbs")

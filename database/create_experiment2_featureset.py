@@ -14,8 +14,8 @@ DB_PATH = os.path.join(os.path.dirname(__file__), "eeg2go.db")
 # Baseline pipeline for Experiment 2 (sleep-stage-aware 10s subepochs)
 PIPE_SHORTNAME = "P0_sleep10s_hp"
 
-# Channels and bands
-CHANS = ["F3", "F4", "C3", "C4", "O1", "O2"]
+# Channels and bands (Sleep-EDFx uses Fpz-Cz and Pz-Oz)
+CHANS = ["Fpz-Cz", "Pz-Oz"]
 BANDS = ["delta", "theta", "alpha", "beta"]
 
 # Wide feature list (22 total: 11 time + 11 freq)
@@ -166,9 +166,8 @@ def create_experiment2_featureset() -> Dict[str, int]:
     fs_id = add_featureset({
         "name": fs_name,
         "description": (
-            "Experiment 2: 10s subepochs aligned to sleep stages; "
-            "features = 4 relative bands × 6 chans + 22 wide features × 6 chans. "
-            "Downstream stats will aggregate across channels by per-feature median at stage level."
+            "Experiment 2: Sleep-EDFx two-channel (Fpz-Cz, Pz-Oz); 10s subepochs aligned to sleep stages; "
+            "features = 4 relative bands × 2 chans + 22 wide features (median over 2 chans)."
         ),
         "fxdef_ids": fxids,
     })

@@ -7,6 +7,7 @@ from datetime import datetime
 import tempfile
 import zipfile
 import logging
+import math
 from eeg2fx.featureset_fetcher import run_feature_set
 from eeg2fx.featureset_grouping import load_fxdefs_for_set
 from .utils.pipeline_visualizer import get_pipeline_visualization_data
@@ -97,6 +98,24 @@ def get_db_connection():
     conn = sqlite3.connect(DATABASE_PATH)
     conn.row_factory = sqlite3.Row
     return conn
+
+def sanitize_for_json(obj):
+    """Recursively convert NaN/Infinity to None and non-serializable to str for strict JSON."""
+    if isinstance(obj, float):
+        if math.isnan(obj) or math.isinf(obj):
+            return None
+        return obj
+    if obj is None or isinstance(obj, (int, str, bool)):
+        return obj
+    if isinstance(obj, list):
+        return [sanitize_for_json(x) for x in obj]
+    if isinstance(obj, dict):
+        return {k: sanitize_for_json(v) for k, v in obj.items()}
+    # Fallback for other types
+    try:
+        return str(obj)
+    except Exception:
+        return None
 
 def infer_pipeline_params(steps):
     params = {
@@ -298,10 +317,29 @@ def get_feature_values():
         ''', (fxdef_id, recording_id)).fetchone()
         
         if value:
+            # 解析 value 与 shape，容错并清洗 NaN/Inf
+            parsed_value = None
+            raw_value = value['value']
+            if raw_value is not None and raw_value != 'null':
+                try:
+                    parsed_value = json.loads(raw_value)
+                except Exception:
+                    # 如果数据库中并非严格JSON，保留为原始字符串
+                    parsed_value = raw_value
+            parsed_value = sanitize_for_json(parsed_value)
+
+            parsed_shape = []
+            if value['shape']:
+                try:
+                    parsed_shape = json.loads(value['shape'])
+                except Exception:
+                    parsed_shape = []
+            parsed_shape = sanitize_for_json(parsed_shape)
+
             feature_values[fxdef['shortname']] = {
-                'value': json.loads(value['value']) if value['value'] != 'null' else None,
+                'value': parsed_value,
                 'dim': value['dim'],
-                'shape': json.loads(value['shape']) if value['shape'] else [],
+                'shape': parsed_shape,
                 'notes': value['notes']
             }
         else:
