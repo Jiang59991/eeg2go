@@ -86,12 +86,28 @@ def load_recording(recording_id):
     return raw
 
 @auto_gc
-def filter(raw, hp, lp):
-    if hp is None or lp is None:
-        raise ValueError("High-pass and low-pass cutoff frequencies must be explicitly provided.")
-    if lp <= hp:
-        raise ValueError(f"Low-pass frequency ({lp}) must be greater than high-pass ({hp}).")
-    return raw.copy().filter(l_freq=hp, h_freq=lp, fir_design='firwin', verbose='ERROR')
+def filter(raw, hp=None, lp=None):
+    out = raw.copy()
+
+    hp = None if (hp is None or hp <= 0) else float(hp)
+    lp = None if (lp is None or lp <= 0) else float(lp)
+
+    if hp is None and lp is None:
+        return out
+
+    sfreq = float(out.info["sfreq"])
+    nyq = sfreq / 2.0
+
+    if hp is not None and hp >= nyq:
+        raise ValueError(f"High-pass ({hp} Hz) must be < Nyquist ({nyq} Hz).")
+    if lp is not None and lp >= nyq:
+        raise ValueError(f"Low-pass ({lp} Hz) must be < Nyquist ({nyq} Hz).")
+    if hp is not None and lp is not None and lp <= hp:
+        raise ValueError(f"Low-pass ({lp}) must be greater than high-pass ({hp}).")
+
+    out.filter(l_freq=hp, h_freq=lp, fir_design='firwin', verbose='ERROR')
+
+    return out
 
 @auto_gc
 def notch_filter(raw, freq):
@@ -171,19 +187,74 @@ def ica(raw, n_components, detect_artifacts):
             EEG data after ICA cleaning (if any components excluded).
     """
 
-    if isinstance(n_components, int) and n_components > raw.info['nchan']:
-        raise ValueError(f"n_components={n_components} exceeds number of channels.")
+    if isinstance(n_components, int):
+        if n_components <= 0:
+            raise ValueError("n_components must be positive.")
+        if n_components > raw.info['nchan']:
+            raise ValueError(f"n_components={n_components} exceeds number of channels ({raw.info['nchan']}).")
+    elif isinstance(n_components, float):
+        if not (0.0 < n_components <= 1.0):
+            raise ValueError("When float, n_components must be in (0, 1].")
+    else:
+        raise TypeError("n_components must be int or float.")
     
-    ica_inst = mne.preprocessing.ICA(n_components=n_components, random_state=97, max_iter='auto')
+    # Fit ICA
+    ica_inst = mne.preprocessing.ICA(
+        n_components=n_components,
+        random_state=97,
+        max_iter='auto'
+    )
     ica_inst.fit(raw)
 
-    exclude = []
-    if detect_artifacts == "eog":
-        exclude, _ = ica_inst.find_bads_eog(raw)
-    elif detect_artifacts == "ecg":
-        exclude, _ = ica_inst.find_bads_ecg(raw)
+    # Helper: try EOG with fallback proxies if no EOG channel exists
+    def _find_bads_eog_with_fallback(ica_obj, raw_obj):
+        eog_picks = mne.pick_types(raw_obj.info, eeg=False, eog=True)
+        if len(eog_picks) > 0:
+            eog_inds, eog_scores = ica_obj.find_bads_eog(raw_obj)
+            return eog_inds, eog_scores
 
-    raw_clean = ica_inst.apply(raw.copy(), exclude=exclude)
+        # Fallback: use frontal proxies if available
+        proxies = {'fp1', 'fp2', 'fpz'}
+        ch_lower = {ch.lower(): ch for ch in raw_obj.ch_names}
+        proxy_name = next((ch_lower[k] for k in proxies if k in ch_lower), None)
+        if proxy_name is not None:
+            eog_inds, eog_scores = ica_obj.find_bads_eog(raw_obj, ch_name=proxy_name)
+            return eog_inds, eog_scores
+
+        # Nothing found / no proxies
+        return [], None
+
+    # Helper: ECG only if ECG channel exists (safer in EEG-only recordings)
+    def _find_bads_ecg_safe(ica_obj, raw_obj):
+        ecg_picks = mne.pick_types(raw_obj.info, eeg=False, ecg=True)
+        if len(ecg_picks) == 0:
+            return [], None
+        ecg_inds, ecg_scores = ica_obj.find_bads_ecg(raw_obj, method='correlation')
+        return ecg_inds, ecg_scores
+
+    mode = (detect_artifacts or "none").strip().lower()
+    exclude = set()
+
+    if mode == "none":
+        pass
+    elif mode == "eog":
+        inds, _ = _find_bads_eog_with_fallback(ica_inst, raw)
+        exclude.update(inds)
+    elif mode == "ecg":
+        inds, _ = _find_bads_ecg_safe(ica_inst, raw)
+        exclude.update(inds)
+    elif mode == "auto":
+        eog_inds, _ = _find_bads_eog_with_fallback(ica_inst, raw)
+        ecg_inds, _ = _find_bads_ecg_safe(ica_inst, raw)
+        exclude.update(eog_inds)
+        exclude.update(ecg_inds)
+    else:
+        raise ValueError("detect_artifacts must be one of {'auto','eog','ecg','none'}.")
+
+    # Apply ICA (on a copy)
+    raw_clean = raw.copy()
+    if len(exclude) > 0:
+        ica_inst.apply(raw_clean, exclude=list(exclude))
 
     return raw_clean
 

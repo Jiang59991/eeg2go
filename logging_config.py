@@ -2,12 +2,17 @@ import logging
 import os
 from datetime import datetime
 
-# 日志目录和文件名
-LOG_DIR = os.path.join(os.path.dirname(__file__), 'logs')
+# 固定日志目录与文件名（用户要求固定为项目 logs 目录）
+LOG_DIR = '/rds/general/user/zj724/home/eeg2go/logs'
 os.makedirs(LOG_DIR, exist_ok=True)
 
-# 默认使用固定的日志文件名
-DEFAULT_LOG_FILE = os.path.join(LOG_DIR, 'eeg2go_default.log')
+# 允许通过环境变量强制指定完整日志文件路径（用于“每次提交一个批次日志”）
+forced_log_file = os.environ.get('EEG2GO_LOG_FILE')
+if forced_log_file:
+    DEFAULT_LOG_FILE = forced_log_file
+else:
+    # 固定文件名（不随 JobID 变化）
+    DEFAULT_LOG_FILE = os.path.join(LOG_DIR, 'eeg2go_default.log')
 
 # 日志格式
 LOG_FORMAT = '[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s'
@@ -17,15 +22,20 @@ DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 logger = logging.getLogger('eeg2go')
 logger.setLevel(logging.INFO)
 
-# 文件Handler - 使用固定文件名
-file_handler = logging.FileHandler(DEFAULT_LOG_FILE, encoding='utf-8')
-file_handler.setFormatter(logging.Formatter(LOG_FORMAT, datefmt=DATE_FORMAT))
-logger.addHandler(file_handler)
+# 允许通过环境变量禁用文件日志（例如在PBS作业中避免每个作业产生日志文件）
+DISABLE_FILE_LOG = os.environ.get('EEG2GO_NO_FILE_LOG', '').lower() in ('1', 'true', 'yes')
 
-# 控制台Handler
-console_handler = logging.StreamHandler()
-console_handler.setFormatter(logging.Formatter(LOG_FORMAT, datefmt=DATE_FORMAT))
-logger.addHandler(console_handler)
+# 避免重复添加handler（某些执行环境会多次导入模块）
+if not logger.handlers:
+    if not DISABLE_FILE_LOG:
+        file_handler = logging.FileHandler(DEFAULT_LOG_FILE, encoding='utf-8')
+        file_handler.setFormatter(logging.Formatter(LOG_FORMAT, datefmt=DATE_FORMAT))
+        logger.addHandler(file_handler)
+
+    # 控制台Handler（会写到stdout/stderr）
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(logging.Formatter(LOG_FORMAT, datefmt=DATE_FORMAT))
+    logger.addHandler(console_handler)
 
 # 可选：抑制mne和其他第三方库的冗余输出
 try:

@@ -88,11 +88,12 @@ except Exception as e:
 # ====== 继续执行初始化脚本 ======
 module_scripts = [
     "database.init_db",
-    "database.import_harvard_demo",
+    # "database.import_harvard_demo",
     "database.default_pipelines",
-    "database.default_fxdefs",
-    "database.default_featuresets",
-    "setup_age_correlation"
+    # "database.default_fxdefs",
+    # "database.default_featuresets",
+    # "setup_age_correlation",
+    "database.create_experiment1_featureset"
 ]
 
 for module in module_scripts:

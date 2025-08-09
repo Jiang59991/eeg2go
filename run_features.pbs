@@ -3,18 +3,30 @@
 #PBS -l select=1:ncpus=4:mem=16gb
 #PBS -l walltime=02:00:00
 #PBS -j oe
-#PBS -o $PBS_O_WORKDIR/logs/tmp.log
 
 cd $PBS_O_WORKDIR
-mkdir -p logs
-
-exec > logs/eeg_features_${PBS_JOBID}.log 2>&1
 
 echo "Job ID: $PBS_JOBID"
 echo "Start time: $(date)"
 echo "Running in: $(pwd)"
 
 source ~/miniconda/etc/profile.d/conda.sh
-conda activate eeg2go_env
+conda activate eeg2go
 
-python -m feature_mill.feature_matrix --dataset 1 --featureset 2 --num-workers 4
+# 导入从 qsub -v 传入的 EEG2GO_LOG_FILE（若有），让 Python logger 与批次日志对齐
+if [ -n "$EEG2GO_LOG_FILE" ]; then
+  export EEG2GO_LOG_FILE
+fi
+
+# If per-recording env vars are provided, run single-recording execution; otherwise fallback to dataset-level
+if [ -n "$RECORDING_ID" ] && [ -n "$FEATURE_SET_ID" ]; then
+  echo "Running per-recording: recording=$RECORDING_ID, feature_set=$FEATURE_SET_ID"
+  python -m tools.run_feature_for_recording --featureset "$FEATURE_SET_ID" --recording "$RECORDING_ID"
+else
+  echo "Running dataset-level fallback (no RECORDING_ID/FEATURE_SET_ID provided)"
+  # You may override these defaults when submitting without per-recording mode
+  : ${DATASET_ID:=1}
+  : ${FEATURE_SET_ID:=2}
+  : ${NUM_WORKERS:=4}
+  python -m feature_mill.feature_matrix --dataset "$DATASET_ID" --featureset "$FEATURE_SET_ID" --num-workers "$NUM_WORKERS"
+fi

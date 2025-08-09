@@ -84,7 +84,7 @@ def create_default_pipelines():
             "shortname": "entropy_eval_base",
             "description": "Minimal pipeline ending with epochs (used for entropy fxdef)",
             "source": "test",
-            "chanset": "minimal",
+            "chanset": "10/20",
             "fs": 250,
             "hp": 1.0,
             "lp": 35.0,
@@ -93,6 +93,82 @@ def create_default_pipelines():
             "steps": [
                 ["flt", "filter", ["raw"], {"hp": 1.0, "lp": 35.0}],
                 ["epoch", "epoch", ["flt"], {"duration": 2.0}]
+            ]
+        },
+    ]
+
+    for p in pipelines:
+        logger.info(f"Adding pipeline: {p['shortname']}")
+        add_pipeline(p)
+
+
+def create_experiment1_pipelines():
+    pipelines = [
+        {
+            "shortname": "P0_minimal_hp",
+            "description": "Minimal preprocessing baseline: resample -> 0.5 Hz high-pass -> epoch",
+            "source": "experiment1",
+            "chanset": "10/20",
+            "fs": 250.0,
+            "hp": 0.5,
+            "lp": 0,
+            "epoch": 10.0,
+            "sample_rating": 9.0,
+            "steps": [
+                ["resample", "resample", ["raw"], {"sfreq": 250.0}],
+                ["hp", "filter", ["resample"], {"hp": 0.5, "lp": 0}],
+                ["epoch", "epoch", ["hp"], {"duration": 10.0}]
+            ]
+        },
+        {
+            "shortname": "P1_hp_avg_reref",
+            "description": "Minimal + average rereferencing: resample -> 0.5 Hz HP -> reref(avg) -> epoch",
+            "source": "experiment1",
+            "chanset": "10/20",
+            "fs": 250.0,
+            "hp": 0.5,
+            "lp": 0,
+            "epoch": 10.0,
+            "sample_rating": 9.0,
+            "steps": [
+                ["resample", "resample", ["raw"], {"sfreq": 250.0}],
+                ["hp", "filter", ["resample"], {"hp": 0.5, "lp": 0}],
+                ["reref", "reref", ["hp"], {"method": "average"}],
+                ["epoch", "epoch", ["reref"], {"duration": 10.0}]
+            ]
+        },
+        {
+            "shortname": "P2_hp_notch50",
+            "description": "Minimal + 50 Hz notch: resample -> 0.5 Hz HP -> notch(50) -> epoch",
+            "source": "experiment1",
+            "chanset": "10/20",
+            "fs": 250.0,
+            "hp": 0.5,
+            "lp": 0,
+            "epoch": 10.0,
+            "sample_rating": 9.0,
+            "steps": [
+                ["resample", "resample", ["raw"], {"sfreq": 250.0}],
+                ["hp", "filter", ["resample"], {"hp": 0.5, "lp": 0}],
+                ["notch", "notch_filter", ["hp"], {"freq": 50.0}],
+                ["epoch", "epoch", ["notch"], {"duration": 10.0}]
+            ]
+        },
+        {
+            "shortname": "P3_hp_ica_auto",
+            "description": "Minimal + ICA auto artifact removal: resample -> 0.5 Hz HP -> ICA(auto) -> epoch",
+            "source": "experiment1",
+            "chanset": "10/20",
+            "fs": 250.0,
+            "hp": 0.5,
+            "lp": 0,
+            "epoch": 10.0,
+            "sample_rating": 9.0,
+            "steps": [
+                ["resample", "resample", ["raw"], {"sfreq": 250.0}],
+                ["hp", "filter", ["resample"], {"hp": 0.5, "lp": 0}],
+                ["ica", "ica", ["hp"], {"n_components": 20, "detect_artifacts": "auto"}],
+                ["epoch", "epoch", ["ica"], {"duration": 10.0}]
             ]
         }
     ]
@@ -103,3 +179,4 @@ def create_default_pipelines():
 
 if __name__ == "__main__":
     create_default_pipelines()
+    create_experiment1_pipelines()

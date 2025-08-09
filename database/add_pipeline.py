@@ -14,8 +14,8 @@ DB_PATH = "database/eeg2go.db"
 STEP_REGISTRY = {
     "filter": {
         "params": {
-            "hp": {"type": "float", "min": 0.1, "max": 100.0, "default": 1.0, "required": True},
-            "lp": {"type": "float", "min": 1.0, "max": 200.0, "default": 40.0, "required": True}
+            "hp": {"type": "float", "min": 0, "max": 100.0, "default": 1.0, "required": True},
+            "lp": {"type": "float", "min": 0, "max": 200.0, "default": 40.0, "required": True}
         },
         "input_type": "raw",
         "output_type": "raw"
@@ -51,7 +51,7 @@ STEP_REGISTRY = {
     "ica": {
         "params": {
             "n_components": {"type": "int", "min": 1, "max": 100, "default": 20, "required": True},
-            "detect_artifacts": {"type": "str", "required": True, "default": "none", "options": ["eog", "ecg", "none"]}
+            "detect_artifacts": {"type": "str", "required": True, "default": "none", "options": ["eog", "ecg", "auto","none"]}
         },
         "input_type": "raw",
         "output_type": "raw"
@@ -169,7 +169,7 @@ def validate_pipeline(pipeline_steps, step_registry=STEP_REGISTRY):
             if "lp" in params and "hp" in params:
                 lp_val = float(params["lp"])
                 hp_val = float(params["hp"])
-                if lp_val <= hp_val:
+                if lp_val > 0 and hp_val > 0 and lp_val <= hp_val:
                     raise ValueError(f"Filter step: low-pass frequency ({lp_val}) must be greater than high-pass frequency ({hp_val})")
         
     return True
