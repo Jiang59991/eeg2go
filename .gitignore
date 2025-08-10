@@ -8,3 +8,4 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+outputs/exp2/exp2_epoch_matrix.csv
