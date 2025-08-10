@@ -6,9 +6,6 @@ export function initializeDatasets() {
     console.log('Initializing datasets module...');
     
     // 初始化全局变量
-    if (!window.selectedRecordings) {
-        window.selectedRecordings = new Set();
-    }
     if (!window.currentDatasetId) {
         window.currentDatasetId = null;
     }
@@ -39,11 +36,6 @@ export async function showDatasets() {
     // Clear current dataset - 添加安全检查
     window.currentDatasetId = null;
     window.currentDatasetName = null;
-    if (window.selectedRecordings && typeof window.selectedRecordings.clear === 'function') {
-        window.selectedRecordings.clear();
-    } else {
-        window.selectedRecordings = new Set();
-    }
     
     await loadDatasets();
 }
@@ -109,11 +101,6 @@ export function displayDatasets(datasets) {
 export async function showRecordings(datasetId, datasetName) {
     console.log('showRecordings called:', datasetId, datasetName);
     
-    // 确保全局变量已初始化
-    if (!window.selectedRecordings) {
-        window.selectedRecordings = new Set();
-    }
-    
     window.currentDatasetId = datasetId;
     window.currentDatasetName = datasetName;
     
@@ -176,7 +163,7 @@ export function displayRecordings(recordings) {
     }
     
     if (recordings.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted">No recordings found in this dataset</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No recordings found in this dataset</td></tr>';
         return;
     }
     
@@ -185,7 +172,6 @@ export function displayRecordings(recordings) {
     recordings.forEach(recording => {
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td><input type="checkbox" class="recording-checkbox" value="${recording.id}"></td>
             <td>${recording.id}</td>
             <td>${recording.subject_id || '-'}</td>
             <td>${recording.filename || '-'}</td>
@@ -201,48 +187,8 @@ export function displayRecordings(recordings) {
             </td>
         `;
         
-        // Add event listener to checkbox
-        const checkbox = row.querySelector('.recording-checkbox');
-        checkbox.addEventListener('change', function() {
-            const recordingId = parseInt(this.value);
-            if (this.checked) {
-                window.selectedRecordings.add(recordingId);
-            } else {
-                window.selectedRecordings.delete(recordingId);
-            }
-            updateButtonStates();
-        });
-        
         tbody.appendChild(row);
     });
-}
-
-export function selectAllRecordings() {
-    const checkboxes = document.querySelectorAll('.recording-checkbox');
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = true;
-        window.selectedRecordings.add(parseInt(checkbox.value));
-    });
-    document.getElementById('selectAllCheckbox').checked = true;
-    updateButtonStates();
-}
-
-export function clearSelection() {
-    const checkboxes = document.querySelectorAll('.recording-checkbox');
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = false;
-    });
-    document.getElementById('selectAllCheckbox').checked = false;
-    if (window.selectedRecordings && typeof window.selectedRecordings.clear === 'function') {
-        window.selectedRecordings.clear();
-    } else {
-        window.selectedRecordings = new Set();
-    }
-    updateButtonStates();
-}
-
-export function updateButtonStates() {
-    // Button states are now handled by individual views
 }
 
 // 查看某条 recording 的特征值并显示到模态框
@@ -383,60 +329,120 @@ export function viewFeatureValues(recordingId) {
                 </div>
             `;
 
-            // 特征值
+            // 特征值（摘要 + 可展开详情）
             const entries = data ? Object.entries(data) : [];
             if (entries.length === 0) {
                 container.innerHTML = overviewHtml + metadataHtml + eventsHtml + '<div class="text-muted">No feature values available for this recording.</div>';
             } else {
-                const rowsHtml = entries.map(([shortname, info]) => {
+                // 生成特征值摘要
+                const featureSummary = entries.map(([shortname, info]) => {
                     const dim = info && info.dim ? info.dim : '-';
                     const shape = info && Array.isArray(info.shape) && info.shape.length > 0 ? info.shape.join('×') : '-';
                     const notes = info && info.notes ? info.notes : '';
-                    let valueRendered = '<span class="text-muted">None</span>';
+                    
+                    // 生成值摘要
+                    let valueSummary = '<span class="text-muted">None</span>';
+                    let hasDetails = false;
                     if (info && info.value !== undefined && info.value !== null) {
                         if (typeof info.value === 'object') {
-                            try {
-                                valueRendered = `<pre class=\"mb-0\">${JSON.stringify(info.value, null, 2)}</pre>`;
-                            } catch (e) {
-                                valueRendered = String(info.value);
+                            if (Array.isArray(info.value)) {
+                                if (info.value.length === 0) {
+                                    valueSummary = '<span class="text-muted">Empty array</span>';
+                                } else if (info.value.length === 1) {
+                                    valueSummary = `<code>${info.value[0]}</code>`;
+                                } else {
+                                    const firstVal = info.value[0];
+                                    const lastVal = info.value[info.value.length - 1];
+                                    valueSummary = `<code>[${firstVal}, ..., ${lastVal}] (${info.value.length} items)</code>`;
+                                    hasDetails = true;
+                                }
+                            } else {
+                                const keys = Object.keys(info.value);
+                                if (keys.length === 0) {
+                                    valueSummary = '<span class="text-muted">Empty object</span>';
+                                } else if (keys.length <= 3) {
+                                    valueSummary = `<code>{${keys.map(k => `${k}: ${info.value[k]}`).join(', ')}}</code>`;
+                                } else {
+                                    valueSummary = `<code>{${keys.slice(0, 2).map(k => `${k}: ${info.value[k]}`).join(', ')}, ...} (${keys.length} keys)</code>`;
+                                    hasDetails = true;
+                                }
                             }
                         } else {
-                            valueRendered = String(info.value);
+                            valueSummary = `<code>${info.value}</code>`;
                         }
                     }
+                    
                     return `
                         <tr>
                             <td><strong>${shortname}</strong></td>
                             <td>${dim}</td>
                             <td>${shape}</td>
-                            <td style=\"max-width: 600px;\">${valueRendered}</td>
+                            <td>${valueSummary}</td>
                             <td>${notes}</td>
+                            <td>${hasDetails ? '<button class="btn btn-sm btn-outline-primary" onclick="showFeatureDetails(this, \'' + shortname + '\')">Details</button>' : '-'}</td>
                         </tr>
                     `;
                 }).join('');
 
+                // 生成详细值（用于弹窗）
+                const featureDetails = {};
+                entries.forEach(([shortname, info]) => {
+                    if (info && info.value !== undefined && info.value !== null) {
+                        let detailedValue = 'None';
+                        if (typeof info.value === 'object') {
+                            try {
+                                detailedValue = JSON.stringify(info.value, null, 2);
+                            } catch (e) {
+                                detailedValue = String(info.value);
+                            }
+                        } else {
+                            detailedValue = String(info.value);
+                        }
+                        featureDetails[shortname] = detailedValue;
+                    }
+                });
+
                 container.innerHTML = overviewHtml + metadataHtml + eventsHtml + `
-                    <div class=\"card\">
-                        <div class=\"card-header\"><strong>Feature Values Details</strong></div>
-                        <div class=\"card-body\">
-                        <div class=\"table-responsive\">
-                            <table class=\"table table-sm align-middle\">
-                                <thead>
-                                    <tr>
-                                        <th>Feature</th>
-                                        <th>Dim</th>
-                                        <th>Shape</th>
-                                        <th>Value</th>
-                                        <th>Notes</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${rowsHtml}
-                                </tbody>
-                            </table>
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <strong>Feature Values Summary</strong>
+                            <span class="text-muted">${entries.length} feature(s)</span>
                         </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>Feature</th>
+                                            <th>Dim</th>
+                                            <th>Shape</th>
+                                            <th>Value Summary</th>
+                                            <th>Notes</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${featureSummary}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
+                    <script>
+                        // 存储特征详情数据
+                        window.featureDetails_${recordingId} = ${JSON.stringify(featureDetails)};
+                        
+                        // 显示特征详情的函数
+                        window.showFeatureDetails = function(btn, featureName) {
+                            const details = window.featureDetails_${recordingId}[featureName];
+                            if (details) {
+                                const modal = new bootstrap.Modal(document.getElementById('featureDetailModal'));
+                                document.getElementById('featureDetailTitle').textContent = 'Feature: ' + featureName;
+                                document.getElementById('featureDetailContent').innerHTML = '<pre class="mb-0">' + details + '</pre>';
+                                modal.show();
+                            }
+                        };
+                    </script>
                 `;
             }
 
@@ -457,6 +463,4 @@ export function viewFeatureValues(recordingId) {
 // 导出到全局作用域
 window.showDatasets = showDatasets;
 window.showRecordings = showRecordings;
-window.selectAllRecordings = selectAllRecordings;
-window.clearSelection = clearSelection;
 window.viewFeatureValues = viewFeatureValues;

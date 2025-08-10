@@ -106,15 +106,7 @@
                 <div id="recordingsView" style="display: none;">
                     <div class="content-header">
                         <h3 id="recordingsTitle">Recordings</h3>
-                        <div class="page-desc text-muted">Select recordings to extract or export features</div>
-                        <div class="header-actions">
-                            <button id="selectAllBtn" class="btn btn-outline-secondary btn-sm">
-                                <i class="bi bi-check-all"></i> Select All
-                            </button>
-                            <button id="clearSelectionBtn" class="btn btn-outline-secondary btn-sm">
-                                <i class="bi bi-x-circle"></i> Clear Selection
-                            </button>
-                        </div>
+                        <div class="page-desc text-muted">View recordings in this dataset</div>
                     </div>
                     
                     <!-- Recordings Table -->
@@ -122,7 +114,6 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th><input type="checkbox" id="selectAllCheckbox"></th>
                                     <th>ID</th>
                                     <th>Subject ID</th>
                                     <th>Filename</th>
@@ -136,7 +127,7 @@
                             </thead>
                             <tbody id="recordingsTableBody">
                                 <tr>
-                                    <td colspan="10" class="text-center text-muted">
+                                    <td colspan="9" class="text-center text-muted">
                                         Loading recordings...
                                     </td>
                                 </tr>
@@ -487,6 +478,21 @@
                 </div>
                 <div class="modal-body">
                     <div id="featureValuesContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feature Detail Modal -->
+    <div class="modal fade" id="featureDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="featureDetailTitle">Feature Detail</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="featureDetailContent"></div>
                 </div>
             </div>
         </div>

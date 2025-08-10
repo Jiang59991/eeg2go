@@ -1,0 +1,49 @@
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>实验2：睡眠阶段差异分析</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { background-color: #f0f0f0; padding: 20px; border-radius: 5px; }
+            .section { margin: 20px 0; }
+            .image { text-align: center; margin: 20px 0; }
+            .image img { max-width: 100%; height: auto; }
+            .metadata { background-color: #f8f9fa; padding: 15px; border-radius: 5px; }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>实验2：睡眠阶段差异分析</h1>
+            <p>实验名称: stage_differences_anova</p>
+            <p>运行时间: 2025-08-10 06:32:38</p>
+        </div>
+        
+        <div class="section">
+            <h2>实验元数据</h2>
+            <div class="metadata">
+                <p><strong>数据集:</strong> SleepEDFx_v1</p>
+                <p><strong>特征集:</strong> exp2_wide_sleep_featureset__P0_sleep10s_hp</p>
+                <p><strong>统计检验:</strong> ANOVA</p>
+                <p><strong>总特征数:</strong> 30</p>
+                <p><strong>最佳特征:</strong> spectral_bandwidth</p>
+                <p><strong>最大效应量:</strong> 0.4771</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>热图：Top 30 特征 vs 睡眠阶段</h2>
+            <div class="image">
+                <img src="heatmap_top30_features.png" alt="Feature Heatmap">
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>分布图：Top 6 特征跨阶段分布</h2>
+            <div class="image">
+                <img src="distribution_top6_features.png" alt="Feature Distribution">
+            </div>
+        </div>
+    </body>
+    </html>
+    

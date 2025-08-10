@@ -148,37 +148,97 @@ function initializeFeatureSetCytoscape(cytoscapeData) {
                     'background-color': '#ADD8E6',
                     'label': 'data(label)',
                     'text-wrap': 'wrap',
-                    'text-max-width': '120px',
-                    'font-size': '12px',
-                    'width': '100px',
-                    'height': '50px',
+                    'text-max-width': '140px',
+                    'font-size': '11px',
+                    'font-family': 'Consolas, Menlo, Monaco, "Fira Mono", "Roboto Mono", "Courier New", monospace',
+                    'text-valign': 'center',
+                    'text-halign': 'center',
+                    'width': '140px',
+                    'height': '60px',
                     'border-width': 2,
                     'border-color': '#666',
+                    'border-opacity': 0.8,
                     'shape': 'rectangle'
+                }
+            },
+            {
+                selector: 'node.input',
+                style: {
+                    'background-color': '#90EE90'
+                }
+            },
+            {
+                selector: 'node.output',
+                style: {
+                    'background-color': '#F0A0A0'
+                }
+            },
+            {
+                selector: 'node.process',
+                style: {
+                    'background-color': '#ADD8E6'
                 }
             },
             {
                 selector: 'edge',
                 style: {
-                    'width': 2,
+                    'width': 3,
                     'line-color': '#666',
                     'target-arrow-color': '#666',
                     'target-arrow-shape': 'triangle',
-                    'curve-style': 'bezier'
+                    'curve-style': 'bezier',
+                    'arrow-scale': 1.5
                 }
             }
         ],
         layout: {
             name: 'dagre',
             rankDir: 'TB',
-            nodeSep: 30,
-            edgeSep: 20,
-            rankSep: 60
-        }
+            nodeSep: 50,
+            edgeSep: 30,
+            rankSep: 80,
+            padding: 20
+        },
+        userZoomingEnabled: false,
+        userPanningEnabled: true,
+        boxSelectionEnabled: true,
+        autoungrabify: false,
+        autolock: false
     });
     
-    cy.fit();
-    cy.center();
+    // 添加交互功能
+    cy.on('mouseover', 'node', function(e) {
+        const node = e.target;
+        node.style('border-width', 4);
+        node.style('border-color', '#007bff');
+    });
+    
+    cy.on('mouseout', 'node', function(e) {
+        const node = e.target;
+        node.style('border-width', 2);
+        node.style('border-color', '#666');
+    });
+    
+    // 先 resize 一次
+    cy.resize();
+
+    // 关键：延迟 fit/center，确保容器宽度已渲染
+    setTimeout(() => {
+        cy.resize();
+        cy.fit();
+        cy.center();
+    }, 50);
+
+    // 可选：监听窗口大小变化
+    window.addEventListener('resize', () => {
+        cy.resize();
+        cy.fit();
+    });
+
+    // 放大缩小按钮事件
+    document.getElementById('cy-zoom-in-fs').onclick = () => cy.zoom({ level: cy.zoom() * 1.2, renderedPosition: { x: cy.width()/2, y: cy.height()/2 } });
+    document.getElementById('cy-zoom-out-fs').onclick = () => cy.zoom({ level: cy.zoom() / 1.2, renderedPosition: { x: cy.width()/2, y: cy.height()/2 } });
+    document.getElementById('cy-zoom-fit-fs').onclick = () => { cy.fit(); cy.center(); };
 }
 
 // 导出到全局作用域

@@ -127,10 +127,36 @@ def _build_stage_vector(recording_id: int, pipeid: int) -> List[str]:
 
 
 def _parse_values_from_cache(cached: Dict) -> List[float]:
+    """
+    Convert cached structured/list values to a flat list of floats.
+    Supports:
+      - list of {epoch,start,end,value}
+      - list of numbers
+      - scalar number
+    Missing/NaN/None → np.nan
+    """
     if not cached or cached.get("value") is None:
         return []
     v = cached["value"]
-    return list(v) if isinstance(v, list) else [v]
+    out: List[float] = []
+    if isinstance(v, list):
+        for item in v:
+            if isinstance(item, dict) and "value" in item:
+                val = item["value"]
+            else:
+                val = item
+            try:
+                if val is None:
+                    out.append(np.nan)
+                else:
+                    out.append(float(val))
+            except Exception:
+                out.append(np.nan)
+        return out
+    try:
+        return [float(v)]
+    except Exception:
+        return [np.nan]
 
 
 def extract_epoch_matrix(dataset_id: int, feature_set_id: int, limit: int | None = None,
@@ -178,8 +204,8 @@ def extract_epoch_matrix(dataset_id: int, feature_set_id: int, limit: int | None
             stages = _build_stage_vector(rid, pipeid)
             n_epochs = len(stages)
 
-            # 收集相对功率：4×6=24 列
-    rel_cols: Dict[str, List[float]] = {}
+            # 收集相对功率：4×2=8 列
+            rel_cols: Dict[str, List[float]] = {}
             for fx in rel_power_fx:
                 cached = load_cached_feature_value(fx["id"], rid)
                 vals = _parse_values_from_cache(cached)
@@ -206,7 +232,7 @@ def extract_epoch_matrix(dataset_id: int, feature_set_id: int, limit: int | None
                         vals = [np.nan] * n_epochs
                     chan_vals.append(vals)
                 if chan_vals:
-                    arr = np.array(chan_vals, dtype=float)  # shape: (6, n_epochs)
+                    arr = np.array(chan_vals, dtype=float)  # shape: (2, n_epochs)
                     med = np.nanmedian(arr, axis=0)         # shape: (n_epochs,)
                     wide_cols[fname] = med.tolist()
                 else:

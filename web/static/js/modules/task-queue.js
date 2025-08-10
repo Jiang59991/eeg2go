@@ -2,6 +2,10 @@
 import { setActiveNavButton, hideAllViews, updateBreadcrumb } from './navigation.js';
 import { showStatus } from './ui-utils.js';
 
+// 导入其他模块的函数
+import { showExperimentDetails } from './experiments.js';
+import { viewExtractionTask } from './feature-extraction.js';
+
 export function initializeTaskQueue() {
     console.log('Initializing task queue module...');
 }
@@ -210,30 +214,27 @@ export function showTaskDetails(taskId) {
         .then(data => {
             if (data.success) {
                 const task = data.task;
+                const taskType = task.task_type;
                 
-                // 填充任务详情
-                document.getElementById('taskDetailId').textContent = task.id;
-                document.getElementById('taskDetailType').textContent = task.task_type;
-                document.getElementById('taskDetailStatus').textContent = task.status;
-                document.getElementById('taskDetailCreated').textContent = task.created_at ? new Date(task.created_at).toLocaleString() : 'N/A';
-                document.getElementById('taskDetailStarted').textContent = task.started_at ? new Date(task.started_at).toLocaleString() : 'N/A';
-                document.getElementById('taskDetailCompleted').textContent = task.completed_at ? new Date(task.completed_at).toLocaleString() : 'N/A';
+                console.log(`Task type: ${taskType}, routing to appropriate detail view`);
                 
-                // 参数和结果
-                document.getElementById('taskDetailParams').textContent = task.parameters ? JSON.stringify(task.parameters, null, 2) : 'N/A';
-                document.getElementById('taskDetailResult').textContent = task.result ? JSON.stringify(task.result, null, 2) : 'N/A';
-                
-                // 错误信息
-                if (task.error_message) {
-                    document.getElementById('taskDetailError').style.display = 'block';
-                    document.getElementById('taskDetailErrorMessage').textContent = task.error_message;
-                } else {
-                    document.getElementById('taskDetailError').style.display = 'none';
+                // 根据任务类型路由到对应的详情页面
+                switch (taskType) {
+                    case 'experiment':
+                        // 调用实验详情函数
+                        showExperimentDetails(taskId);
+                        break;
+                        
+                    case 'feature_extraction':
+                        // 调用特征提取详情函数
+                        viewExtractionTask(taskId);
+                        break;
+                        
+                    default:
+                        // 对于其他类型的任务，显示通用的任务详情模态框
+                        showGenericTaskDetails(task);
+                        break;
                 }
-                
-                // 显示模态框
-                const modal = new bootstrap.Modal(document.getElementById('taskDetailsModal'));
-                modal.show();
             } else {
                 showStatus(`Error: ${data.error}`, 'error');
             }
@@ -242,6 +243,33 @@ export function showTaskDetails(taskId) {
             console.error('Failed to load task details:', error);
             showStatus('Failed to load task details', 'error');
         });
+}
+
+// 通用任务详情显示函数（用于非experiment/feature_extraction任务）
+function showGenericTaskDetails(task) {
+    // 填充任务详情
+    document.getElementById('taskDetailId').textContent = task.id;
+    document.getElementById('taskDetailType').textContent = task.task_type;
+    document.getElementById('taskDetailStatus').textContent = task.status;
+    document.getElementById('taskDetailCreated').textContent = task.created_at ? new Date(task.created_at).toLocaleString() : 'N/A';
+    document.getElementById('taskDetailStarted').textContent = task.started_at ? new Date(task.started_at).toLocaleString() : 'N/A';
+    document.getElementById('taskDetailCompleted').textContent = task.completed_at ? new Date(task.completed_at).toLocaleString() : 'N/A';
+    
+    // 参数和结果
+    document.getElementById('taskDetailParams').textContent = task.parameters ? JSON.stringify(task.parameters, null, 2) : 'N/A';
+    document.getElementById('taskDetailResult').textContent = task.result ? JSON.stringify(task.result, null, 2) : 'N/A';
+    
+    // 错误信息
+    if (task.error_message) {
+        document.getElementById('taskDetailError').style.display = 'block';
+        document.getElementById('taskDetailErrorMessage').textContent = task.error_message;
+    } else {
+        document.getElementById('taskDetailError').style.display = 'none';
+    }
+    
+    // 显示模态框
+    const modal = new bootstrap.Modal(document.getElementById('taskDetailsModal'));
+    modal.show();
 }
 
 // 导出到全局作用域
