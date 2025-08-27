@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-实验2可视化：睡眠阶段差异分析结果可视化
+Experiment 2 Visualization: Sleep Stage Difference Analysis Results Visualization
 
-生成内容：
-1. 热图：Top 30 特征 × 阶段，显示相对W的标准化差值
-2. 箱线/小提琴图：Top 6 特征跨阶段分布
-3. 侧栏信息：实验元数据
+Generated content:
+1. Heatmap: Top 30 features × stages, showing standardized differences relative to W
+2. Box/Violin plots: Top 6 features distribution across stages
+3. Sidebar information: Experiment metadata
 """
 
 import pandas as pd
@@ -19,44 +19,39 @@ import argparse
 import logging
 from typing import Dict, List, Tuple
 
-# 设置字体和样式
+# Set font and style
 import matplotlib
-matplotlib.use('Agg')  # 使用非交互式后端
+matplotlib.use('Agg')  # Use non-interactive backend
 
-# 尝试设置中文字体，如果失败则使用默认字体
-try:
-    plt.rcParams['font.sans-serif'] = ['SimHei', 'Arial Unicode MS', 'DejaVu Sans']
-    plt.rcParams['axes.unicode_minus'] = False
-except:
-    # 如果中文字体不可用，使用英文
-    plt.rcParams['font.sans-serif'] = ['DejaVu Sans', 'Arial', 'Helvetica']
+# Set English fonts
+plt.rcParams['font.sans-serif'] = ['DejaVu Sans', 'Arial', 'Helvetica']
 
 sns.set_style("whitegrid")
 
-# 设置日志
+# Set up logging
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s')
 logger = logging.getLogger(__name__)
 
 def load_data(stage_feature_csv: str, feature_stats_csv: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """加载数据"""
+    """Load data"""
     logger.info("Loading data...")
     
-    # 加载阶段特征数据
+    # Load stage feature data
     stage_data = pd.read_csv(stage_feature_csv)
     logger.info(f"Stage feature data: {stage_data.shape}")
     
-    # 加载特征统计结果
+    # Load feature statistics results
     stats_data = pd.read_csv(feature_stats_csv)
     logger.info(f"Feature stats data: {stats_data.shape}")
     
     return stage_data, stats_data
 
 def get_experiment_metadata(db_path: str, experiment_result_id: int = None) -> Dict:
-    """从数据库获取实验元数据"""
+    """Get experiment metadata from database"""
     conn = sqlite3.connect(db_path)
     
     if experiment_result_id is None:
-        # 获取最新的实验记录
+        # Get the latest experiment record
         cursor = conn.execute("""
         SELECT id, experiment_type, experiment_name, dataset_id, feature_set_id, 
                parameters, summary, run_time, output_dir
@@ -77,7 +72,7 @@ def get_experiment_metadata(db_path: str, experiment_result_id: int = None) -> D
         logger.warning("No experiment results found")
         return {}
     
-    # 获取元数据
+    # Get metadata
     metadata = {}
     cursor = conn.execute("""
     SELECT key, value, value_type FROM experiment_metadata 
@@ -87,7 +82,7 @@ def get_experiment_metadata(db_path: str, experiment_result_id: int = None) -> D
     for key, value, value_type in cursor.fetchall():
         metadata[key] = value
     
-    # 获取数据集和特征集信息
+    # Get dataset and feature set information
     cursor = conn.execute("SELECT name FROM datasets WHERE id = ?", (result[3],))
     dataset_result = cursor.fetchone()
     dataset_name = dataset_result[0] if dataset_result else "Unknown"
@@ -110,13 +105,13 @@ def get_experiment_metadata(db_path: str, experiment_result_id: int = None) -> D
 
 def create_heatmap(stage_data: pd.DataFrame, stats_data: pd.DataFrame, 
                   top_n: int = 30, output_path: str = None) -> plt.Figure:
-    """创建热图：Top N 特征 × 阶段，显示相对W的标准化差值"""
+    """Create heatmap: Top N features × stages, showing standardized differences relative to W"""
     logger.info(f"Creating heatmap for top {top_n} features...")
     
-    # 获取Top N特征
+    # Get Top N features
     top_features = stats_data.head(top_n)['feature'].tolist()
     
-    # 准备热图数据
+    # Prepare heatmap data
     stages = ['W', 'N1', 'N2', 'N3', 'REM']
     heatmap_data = []
     
@@ -124,7 +119,7 @@ def create_heatmap(stage_data: pd.DataFrame, stats_data: pd.DataFrame,
         row = []
         for stage in stages:
             if stage == 'W':
-                row.append(0)  # W阶段作为参考，差值为0
+                row.append(0)  # W stage as reference, difference is 0
             else:
                 cohens_d_key = f'cohens_d_{stage}'
                 if cohens_d_key in stats_data.columns:
@@ -136,10 +131,10 @@ def create_heatmap(stage_data: pd.DataFrame, stats_data: pd.DataFrame,
     
     heatmap_df = pd.DataFrame(heatmap_data, index=top_features, columns=stages)
     
-    # 创建热图
+    # Create heatmap
     fig, ax = plt.subplots(figsize=(12, max(8, top_n * 0.3)))
     
-    # 使用自定义颜色映射
+    # Use custom color mapping
     cmap = sns.diverging_palette(10, 220, sep=80, n=7)
     
     sns.heatmap(heatmap_df, 
@@ -155,7 +150,7 @@ def create_heatmap(stage_data: pd.DataFrame, stats_data: pd.DataFrame,
     ax.set_xlabel('Sleep Stage', fontsize=12)
     ax.set_ylabel('Feature', fontsize=12)
     
-    # 调整y轴标签
+    # Adjust y-axis labels
     ax.set_yticklabels(ax.get_yticklabels(), rotation=0, fontsize=10)
     
     plt.tight_layout()
@@ -168,13 +163,13 @@ def create_heatmap(stage_data: pd.DataFrame, stats_data: pd.DataFrame,
 
 def create_distribution_plots(stage_data: pd.DataFrame, stats_data: pd.DataFrame, 
                             top_n: int = 6, output_path: str = None) -> plt.Figure:
-    """创建箱线/小提琴图：Top N 特征跨阶段分布"""
+    """Create box/violin plots: Top N features distribution across stages"""
     logger.info(f"Creating distribution plots for top {top_n} features...")
     
-    # 获取Top N特征
+    # Get Top N features
     top_features = stats_data.head(top_n)['feature'].tolist()
     
-    # 准备数据
+    # Prepare data
     plot_data = []
     for feature in top_features:
         feature_data = stage_data[stage_data['feature'] == feature]
@@ -189,7 +184,7 @@ def create_distribution_plots(stage_data: pd.DataFrame, stats_data: pd.DataFrame
     
     plot_df = pd.DataFrame(plot_data)
     
-    # 创建子图
+    # Create subplots
     n_features = len(top_features)
     n_cols = 3
     n_rows = (n_features + n_cols - 1) // n_cols
@@ -198,7 +193,7 @@ def create_distribution_plots(stage_data: pd.DataFrame, stats_data: pd.DataFrame
     if n_rows == 1:
         axes = axes.reshape(1, -1)
     
-    # 设置颜色
+    # Set colors
     colors = sns.color_palette("husl", 5)
     stage_colors = dict(zip(['W', 'N1', 'N2', 'N3', 'REM'], colors))
     
@@ -209,27 +204,27 @@ def create_distribution_plots(stage_data: pd.DataFrame, stats_data: pd.DataFrame
         
         feature_data = plot_df[plot_df['feature'] == feature]
         
-        # 创建箱线图
+        # Create box plot
         box_data = []
         labels = []
         for stage in ['W', 'N1', 'N2', 'N3', 'REM']:
             stage_data = feature_data[feature_data['stage'] == stage]
             if len(stage_data) > 0:
-                # 模拟分布数据（基于median和IQR）
+                # Simulate distribution data (based on median and IQR)
                 median_val = stage_data['median'].iloc[0]
                 iqr_val = stage_data['iqr'].iloc[0]
                 n_samples = int(stage_data['n_epochs'].iloc[0])
                 
-                # 生成模拟数据
-                np.random.seed(42)  # 保持一致性
+                # Generate simulated data
+                np.random.seed(42)  # Maintain consistency
                 simulated_data = np.random.normal(median_val, iqr_val/1.35, n_samples)
                 box_data.append(simulated_data)
                 labels.append(stage)
         
         if box_data:
-            bp = ax.boxplot(box_data, labels=labels, patch_artist=True)
+            bp = ax.boxplot(box_data, tick_labels=labels, patch_artist=True)
             
-            # 设置颜色
+            # Set colors
             for patch, stage in zip(bp['boxes'], labels):
                 patch.set_facecolor(stage_colors[stage])
                 patch.set_alpha(0.7)
@@ -238,10 +233,10 @@ def create_distribution_plots(stage_data: pd.DataFrame, stats_data: pd.DataFrame
         ax.set_ylabel('Feature Value')
         ax.grid(True, alpha=0.3)
         
-        # 旋转x轴标签
+        # Rotate x-axis labels
         ax.tick_params(axis='x', rotation=45)
     
-    # 隐藏多余的子图
+    # Hide extra subplots
     for i in range(n_features, n_rows * n_cols):
         row = i // n_cols
         col = i % n_cols
@@ -259,80 +254,43 @@ def create_distribution_plots(stage_data: pd.DataFrame, stats_data: pd.DataFrame
     return fig
 
 def create_metadata_summary(metadata: Dict, output_path: str = None) -> plt.Figure:
-    """创建元数据摘要图"""
+    """Create metadata summary figure"""
     logger.info("Creating metadata summary...")
     
     fig, ax = plt.subplots(figsize=(10, 8))
     ax.axis('off')
     
-    # 检查是否可以使用中文字体
-    try:
-        # 测试中文字体
-        test_font = plt.matplotlib.font_manager.FontProperties(family=['SimHei', 'Arial Unicode MS'])
-        use_chinese = True
-    except:
-        use_chinese = False
-    
-    # 准备显示信息
+    # Prepare display information
     info_text = []
-    if use_chinese:
-        info_text.append("实验2：睡眠阶段差异分析")
-        info_text.append("=" * 30)
-        info_text.append("")
-        
-        # 基本信息
-        info_text.append(f"实验名称: {metadata.get('experiment_name', 'N/A')}")
-        info_text.append(f"数据集: {metadata.get('dataset_name', 'N/A')}")
-        info_text.append(f"特征集: {metadata.get('feature_set_name', 'N/A')}")
-        info_text.append(f"运行时间: {metadata.get('run_time', 'N/A')}")
-        info_text.append("")
-        
-        # 参数信息
-        params = metadata.get('parameters', {})
-        info_text.append("分析参数:")
-        info_text.append(f"  统计检验: {params.get('test_type', 'N/A').upper()}")
-        info_text.append(f"  特征数量: {params.get('top_n', 'N/A')}")
-        info_text.append("")
-        
-        # 元数据信息
-        meta = metadata.get('metadata', {})
-        info_text.append("分析结果:")
-        info_text.append(f"  总特征数: {meta.get('total_features', 'N/A')}")
-        info_text.append(f"  参考阶段: {meta.get('reference_stage', 'N/A')}")
-        info_text.append(f"  分析阶段: {meta.get('stages_analyzed', 'N/A')}")
-        info_text.append(f"  效应量类型: {meta.get('effect_size_type', 'N/A')}")
-        info_text.append(f"  最佳特征: {meta.get('top_feature', 'N/A')}")
-        info_text.append(f"  最大效应量: {meta.get('max_effect_size', 'N/A')}")
-    else:
-        info_text.append("Experiment 2: Sleep Stage Difference Analysis")
-        info_text.append("=" * 40)
-        info_text.append("")
-        
-        # Basic information
-        info_text.append(f"Experiment Name: {metadata.get('experiment_name', 'N/A')}")
-        info_text.append(f"Dataset: {metadata.get('dataset_name', 'N/A')}")
-        info_text.append(f"Feature Set: {metadata.get('feature_set_name', 'N/A')}")
-        info_text.append(f"Run Time: {metadata.get('run_time', 'N/A')}")
-        info_text.append("")
-        
-        # Parameter information
-        params = metadata.get('parameters', {})
-        info_text.append("Analysis Parameters:")
-        info_text.append(f"  Statistical Test: {params.get('test_type', 'N/A').upper()}")
-        info_text.append(f"  Feature Count: {params.get('top_n', 'N/A')}")
-        info_text.append("")
-        
-        # Metadata information
-        meta = metadata.get('metadata', {})
-        info_text.append("Analysis Results:")
-        info_text.append(f"  Total Features: {meta.get('total_features', 'N/A')}")
-        info_text.append(f"  Reference Stage: {meta.get('reference_stage', 'N/A')}")
-        info_text.append(f"  Analyzed Stages: {meta.get('stages_analyzed', 'N/A')}")
-        info_text.append(f"  Effect Size Type: {meta.get('effect_size_type', 'N/A')}")
-        info_text.append(f"  Top Feature: {meta.get('top_feature', 'N/A')}")
-        info_text.append(f"  Max Effect Size: {meta.get('max_effect_size', 'N/A')}")
+    info_text.append("Experiment 2: Sleep Stage Difference Analysis")
+    info_text.append("=" * 40)
+    info_text.append("")
     
-    # 显示文本
+    # Basic information
+    info_text.append(f"Experiment Name: {metadata.get('experiment_name', 'N/A')}")
+    info_text.append(f"Dataset: {metadata.get('dataset_name', 'N/A')}")
+    info_text.append(f"Feature Set: {metadata.get('feature_set_name', 'N/A')}")
+    info_text.append(f"Run Time: {metadata.get('run_time', 'N/A')}")
+    info_text.append("")
+    
+    # Parameter information
+    params = metadata.get('parameters', {})
+    info_text.append("Analysis Parameters:")
+    info_text.append(f"  Statistical Test: {params.get('test_type', 'N/A').upper()}")
+    info_text.append(f"  Feature Count: {params.get('top_n', 'N/A')}")
+    info_text.append("")
+    
+    # Metadata information
+    meta = metadata.get('metadata', {})
+    info_text.append("Analysis Results:")
+    info_text.append(f"  Total Features: {meta.get('total_features', 'N/A')}")
+    info_text.append(f"  Reference Stage: {meta.get('reference_stage', 'N/A')}")
+    info_text.append(f"  Analyzed Stages: {meta.get('stages_analyzed', 'N/A')}")
+    info_text.append(f"  Effect Size Type: {meta.get('effect_size_type', 'N/A')}")
+    info_text.append(f"  Top Feature: {meta.get('top_feature', 'N/A')}")
+    info_text.append(f"  Max Effect Size: {meta.get('max_effect_size', 'N/A')}")
+    
+    # Display text
     ax.text(0.05, 0.95, '\n'.join(info_text), 
             transform=ax.transAxes, 
             fontsize=12, 
@@ -349,43 +307,43 @@ def create_metadata_summary(metadata: Dict, output_path: str = None) -> plt.Figu
     return fig
 
 def main():
-    parser = argparse.ArgumentParser(description='实验2可视化：睡眠阶段差异分析')
-    parser.add_argument('--stage-data', required=True, help='阶段特征数据CSV路径')
-    parser.add_argument('--stats-data', required=True, help='特征统计结果CSV路径')
-    parser.add_argument('--db-path', required=True, help='数据库路径')
-    parser.add_argument('--output-dir', default='outputs/experiment2', help='输出目录')
-    parser.add_argument('--top-n-heatmap', type=int, default=30, help='热图显示的特征数量')
-    parser.add_argument('--top-n-distribution', type=int, default=6, help='分布图显示的特征数量')
-    parser.add_argument('--experiment-id', type=int, help='实验ID（可选，默认使用最新）')
+    parser = argparse.ArgumentParser(description='Experiment 2 Visualization: Sleep Stage Difference Analysis')
+    parser.add_argument('--stage-data', required=True, help='Stage feature data CSV path')
+    parser.add_argument('--stats-data', required=True, help='Feature statistics results CSV path')
+    parser.add_argument('--db-path', required=True, help='Database path')
+    parser.add_argument('--output-dir', default='outputs/experiment2', help='Output directory')
+    parser.add_argument('--top-n-heatmap', type=int, default=30, help='Number of features to display in heatmap')
+    parser.add_argument('--top-n-distribution', type=int, default=6, help='Number of features to display in distribution plots')
+    parser.add_argument('--experiment-id', type=int, help='Experiment ID (optional, default use latest)')
     
     args = parser.parse_args()
     
-    # 创建输出目录
+    # Create output directory
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     
-    # 加载数据
+    # Load data
     stage_data, stats_data = load_data(args.stage_data, args.stats_data)
     
-    # 获取实验元数据
+    # Get experiment metadata
     metadata = get_experiment_metadata(args.db_path, args.experiment_id)
     
-    # 生成可视化
+    # Generate visualizations
     logger.info("Generating visualizations...")
     
-    # 1. 热图
+    # 1. Heatmap
     heatmap_path = output_dir / 'heatmap_top30_features.png'
     create_heatmap(stage_data, stats_data, args.top_n_heatmap, str(heatmap_path))
     
-    # 2. 分布图
+    # 2. Distribution plots
     distribution_path = output_dir / 'distribution_top6_features.png'
     create_distribution_plots(stage_data, stats_data, args.top_n_distribution, str(distribution_path))
     
-    # 3. 元数据摘要
+    # 3. Metadata summary
     metadata_path = output_dir / 'experiment_metadata.png'
     create_metadata_summary(metadata, str(metadata_path))
     
-    # 4. 保存数据副本
+    # 4. Save data copies
     stage_data.to_csv(output_dir / 'stage_feature_table.csv', index=False)
     stats_data.to_csv(output_dir / 'feature_stats.csv', index=False)
     
