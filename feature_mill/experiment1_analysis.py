@@ -15,8 +15,11 @@ from sklearn.preprocessing import StandardScaler
 import warnings
 warnings.filterwarnings('ignore')
 
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from logging_config import logger
-from feature_matrix import FeatureMatrix
+# 移除FeatureMatrix导入，直接使用数据库查询
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "..", "database", "eeg2go.db")
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "..", "outputs", "experiment1")
@@ -62,15 +65,19 @@ class Experiment1Analyzer:
         
         subjects = [row[0] for row in c.fetchall()]
         
-        # 为每个subject选择recording
+        # 为每个subject选择recording（只选择有特征数据的）
         recordings = []
         for subject_id in subjects:
-            # 优先选择abnormal标签的recording，然后按duration排序
+            # 优先选择abnormal标签的recording，然后按duration排序，但只选择有特征数据的
             c.execute("""
                 SELECT r.id, r.subject_id, r.filename, r.path, r.duration, rm.abnormal
                 FROM recordings r
                 JOIN recording_metadata rm ON r.id = rm.recording_id
-                WHERE r.dataset_id = ? AND r.subject_id = ?
+                JOIN feature_values fv ON r.id = fv.recording_id
+                JOIN fxdef fd ON fv.fxdef_id = fd.id
+                JOIN feature_set_items fsi ON fd.id = fsi.fxdef_id
+                JOIN feature_sets fs ON fsi.feature_set_id = fs.id
+                WHERE r.dataset_id = ? AND r.subject_id = ? AND fs.name LIKE '%exp1_bp_rel%'
                 ORDER BY rm.abnormal DESC, r.duration DESC
                 LIMIT 1
             """, (dataset_id, subject_id))
@@ -83,7 +90,7 @@ class Experiment1Analyzer:
                     'filename': row[2],
                     'path': row[3],
                     'duration': row[4],
-                    'is_abnormal': bool(row[5])
+                    'is_abnormal': row[5] == '1' if isinstance(row[5], str) else bool(row[5])
                 })
         
         conn.close()
@@ -93,8 +100,6 @@ class Experiment1Analyzer:
         """为指定pipeline提取特征"""
         logger.info(f"Extracting features for {featureset_name}")
         
-        fm = FeatureMatrix(self.db_path)
-        
         # 获取featureset ID
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
@@ -102,15 +107,77 @@ class Experiment1Analyzer:
         featureset_id = c.fetchone()[0]
         conn.close()
         
-        # 提取特征矩阵
+        # 直接查询特征值
         recording_ids = [r['recording_id'] for r in recordings]
-        feature_matrix = fm.get_feature_matrix(featureset_id, recording_ids)
-        
-        if feature_matrix is None or feature_matrix.empty:
-            logger.error(f"No features extracted for {featureset_name}")
+        if not recording_ids:
             return pd.DataFrame()
         
+        # 构建查询
+        placeholders = ','.join(['?' for _ in recording_ids])
+        query = f"""
+            SELECT fv.recording_id, fv.value, fd.shortname, fd.chans
+            FROM feature_values fv
+            JOIN fxdef fd ON fv.fxdef_id = fd.id
+            JOIN feature_set_items fsi ON fd.id = fsi.fxdef_id
+            WHERE fsi.feature_set_id = ? AND fv.recording_id IN ({placeholders})
+        """
+        
+        conn = sqlite3.connect(self.db_path)
+        c = conn.cursor()
+        c.execute(query, [featureset_id] + recording_ids)
+        rows = c.fetchall()
+        conn.close()
+        
+        if not rows:
+            logger.error(f"No features found for {featureset_name}")
+            return pd.DataFrame()
+        
+        # 构建特征矩阵
+        feature_data = {}
+        for recording_id, value, shortname, chans in rows:
+            if recording_id not in feature_data:
+                feature_data[recording_id] = {}
+            
+            # 解析特征值（处理复杂的JSON格式）
+            try:
+                import json
+                if isinstance(value, str):
+                    parsed_value = json.loads(value)
+                else:
+                    parsed_value = value
+                
+                # 处理不同的特征值格式
+                if isinstance(parsed_value, list) and len(parsed_value) > 0:
+                    # 如果是epoch列表，计算平均值
+                    if isinstance(parsed_value[0], dict) and 'value' in parsed_value[0]:
+                        # 提取所有epoch的value并计算平均值
+                        epoch_values = [epoch['value'] for epoch in parsed_value if 'value' in epoch]
+                        if epoch_values:
+                            final_value = sum(epoch_values) / len(epoch_values)
+                        else:
+                            continue
+                    else:
+                        # 如果是简单的数值列表，计算平均值
+                        final_value = sum(parsed_value) / len(parsed_value)
+                elif isinstance(parsed_value, (int, float)):
+                    final_value = parsed_value
+                else:
+                    logger.warning(f"Unknown feature value format for {recording_id}: {type(parsed_value)}")
+                    continue
+                
+                # 生成特征名称
+                feature_name = f"{shortname}_{chans}"
+                feature_data[recording_id][feature_name] = final_value
+            except Exception as e:
+                logger.warning(f"Could not parse feature value for {recording_id}: {e}")
+                continue
+        
+        # 转换为DataFrame
+        feature_matrix = pd.DataFrame.from_dict(feature_data, orient='index')
+        
         logger.info(f"Extracted {feature_matrix.shape[1]} features for {len(recordings)} recordings")
+        if not feature_matrix.empty:
+            logger.info(f"Feature columns: {list(feature_matrix.columns[:5])}...")  # 显示前5个特征名
         return feature_matrix
     
     def aggregate_features(self, feature_matrix: pd.DataFrame) -> pd.DataFrame:
@@ -121,20 +188,31 @@ class Experiment1Analyzer:
             return pd.DataFrame()
         
         logger.info("Aggregating features...")
+        logger.info(f"Available bands: {self.bands}")
+        logger.info(f"Available channels: {self.channels}")
+        logger.info(f"Feature matrix columns: {list(feature_matrix.columns[:10])}...")  # 显示前10个特征名
         
         # 1. 通道中位数聚合
         aggregated_features = {}
         
         for band in self.bands:
             for channel in self.channels:
-                # 查找该频段和通道的所有特征
-                pattern = f"bp_rel_{band}.*{channel}"
+                # 查找该频段和通道的所有特征（格式：bp_rel_{band}_{channel}_{channel}）
+                pattern = f"bp_rel_{band}_{channel}_{channel}"
                 matching_cols = [col for col in feature_matrix.columns if pattern in col]
                 
                 if matching_cols:
+                    logger.info(f"Found {len(matching_cols)} features for {pattern}")
                     # 计算中位数
                     median_val = feature_matrix[matching_cols].median(axis=1)
                     aggregated_features[f"bp_rel_{band}_{channel}_median"] = median_val
+                else:
+                    logger.warning(f"No features found for pattern: {pattern}")
+        
+        # 如果没有找到匹配的特征，直接返回原始特征矩阵
+        if not aggregated_features:
+            logger.warning("No matching features found for aggregation, returning original features")
+            return feature_matrix
         
         # 2. 创建聚合后的DataFrame
         aggregated_df = pd.DataFrame(aggregated_features, index=feature_matrix.index)
@@ -146,11 +224,11 @@ class Experiment1Analyzer:
         """
         创建目标变量y（使用真实的normal/abnormal标签）
         """
-        # 使用真实的normal/abnormal标签
-        subject_ids = [r['subject_id'] for r in recordings]
+        # 使用真实的normal/abnormal标签，使用recording_id作为索引
+        recording_ids = [r['recording_id'] for r in recordings]
         labels = [1 if r['is_abnormal'] else 0 for r in recordings]  # 1=abnormal, 0=normal
         
-        y = pd.Series(labels, index=subject_ids, name='target')
+        y = pd.Series(labels, index=recording_ids, name='target')
         
         logger.info(f"Created target variable: {y.value_counts().to_dict()}")
         logger.info(f"Label mapping: 0=Normal, 1=Abnormal")
@@ -248,8 +326,16 @@ class Experiment1Analyzer:
             
             # 确保X和y的索引对齐
             common_idx = X.index.intersection(y.index)
+            logger.info(f"Feature matrix shape: {X.shape}")
+            logger.info(f"Target variable shape: {y.shape}")
+            logger.info(f"Common indices: {len(common_idx)}")
+            
             if len(common_idx) < len(X.index):
                 logger.warning(f"Removing {len(X.index) - len(common_idx)} samples due to missing targets")
+            
+            if len(common_idx) == 0:
+                logger.error(f"No common indices found between features and targets for {pipeline_name}")
+                continue
             
             X_aligned = X.loc[common_idx]
             y_aligned = y.loc[common_idx]
@@ -267,15 +353,22 @@ class Experiment1Analyzer:
         """
         logger.info("Creating visualizations...")
         
+        if not results:
+            logger.error("No results to visualize")
+            return pd.DataFrame()
+        
         # 1. 性能比较图
         fig, axes = plt.subplots(1, 3, figsize=(15, 5))
         
         metrics = ['auc', 'accuracy', 'f1']
         metric_names = ['AUC', 'Accuracy', 'F1 Score']
         
+        # 只处理有结果的pipeline
+        available_pipelines = [p for p in self.featuresets if p in results]
+        
         for i, (metric, name) in enumerate(zip(metrics, metric_names)):
-            values = [results[pipeline]['oof_scores'][metric] for pipeline in self.featuresets]
-            pipeline_names = [p.split('__')[-1] for p in self.featuresets]  # 提取pipeline名称
+            values = [results[pipeline]['oof_scores'][metric] for pipeline in available_pipelines]
+            pipeline_names = [p.split('__')[-1] for p in available_pipelines]  # 提取pipeline名称
             
             axes[i].bar(pipeline_names, values, color=['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728'])
             axes[i].set_title(f'{name} Comparison')
@@ -293,8 +386,8 @@ class Experiment1Analyzer:
         plt.show()
         
         # 2. 统计显著性热图
-        pipeline_names = [p.split('__')[-1] for p in self.featuresets]
-        auc_scores = [results[pipeline]['oof_scores']['auc'] for pipeline in self.featuresets]
+        pipeline_names = [p.split('__')[-1] for p in available_pipelines]
+        auc_scores = [results[pipeline]['oof_scores']['auc'] for pipeline in available_pipelines]
         
         # 计算差异矩阵
         diff_matrix = np.zeros((len(pipeline_names), len(pipeline_names)))
@@ -364,9 +457,9 @@ def main():
     # 3. 创建目标变量
     y = analyzer.create_target_variable(recordings)
     
-    # 4. 创建groups（使用subject_id）
-    subject_to_recording = {r['subject_id']: r['recording_id'] for r in recordings}
-    groups = pd.Series([subject_to_recording.get(rid, rid) for rid in y.index], index=y.index)
+    # 4. 创建groups（使用subject_id作为group，但索引是recording_id）
+    recording_to_subject = {r['recording_id']: r['subject_id'] for r in recordings}
+    groups = pd.Series([recording_to_subject.get(rid, rid) for rid in y.index], index=y.index)
     
     # 5. 比较所有pipeline
     results = analyzer.compare_pipelines(all_features, y, groups)
@@ -391,4 +484,11 @@ def main():
     return results
 
 if __name__ == "__main__":
-    main()
+    print("Starting Experiment 1 analysis...")
+    try:
+        main()
+        print("Experiment 1 analysis completed successfully!")
+    except Exception as e:
+        print(f"Error in Experiment 1 analysis: {e}")
+        import traceback
+        traceback.print_exc()

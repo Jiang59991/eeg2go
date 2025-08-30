@@ -2,49 +2,74 @@ import sqlite3
 import json
 import os
 import numpy as np
+import time
+import random
 from logging_config import logger
 
 DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "database", "eeg2go.db"))
 
-def save_feature_values(recording_id, results):
+def save_feature_values(recording_id, results, max_retries=5):
     """
-    Save extracted feature values to the database.
+    Save extracted feature values to the database with retry mechanism for database locks.
     
     Parameters:
         recording_id (int): The recording ID
         results (dict): {fxdef_id: {value, dim, shape, notes}}
+        max_retries (int): Maximum number of retry attempts
     """
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-
-    for fxid, res in results.items():
-        # Handle None values (failed features)
-        if res["value"] is None:
-            value = "null"
-        else:
-            # 对于结构化数据，直接存储完整的JSON
-            value = json.dumps(res["value"], ensure_ascii=False)
-            
-        dim = res.get("dim", "unknown")
-        shape = json.dumps(res.get("shape", []))
-        notes = res.get("notes", "")
-
+    for attempt in range(max_retries):
         try:
-            c.execute("""
-                INSERT OR REPLACE INTO feature_values 
-                (fxdef_id, recording_id, value, dim, shape, notes)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (fxid, recording_id, value, dim, shape, notes))
-        except Exception as e:
-            logger.error(f"Failed to insert fxid={fxid}: {e}")
+            # 使用WAL模式提高并发性能
+            conn = sqlite3.connect(DB_PATH, timeout=30.0)
+            conn.execute("PRAGMA journal_mode=WAL")
+            conn.execute("PRAGMA synchronous=NORMAL")
+            conn.execute("PRAGMA cache_size=10000")
+            conn.execute("PRAGMA temp_store=MEMORY")
+            c = conn.cursor()
 
-    conn.commit()
-    conn.close()
-    
-    # Count successful and failed features
-    successful = sum(1 for res in results.values() if res["value"] is not None)
-    failed = len(results) - successful
-    logger.info(f"Saved {len(results)} feature values for recording {recording_id} (successful: {successful}, failed: {failed})")
+            for fxid, res in results.items():
+                # Handle None values (failed features)
+                if res["value"] is None:
+                    value = "null"
+                else:
+                    # 对于结构化数据，直接存储完整的JSON
+                    value = json.dumps(res["value"], ensure_ascii=False)
+                    
+                dim = res.get("dim", "unknown")
+                shape = json.dumps(res.get("shape", []))
+                notes = res.get("notes", "")
+
+                try:
+                    c.execute("""
+                        INSERT OR REPLACE INTO feature_values 
+                        (fxdef_id, recording_id, value, dim, shape, notes)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                    """, (fxid, recording_id, value, dim, shape, notes))
+                except Exception as e:
+                    logger.error(f"Failed to insert fxid={fxid}: {e}")
+
+            conn.commit()
+            conn.close()
+            
+            # Count successful and failed features
+            successful = sum(1 for res in results.values() if res["value"] is not None)
+            failed = len(results) - successful
+            logger.info(f"Saved {len(results)} feature values for recording {recording_id} (successful: {successful}, failed: {failed})")
+            return  # 成功保存，退出重试循环
+            
+        except sqlite3.OperationalError as e:
+            if "database is locked" in str(e) and attempt < max_retries - 1:
+                # 随机延迟避免冲突
+                delay = random.uniform(0.1, 2.0) * (attempt + 1)
+                logger.warning(f"Database locked for recording {recording_id}, attempt {attempt + 1}/{max_retries}, retrying in {delay:.2f}s: {e}")
+                time.sleep(delay)
+                continue
+            else:
+                logger.error(f"Database error for recording {recording_id} after {attempt + 1} attempts: {e}")
+                raise
+        except Exception as e:
+            logger.error(f"Unexpected error saving features for recording {recording_id}: {e}")
+            raise
 
 
 def is_all_nan_feature(value_json):

@@ -202,7 +202,7 @@ def create_tuab_subset_for_experiment1():
                 'filename': row[1],
                 'path': row[2],
                 'duration': row[3],
-                'is_abnormal': bool(row[4])
+                'is_abnormal': row[4] == '1' if isinstance(row[4], str) else bool(row[4])
             })
     
     conn.close()

@@ -90,6 +90,7 @@ module_scripts = [
     "database.init_db",
     # "database.import_harvard_demo",
     "database.import_sleep_edfx",
+    "database.import_tuab_data",
     "database.default_pipelines",
     "database.default_fxdefs",
     "database.default_featuresets",

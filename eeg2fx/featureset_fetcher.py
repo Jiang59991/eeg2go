@@ -2,6 +2,8 @@ import os
 import sqlite3
 import json
 import gc
+import time
+import random
 from collections import deque
 import inspect
 from .featureset_grouping import load_fxdefs_for_set
@@ -16,16 +18,32 @@ DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "databas
 MAX_MEMORY_GB = 1  # Set the memory usage limit for a single recording file (GB)
 
 @auto_gc
-def load_cached_feature_value(fxid, recording_id):
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute("""
-        SELECT value, dim, shape, notes
-        FROM feature_values
-        WHERE fxdef_id = ? AND recording_id = ?
-    """, (fxid, recording_id))
-    row = c.fetchone()
-    conn.close()
+def load_cached_feature_value(fxid, recording_id, max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            conn = sqlite3.connect(DB_PATH, timeout=30.0)
+            conn.execute("PRAGMA journal_mode=WAL")
+            c = conn.cursor()
+            c.execute("""
+                SELECT value, dim, shape, notes
+                FROM feature_values
+                WHERE fxdef_id = ? AND recording_id = ?
+            """, (fxid, recording_id))
+            row = c.fetchone()
+            conn.close()
+            break  # 成功读取，退出重试循环
+        except sqlite3.OperationalError as e:
+            if "database is locked" in str(e) and attempt < max_retries - 1:
+                delay = random.uniform(0.1, 1.0) * (attempt + 1)
+                logger.warning(f"Database locked reading fxid={fxid}, attempt {attempt + 1}/{max_retries}, retrying in {delay:.2f}s")
+                time.sleep(delay)
+                continue
+            else:
+                logger.error(f"Database error reading fxid={fxid} after {attempt + 1} attempts: {e}")
+                return None
+        except Exception as e:
+            logger.error(f"Unexpected error reading fxid={fxid}: {e}")
+            return None
 
     if row:
         value, dim, shape, notes = row
