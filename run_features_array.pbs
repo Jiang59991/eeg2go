@@ -1,0 +1,47 @@
+#!/bin/bash
+#PBS -N eeg_features_array
+#PBS -l select=1:ncpus=4:mem=16gb
+#PBS -l walltime=05:00:00
+#PBS -j oe
+#PBS -o tmp/
+#PBS -e tmp/
+
+cd $PBS_O_WORKDIR
+
+echo "Job ID: $PBS_JOBID"
+echo "Array Index: $PBS_ARRAY_INDEX"
+echo "Start time: $(date)"
+echo "Running in: $(pwd)"
+
+source ~/miniconda/etc/profile.d/conda.sh
+conda activate eeg2go
+
+# 导入从 qsub -v 传入的环境变量
+if [ -n "$EEG2GO_LOG_FILE" ]; then
+  export EEG2GO_LOG_FILE
+fi
+
+# 从任务文件中读取当前任务的信息
+TASK_FILE="$PBS_O_WORKDIR/tmp/experiment1_tasks.txt"
+if [ ! -f "$TASK_FILE" ]; then
+    echo "Error: Task file $TASK_FILE not found"
+    exit 1
+fi
+
+# 读取当前array index对应的任务
+TASK_LINE=$(sed -n "${PBS_ARRAY_INDEX}p" "$TASK_FILE")
+if [ -z "$TASK_LINE" ]; then
+    echo "Error: No task found for array index $PBS_ARRAY_INDEX"
+    exit 1
+fi
+
+# 解析任务行：recording_id,featureset_id,featureset_name
+IFS=',' read -r RECORDING_ID FEATURE_SET_ID FEATURESET_NAME <<< "$TASK_LINE"
+
+echo "Processing: recording=$RECORDING_ID, feature_set=$FEATURE_SET_ID ($FEATURESET_NAME)"
+
+# 运行特征提取
+python -m tools.run_feature_for_recording --featureset "$FEATURE_SET_ID" --recording "$RECORDING_ID"
+
+echo "Completed: recording=$RECORDING_ID, feature_set=$FEATURE_SET_ID"
+echo "End time: $(date)"

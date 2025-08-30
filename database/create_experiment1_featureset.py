@@ -4,6 +4,7 @@ import sqlite3
 from typing import Dict, List
 
 from logging_config import logger
+from database.add_pipeline import add_pipeline
 from database.add_fxdef import add_fxdefs
 from database.add_featureset import add_featureset
 
@@ -23,6 +24,87 @@ BANDS = ["delta", "theta", "alpha", "beta"]
 CHANS = ["F3", "F4", "C3", "C4", "O1", "O2"]
 
 
+# === Part A: 先创建/登记实验 1 用到的 pipelines ===
+def create_experiment1_pipelines():
+    """
+    将实验 1 用到的 4 条 pipeline 写入 pipedef（若已存在，add_pipeline 通常会做去重/忽略）。
+    """
+    pipelines = [
+        {
+            "shortname": "P0_minimal_hp",
+            "description": "Minimal preprocessing baseline: resample -> 0.5 Hz high-pass -> epoch",
+            "source": "experiment1",
+            "chanset": "10/20",
+            "fs": 250.0,
+            "hp": 0.5,
+            "lp": 0,
+            "epoch": 10.0,
+            "sample_rating": 9.0,
+            "steps": [
+                ["resample", "resample", ["raw"], {"sfreq": 250.0}],
+                ["hp", "filter", ["resample"], {"hp": 0.5, "lp": 0}],
+                ["epoch", "epoch", ["hp"], {"duration": 10.0}],
+            ],
+        },
+        {
+            "shortname": "P1_hp_avg_reref",
+            "description": "Minimal + average rereferencing: resample -> 0.5 Hz HP -> reref(avg) -> epoch",
+            "source": "experiment1",
+            "chanset": "10/20",
+            "fs": 250.0,
+            "hp": 0.5,
+            "lp": 0,
+            "epoch": 10.0,
+            "sample_rating": 9.0,
+            "steps": [
+                ["resample", "resample", ["raw"], {"sfreq": 250.0}],
+                ["hp", "filter", ["resample"], {"hp": 0.5, "lp": 0}],
+                ["reref", "reref", ["hp"], {"method": "average"}],
+                ["epoch", "epoch", ["reref"], {"duration": 10.0}],
+            ],
+        },
+        {
+            "shortname": "P2_hp_notch50",
+            "description": "Minimal + 50 Hz notch: resample -> 0.5 Hz HP -> notch(50) -> epoch",
+            "source": "experiment1",
+            "chanset": "10/20",
+            "fs": 250.0,
+            "hp": 0.5,
+            "lp": 0,
+            "epoch": 10.0,
+            "sample_rating": 9.0,
+            "steps": [
+                ["resample", "resample", ["raw"], {"sfreq": 250.0}],
+                ["hp", "filter", ["resample"], {"hp": 0.5, "lp": 0}],
+                ["notch", "notch_filter", ["hp"], {"freq": 50.0}],
+                ["epoch", "epoch", ["notch"], {"duration": 10.0}],
+            ],
+        },
+        {
+            "shortname": "P3_hp_ica_auto",
+            "description": "Minimal + ICA auto artifact removal: resample -> 0.5 Hz HP -> ICA(auto) -> epoch",
+            "source": "experiment1",
+            "chanset": "10/20",
+            "fs": 250.0,
+            "hp": 0.5,
+            "lp": 0,
+            "epoch": 10.0,
+            "sample_rating": 9.0,
+            "steps": [
+                ["resample", "resample", ["raw"], {"sfreq": 250.0}],
+                ["hp", "filter", ["resample"], {"hp": 0.5, "lp": 0}],
+                ["ica", "ica", ["hp"], {"n_components": 20, "detect_artifacts": "auto"}],
+                ["epoch", "epoch", ["ica"], {"duration": 10.0}],
+            ],
+        },
+    ]
+
+    for p in pipelines:
+        logger.info(f"Adding pipeline: {p['shortname']}")
+        add_pipeline(p)
+
+
+# === Part B: 基于上述 pipelines，创建特征定义与特征集 ===
 def get_pipeline_id_by_shortname(shortname: str) -> int:
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -70,6 +152,8 @@ def create_experiment1_featuresets() -> Dict[str, int]:
       - exp1_bp_rel__P3_hp_ica_auto
     返回：{featureset_name: featureset_id}
     """
+    create_experiment1_pipelines()
+
     results: Dict[str, int] = {}
 
     for shortname in PIPE_SHORTNAMES:
@@ -82,8 +166,9 @@ def create_experiment1_featuresets() -> Dict[str, int]:
         fs_id = add_featureset({
             "name": fs_name,
             "description": (
-                f"Experiment1 bandpower_rel (delta/theta/alpha/beta) × 6 chans "
-                f"for pipeline {shortname}; per-epoch 1d, downstream aggregate by median/IQR"
+                "Experiment1: relative bandpower (delta/theta/alpha/beta) × 6 chans; "
+                f"pipeline={shortname}; output per-epoch 1d; "
+                "downstream aggregation: channel median → recording median."
             ),
             "fxdef_ids": fxids,
         })

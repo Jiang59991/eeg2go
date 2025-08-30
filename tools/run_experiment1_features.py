@@ -7,6 +7,8 @@ import subprocess
 from datetime import datetime
 from typing import List, Dict
 
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from logging_config import logger
 
 DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "database", "eeg2go.db"))
@@ -72,7 +74,7 @@ def get_tuab_subset_recordings(dataset_id: int, limit: int = None) -> List[Dict]
                 'filename': row[2],
                 'path': row[3],
                 'duration': row[4],
-                'is_abnormal': bool(row[5])
+                'is_abnormal': row[5] == '1' if isinstance(row[5], str) else bool(row[5])
             })
     
     conn.close()
@@ -84,70 +86,140 @@ def get_tuab_subset_recordings(dataset_id: int, limit: int = None) -> List[Dict]
 
 
 def submit_feature_extraction_jobs(recordings: List[Dict], featuresets: Dict[str, int], 
-                                  queue: str = None, dry_run: bool = False) -> Dict[str, List[str]]:
+                                  queue: str = None, dry_run: bool = False, 
+                                  max_concurrent: int = 100) -> Dict[str, List[str]]:
     """
-    为每个pipeline提交特征提取任务
+    使用array jobs提交特征提取任务
     """
     project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     logs_dir = os.path.join(project_root, "logs", "experiment1")
     os.makedirs(logs_dir, exist_ok=True)
     
+    # 确保tmp目录存在
+    tmp_dir = os.path.join(project_root, "tmp")
+    os.makedirs(tmp_dir, exist_ok=True)
+    
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     job_results = {}
     
-    for featureset_name, featureset_id in featuresets.items():
-        logger.info(f"Submitting jobs for {featureset_name} (ID: {featureset_id})")
+    # 创建任务文件
+    task_file = os.path.join(tmp_dir, "experiment1_tasks.txt")
+    task_count = 0
+    
+    with open(task_file, 'w') as f:
+        for featureset_name, featureset_id in featuresets.items():
+            for recording in recordings:
+                recording_id = recording['recording_id']
+                # 格式：recording_id,featureset_id,featureset_name
+                f.write(f"{recording_id},{featureset_id},{featureset_name}\n")
+                task_count += 1
+    
+    logger.info(f"Created task file with {task_count} tasks")
+    
+    # 计算array job的范围
+    # 根据Imperial RCS文档，array jobs最大限制是10,000
+    if task_count > 10000:
+        logger.warning(f"Task count ({task_count}) exceeds maximum array job size (10,000)")
+        logger.info("Will split into multiple array jobs")
         
-        # 为每个pipeline创建单独的日志文件
-        pipeline_log_file = os.path.join(logs_dir, f"{featureset_name}_{timestamp}.log")
-        job_ids = []
+        # 分批处理
+        batch_size = 10000
+        num_batches = (task_count + batch_size - 1) // batch_size
         
-        for recording in recordings:
-            recording_id = recording['recording_id']
-            job_name = f"exp1_{featureset_name}_{recording_id}"
+        for batch_idx in range(num_batches):
+            start_idx = batch_idx * batch_size + 1
+            end_idx = min((batch_idx + 1) * batch_size, task_count)
             
-            env_vars = (
-                f"FEATURE_SET_ID={featureset_id},RECORDING_ID={recording_id},"
-                f"EEG2GO_LOG_FILE={pipeline_log_file},EEG2GO_NO_FILE_LOG=0"
-            )
+            # 创建批次任务文件
+            batch_task_file = os.path.join(tmp_dir, f"experiment1_tasks_batch_{batch_idx}.txt")
+            with open(task_file, 'r') as src, open(batch_task_file, 'w') as dst:
+                for i, line in enumerate(src, 1):
+                    if start_idx <= i <= end_idx:
+                        dst.write(line)
             
-            cmd = [
-                "qsub",
-                "-N", job_name,
-                "-v", env_vars,
-            ]
+            # 提交批次array job
+            job_id = submit_array_job(batch_task_file, start_idx, end_idx, queue, dry_run, max_concurrent)
+            job_results[f"batch_{batch_idx}"] = [job_id]
             
-            if queue:
-                cmd.extend(["-q", queue])
-            
-            cmd.append("run_features.pbs")
-            
-            if dry_run:
-                line = f"DRY RUN: {' '.join(cmd)}"
-                print(line)
-                with open(pipeline_log_file, "a", encoding="utf-8") as f:
-                    f.write(line + "\n")
-            else:
-                env = os.environ.copy()
-                env["EEG2GO_NO_FILE_LOG"] = "1"
-                
-                result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, 
-                                      text=True, env=env)
-                
-                if result.returncode == 0:
-                    job_id = result.stdout.strip()
-                    job_ids.append(job_id)
-                    msg = f"Submitted {job_name}: {job_id}"
-                else:
-                    msg = f"Failed to submit {job_name}: {result.stderr.strip()}"
-                
-                print(msg)
-                with open(pipeline_log_file, "a", encoding="utf-8") as f:
-                    f.write(msg + "\n")
-        
-        job_results[featureset_name] = job_ids
+    else:
+        # 单个array job
+        job_id = submit_array_job(task_file, 1, task_count, queue, dry_run, max_concurrent)
+        job_results["single_array"] = [job_id]
     
     return job_results
+
+
+def submit_array_job(task_file: str, start_idx: int, end_idx: int, 
+                    queue: str = None, dry_run: bool = False, 
+                    max_concurrent: int = 100) -> str:
+    """
+    提交单个array job
+    """
+    # 检查任务文件是否存在
+    if not os.path.exists(task_file):
+        raise FileNotFoundError(f"Task file not found: {task_file}")
+    
+    # 检查PBS脚本是否存在
+    pbs_script = "run_features_array.pbs"
+    if not os.path.exists(pbs_script):
+        raise FileNotFoundError(f"PBS script not found: {pbs_script}")
+    
+    # 设置环境变量
+    env_vars = f"EEG2GO_LOG_FILE={os.path.join('logs', 'experiment1', 'array_job.log')}"
+    
+    # 构建qsub命令
+    cmd = [
+        "qsub",
+        "-N", "eeg_features_array",
+        "-v", env_vars,
+        "-J", f"{start_idx}-{end_idx}%{max_concurrent}",  # 限制并发数
+        "-o", "tmp/",
+        "-e", "tmp/",
+    ]
+    
+    if queue:
+        cmd.extend(["-q", queue])
+    
+    cmd.append(pbs_script)
+    
+    # 打印完整命令用于调试
+    full_cmd = " ".join(cmd)
+    logger.info(f"Submitting array job command: {full_cmd}")
+    print(f"Submitting array job command: {full_cmd}")
+    
+    if dry_run:
+        print(f"DRY RUN: {full_cmd}")
+        return "DRY_RUN_JOB_ID"
+    else:
+        try:
+            result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, 
+                                  text=True, timeout=30)
+            
+            print(f"qsub stdout: {result.stdout}")
+            print(f"qsub stderr: {result.stderr}")
+            print(f"qsub return code: {result.returncode}")
+            
+            if result.returncode == 0:
+                job_id = result.stdout.strip()
+                logger.info(f"Successfully submitted array job {start_idx}-{end_idx}: {job_id}")
+                print(f"Successfully submitted array job {start_idx}-{end_idx}: {job_id}")
+                return job_id
+            else:
+                error_msg = f"Failed to submit array job: {result.stderr.strip()}"
+                logger.error(error_msg)
+                print(f"ERROR: {error_msg}")
+                raise RuntimeError(error_msg)
+                
+        except subprocess.TimeoutExpired:
+            error_msg = "qsub command timed out"
+            logger.error(error_msg)
+            print(f"ERROR: {error_msg}")
+            raise RuntimeError(error_msg)
+        except Exception as e:
+            error_msg = f"Unexpected error submitting array job: {str(e)}"
+            logger.error(error_msg)
+            print(f"ERROR: {error_msg}")
+            raise
 
 
 def main():
@@ -159,6 +231,8 @@ def main():
     parser.add_argument("--dry-run", action="store_true", help="Print qsub commands without submitting")
     parser.add_argument("--pipelines", nargs="+", choices=["P0", "P1", "P2", "P3"], 
                        default=["P0", "P1", "P2", "P3"], help="Which pipelines to run")
+    parser.add_argument("--max-concurrent", type=int, default=20, 
+                       help="Maximum number of concurrent array sub-jobs (default: 20)")
     args = parser.parse_args()
     
     try:
@@ -198,9 +272,21 @@ def main():
             return 1
         
         # 提交特征提取任务
-        job_results = submit_feature_extraction_jobs(
-            recordings, selected_featuresets, args.queue, args.dry_run
-        )
+        print(f"\n=== Starting job submission ===")
+        print(f"Recordings: {len(recordings)}")
+        print(f"Featuresets: {list(selected_featuresets.keys())}")
+        print(f"Queue: {args.queue}")
+        print(f"Dry run: {args.dry_run}")
+        print(f"Max concurrent: {args.max_concurrent}")
+        
+        try:
+            job_results = submit_feature_extraction_jobs(
+                recordings, selected_featuresets, args.queue, args.dry_run, args.max_concurrent
+            )
+        except Exception as e:
+            print(f"ERROR during job submission: {e}")
+            logger.error(f"Job submission failed: {e}")
+            return 1
         
         # 打印结果摘要
         print("\n=== Job Submission Summary ===")
