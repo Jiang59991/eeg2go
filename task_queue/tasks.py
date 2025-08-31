@@ -10,6 +10,7 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 from celery import current_task
 from celery.utils.log import get_task_logger
+import traceback
 
 # Add project root directory to Python path
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -122,17 +123,26 @@ def experiment_task(self, task_id: int, parameters: Dict[str, Any],
     
     try:
         # Update task status to running
+        logger.info(f"Updating task {task_id} status to RUNNING...")
         task_manager = get_task_manager()
         task_manager.update_task_status(task_id, TaskStatus.RUNNING)
         
         # Execute experiment
-        # 从parameters中提取output_dir和其他参数
-        output_dir = parameters.get('output_dir', f'experiments/experiment_{task_id}')
+        # 生成唯一的输出目录
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_dir = parameters.get('output_dir', f'experiments/{experiment_type}_{task_id}_{timestamp}')
+        
+        # 确保输出目录存在
+        os.makedirs(output_dir, exist_ok=True)
+        logger.info(f"Created output directory: {output_dir}")
+        
         extra_args = parameters.copy()
         
         # 移除已明确传递的参数
         for key in ['dataset_id', 'feature_set_id', 'experiment_type', 'output_dir']:
             extra_args.pop(key, None)
+        
+        logger.info(f"Calling run_experiment with parameters: experiment_type={experiment_type}, dataset_id={dataset_id}, feature_set_id={feature_set_id}")
         
         result = run_experiment(
             experiment_type=experiment_type,
@@ -142,16 +152,39 @@ def experiment_task(self, task_id: int, parameters: Dict[str, Any],
             extra_args=extra_args
         )
         
-        # Update task status to completed
+        logger.info(f"run_experiment completed successfully for task {task_id}")
+        logger.info(f"Result: {result}")
+        
+        # 更新任务状态，包含输出目录信息
+        result['output_dir'] = output_dir
+        logger.info(f"Updating task {task_id} status to COMPLETED...")
         task_manager.update_task_status(task_id, TaskStatus.COMPLETED, result=result)
-        logger.info(f"Experiment task {task_id} completed")
+        
+        # 更新数据库中的output_dir字段
+        logger.info(f"Updating output_dir in database for task {task_id}...")
+        conn = sqlite3.connect(task_manager.db_path)
+        c = conn.cursor()
+        c.execute("UPDATE tasks SET output_dir = ? WHERE id = ?", (output_dir, task_id))
+        conn.commit()
+        conn.close()
+        
+        logger.info(f"Experiment task {task_id} completed successfully, output_dir: {output_dir}")
         
         return result
         
     except Exception as e:
         error_message = str(e)
-        task_manager = get_task_manager()
-        task_manager.update_task_status(task_id, TaskStatus.FAILED, error_message=error_message)
+        logger.error(f"Exception in experiment task {task_id}: {error_message}")
+        logger.error(f"Exception type: {type(e).__name__}")
+        logger.error(f"Exception traceback: {traceback.format_exc()}")
+        
+        try:
+            task_manager = get_task_manager()
+            task_manager.update_task_status(task_id, TaskStatus.FAILED, error_message=error_message)
+            logger.info(f"Task {task_id} status updated to FAILED")
+        except Exception as update_error:
+            logger.error(f"Failed to update task status to FAILED: {update_error}")
+        
         logger.error(f"Experiment task {task_id} failed: {error_message}")
         raise
 

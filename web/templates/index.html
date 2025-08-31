@@ -25,6 +25,14 @@
                     <p class="text-muted">EEG Feature Extraction System</p>
                 </div>
                 
+                <!-- System Mode Status -->
+                <div class="sidebar-section">
+                    <h6><i class="bi bi-info-circle"></i> System Mode</h6>
+                    <div id="systemModeStatus" class="alert alert-info alert-sm">
+                        <small><i class="bi bi-clock"></i> Loading...</small>
+                    </div>
+                </div>
+                
                 <!-- Navigation -->
                 <div class="sidebar-section">
                     <h6><i class="bi bi-compass"></i> Navigation</h6>
@@ -701,9 +709,22 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Output Files Section -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="bi bi-folder"></i> Output Files</h6>
+                        </div>
+                        <div class="card-body" id="experimentFiles">
+                            <p class="text-muted">Loading files...</p>
+                        </div>
+                    </div>
+                    
                     <!-- Feature Results Table -->
                     <div class="card">
-                        <div class="card-header" id="experimentResultsHeader"></div>
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="bi bi-table"></i> Feature Results</h6>
+                        </div>
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-sm">
@@ -925,6 +946,48 @@
         margin-top: 4px;
         margin-bottom: 10px;
         font-size: 1rem;
+    }
+    
+    /* 动态参数显示样式 */
+    .conditional-param {
+        transition: all 0.3s ease;
+    }
+    
+    .conditional-param.hidden {
+        opacity: 0;
+        height: 0;
+        overflow: hidden;
+        margin: 0;
+        padding: 0;
+    }
+    
+    /* 参数组样式 */
+    .parameter-group {
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        background-color: #f8f9fa;
+    }
+    
+    .parameter-group h6 {
+        color: #495057;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+    }
+    
+    /* 表单验证样式 */
+    .form-control.is-invalid,
+    .form-select.is-invalid {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+    
+    .invalid-feedback {
+        display: block;
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
     }
     </style>
 

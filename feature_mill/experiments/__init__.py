@@ -55,17 +55,10 @@ AVAILABLE_EXPERIMENTS = {
                 'default': 20,
                 'required': False
             },
-            'plot_corr_matrix': {
+            'generate_plots': {
                 'type': 'checkbox',
-                'label': 'Plot Correlation Matrix',
-                'description': 'Generate correlation matrix visualization',
-                'default': True,
-                'required': False
-            },
-            'plot_scatter': {
-                'type': 'checkbox',
-                'label': 'Plot Scatter Plots',
-                'description': 'Generate scatter plots for top correlations',
+                'label': 'Generate Plots',
+                'description': 'Generate correlation matrix and scatter plot visualizations',
                 'default': True,
                 'required': False
             }
@@ -158,12 +151,11 @@ AVAILABLE_EXPERIMENTS = {
                 'default': 0.95,
                 'required': False
             },
-            'selection_methods': {
-                'type': 'multi_select',
-                'label': 'Selection Methods',
-                'description': 'Feature selection methods to use',
-                'options': ['variance', 'correlation', 'mutual_info', 'lasso', 'random_forest'],
-                'default': ['variance', 'correlation', 'mutual_info'],
+            'generate_plots': {
+                'type': 'checkbox',
+                'label': 'Generate Plots',
+                'description': 'Generate selection results and feature importance plots',
+                'default': True,
                 'required': False
             }
         }
@@ -185,7 +177,7 @@ AVAILABLE_EXPERIMENTS = {
             'age_threshold': {
                 'type': 'number',
                 'label': 'Age Threshold',
-                'description': 'Age threshold for binary classification (young vs old)',
+                'description': 'Age threshold for binary classification (young vs old). Only applicable when target variable is age_group or age_class.',
                 'min': 18,
                 'max': 100,
                 'step': 1,
@@ -212,27 +204,10 @@ AVAILABLE_EXPERIMENTS = {
                 'default': 5,
                 'required': False
             },
-            'random_state': {
-                'type': 'number',
-                'label': 'Random State',
-                'description': 'Random seed for reproducibility',
-                'min': 0,
-                'max': 1000,
-                'step': 1,
-                'default': 42,
-                'required': False
-            },
-            'plot_results': {
+            'generate_plots': {
                 'type': 'checkbox',
-                'label': 'Plot Results',
-                'description': 'Generate classification result plots',
-                'default': True,
-                'required': False
-            },
-            'plot_feature_importance': {
-                'type': 'checkbox',
-                'label': 'Plot Feature Importance',
-                'description': 'Generate feature importance plots',
+                'label': 'Generate Plots',
+                'description': 'Generate classification result plots and feature importance',
                 'default': True,
                 'required': False
             }

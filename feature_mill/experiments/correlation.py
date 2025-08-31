@@ -16,7 +16,9 @@ from scipy.stats import pearsonr, spearmanr
 import warnings
 from sklearn.preprocessing import LabelEncoder
 from datetime import datetime
+import time
 from logging_config import logger  # 使用全局logger
+import json # Added for saving results_index.json
 warnings.filterwarnings('ignore')
 
 # Set English font
@@ -39,7 +41,7 @@ def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs)
             - top_n: 显示前N个最相关特征，默认20
             - plot_corr_matrix: 是否绘制相关性矩阵，默认True
             - plot_scatter: 是否绘制散点图，默认True
-            - save_detailed_results: 是否保存详细结果，默认True
+            - generate_plots: 是否生成图表，默认True
     
     Returns:
         str: 实验摘要
@@ -49,9 +51,7 @@ def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs)
     method = kwargs.get('method', 'pearson')
     min_corr = kwargs.get('min_corr', 0.3)
     top_n = kwargs.get('top_n', 20)
-    plot_corr_matrix = kwargs.get('plot_corr_matrix', True)
-    plot_scatter = kwargs.get('plot_scatter', True)
-    save_detailed_results = kwargs.get('save_detailed_results', True)
+    generate_plots = kwargs.get('generate_plots', True)
     
     logger.info(f"Start correlation analysis experiment")
     logger.info(f"Feature matrix shape: {df_feat.shape}")
@@ -98,496 +98,32 @@ def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs)
     logger.info(f"Numeric columns: {len(numeric_columns)}")
     logger.info(f"Non-numeric columns: {len(non_numeric_columns)}")
     
-    # 移除非数值型列
-    columns_to_remove = [col for col in non_numeric_columns if col != 'recording_id']
-    df_processed = df_processed.drop(columns=columns_to_remove)
-    logger.info(f"Non-numeric columns removed: {len(columns_to_remove)}")
-    logger.info(f"Shape after removing non-numeric columns: {df_processed.shape}")
-    
-    # 移除recording_id列，只保留特征和目标变量
-    if 'recording_id' in df_processed.columns:
-        df_processed = df_processed.drop(columns=['recording_id'])
-    
-    # 分析每个目标变量
-    results = {}
-    
-    for target_var in target_vars:
-        df = df_processed.copy()
-        
-        logger.info(f"Target variables: {target_vars}")
-        
-        # 获取特征列（排除目标变量）
-        feature_cols = [col for col in df.columns if col not in target_vars]
-        
-        logger.info(f"Feature columns: {len(feature_cols)}")
-        
-        if len(feature_cols) == 0:
-            logger.warning("WARNING: No feature columns available for analysis!")
-            logger.warning("This means all columns are either recording_id or target variables")
-            continue
-        
-        # 检查目标变量是否存在
-        if target_var not in df.columns:
-            logger.warning(f"Warning: Target variable {target_var} not in data")
-            # 为不存在的目标变量创建空结果
-            results[target_var] = {
-                'all_results': pd.DataFrame(),
-                'top_results': pd.DataFrame(),
-                'total_features': 0,
-                'significant_count': 0
-            }
-            continue
-        
-        logger.info(f"Analyzing target variable: {target_var}")
-        logger.info(f"Number of features to analyze: {len(feature_cols)}")
-        
-        # 显示一些特征数据样本
-        # logger.info(f"Sample feature data:")
-        # for feature in feature_cols[:3]:  # 只显示前3个特征
-        #     logger.info(f"  {feature}: mean={df[feature].mean():.4f}, std={df[feature].std():.4f}, range=[{df[feature].min():.4f}, {df[feature].max():.4f}]")
-        
-        # 处理目标变量
-        if target_var in ['sex', 'race', 'ethnicity']:
-            # 分类变量，使用标签编码
+    # 处理分类变量
+    for col in non_numeric_columns:
+        if col in df_processed.columns and col != 'recording_id':
             le = LabelEncoder()
-            df[target_var] = le.fit_transform(df[target_var].astype(str))
-            logger.info(f"Converted categorical variable {target_var} to numeric using LabelEncoder")
-        
-        # 计算相关性
-        correlations = []
-        for feature in feature_cols:
-            # 移除缺失值
-            valid_data = df[[feature, target_var]].dropna()
-            
-            if len(valid_data) < 10:  # 至少需要10个有效数据点
-                continue
-            
-            try:
-                if target_var in ['sex', 'race', 'ethnicity']:
-                    # 对于分类变量，使用点双列相关系数（point-biserial correlation）
-                    # 这相当于皮尔逊相关系数，但更适合二分类变量
-                    corr, p_value = stats.pearsonr(valid_data[feature], valid_data[target_var])
-                    correlation_type = 'point-biserial'
-                else:
-                    # 对于连续变量，使用指定的相关系数方法
-                    if method == 'pearson':
-                        corr, p_value = stats.pearsonr(valid_data[feature], valid_data[target_var])
-                        correlation_type = 'pearson'
-                    elif method == 'spearman':
-                        corr, p_value = stats.spearmanr(valid_data[feature], valid_data[target_var])
-                        correlation_type = 'spearman'
-                    else:
-                        logger.warning(f"Unknown correlation method: {method}, using pearson")
-                        corr, p_value = stats.pearsonr(valid_data[feature], valid_data[target_var])
-                        correlation_type = 'pearson'
-                
-                # 检查p-value是否有效
-                if np.isnan(p_value) or p_value < 0 or p_value > 1:
-                    logger.warning(f"Invalid p-value for feature {feature}: {p_value}")
-                    continue
-                
-                # 判断显著性
-                if p_value < 0.001:
-                    significance = '***'
-                elif p_value < 0.01:
-                    significance = '**'
-                elif p_value < 0.05:
-                    significance = '*'
-                else:
-                    significance = 'ns'
-                
-                correlations.append({
-                    'feature': feature,
-                    'correlation': corr,
-                    'p_value': p_value,
-                    'significance': significance,
-                    'n_samples': len(valid_data),
-                    'correlation_type': correlation_type
-                })
-            except Exception as e:
-                logger.warning(f"Failed to calculate correlation for feature {feature}: {e}")
-                continue
-        
-        # 转换为DataFrame并排序
-        result_df = pd.DataFrame(correlations)
-        if len(result_df) > 0:
-            result_df = result_df.sort_values('correlation', key=abs, ascending=False)
-            result_df['rank'] = range(1, len(result_df) + 1)
-            
-            # 筛选显著相关的特征
-            significant_features = result_df[abs(result_df['correlation']) >= min_corr]
-            
-            results[target_var] = {
-                'all_results': result_df,  # 保存所有特征的结果
-                'top_results': significant_features.head(top_n),  # 只保存满足阈值的特征
-                'total_features': len(result_df),
-                'significant_count': len(significant_features)
-            }
-            
-            logger.info(f"Found {len(result_df)} total features analyzed")
-            logger.info(f"Found {len(significant_features)} features with correlation >= {min_corr}")
-            logger.info(f"Significant features: {results[target_var]['significant_count']}")
-            
-            # 显示前几个最相关的特征
-            logger.info(f"Top correlations:")
-            for _, row in result_df.head(5).iterrows():
-                logger.info(f"  {row['feature']}: corr={row['correlation']:.4f}, p={row['p_value']:.4f}")
-        else:
-            results[target_var] = {
-                'all_results': pd.DataFrame(),
-                'top_results': pd.DataFrame(),
-                'total_features': 0,
-                'significant_count': 0
-            }
+            df_processed[col] = le.fit_transform(df_processed[col].astype(str))
+    
+    # 填充缺失值
+    df_processed = df_processed.fillna(df_processed.median())
+    
+    logger.info(f"Final processed data shape: {df_processed.shape}")
+    
+    # 执行相关性分析
+    results = perform_correlation_analysis(df_processed, target_vars, method, min_corr, top_n)
     
     # 保存结果
-    for target_var, result in results.items():
-        # 保存所有特征的相关性结果（不管相关性高低）
-        if len(result['all_results']) > 0:
-            # 保存所有结果到 _all.csv 文件
-            all_results_file = os.path.join(output_dir, f'correlation_{target_var}_all.csv')
-            result['all_results'].to_csv(all_results_file, index=False)
-            
-            # 保存前N个最相关的结果到 _top.csv 文件
-            if save_detailed_results:
-                top_results_file = os.path.join(output_dir, f'correlation_{target_var}_top.csv')
-                result['top_results'].to_csv(top_results_file, index=False)
-            
-            # 保存汇总结果
-            summary_file = os.path.join(output_dir, f'correlation_{target_var}_summary.csv')
-            summary_data = {
-                'target_variable': [target_var],
-                'total_features': [result['total_features']],
-                'significant_features': [result['significant_count']],
-                'correlation_method': [method],
-                'min_correlation_threshold': [min_corr]
-            }
-            pd.DataFrame(summary_data).to_csv(summary_file, index=False)
-        else:
-            # 即使没有特征数据，也要保存空的结果文件
-            all_results_file = os.path.join(output_dir, f'correlation_{target_var}_all.csv')
-            pd.DataFrame(columns=['feature', 'correlation', 'p_value', 'significance', 'n_samples', 'correlation_type']).to_csv(all_results_file, index=False)
-            
-            top_results_file = os.path.join(output_dir, f'correlation_{target_var}_top.csv')
-            pd.DataFrame(columns=['feature', 'correlation', 'p_value', 'significance', 'n_samples', 'correlation_type']).to_csv(top_results_file, index=False)
-            
-            # 保存汇总结果
-            summary_file = os.path.join(output_dir, f'correlation_{target_var}_summary.csv')
-            summary_data = {
-                'target_variable': [target_var],
-                'total_features': [result['total_features']],
-                'significant_features': [result['significant_count']],
-                'correlation_method': [method],
-                'min_correlation_threshold': [min_corr]
-            }
-            pd.DataFrame(summary_data).to_csv(summary_file, index=False)
+    save_correlation_results(results, output_dir)
     
-    # 绘制相关性矩阵
-    if plot_corr_matrix and len(results) > 0:
-        try:
-            # 重新准备数据用于绘图
-            df_plot = df_combined.copy()
-            
-            # 处理分类变量
-            for target_var in target_vars:
-                if target_var in ['sex', 'race', 'ethnicity'] and target_var in df_plot.columns:
-                    le = LabelEncoder()
-                    df_plot[target_var] = le.fit_transform(df_plot[target_var].astype(str))
-            
-            # 选择前10个最相关的特征进行可视化
-            all_features = []
-            for target_var, result in results.items():
-                if len(result['all_results']) > 0:
-                    top_features = result['all_results'].head(10)['feature'].tolist()
-                    all_features.extend(top_features)
-            
-            if all_features:
-                # 去重
-                unique_features = list(set(all_features))[:20]  # 最多20个特征
-                
-                # 确保所有特征都在数据中
-                available_features = [f for f in unique_features if f in df_plot.columns]
-                available_targets = [t for t in target_vars if t in df_plot.columns]
-                
-                if available_features and available_targets:
-                    # 创建相关性矩阵
-                    corr_matrix = df_plot[available_features + available_targets].corr(method=method)
-                    
-                    plt.figure(figsize=(12, 10))
-                    sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', center=0, 
-                               square=True, fmt='.2f', cbar_kws={'shrink': 0.8})
-                    plt.title(f'Feature Correlation Matrix ({method.capitalize()})')
-                    plt.tight_layout()
-                    plt.savefig(os.path.join(output_dir, 'correlation_matrix.png'), dpi=300, bbox_inches='tight')
-                    plt.close()
-        except Exception as e:
-            logger.warning(f"Failed to create correlation matrix plot: {e}")
+    # 可视化
+    if generate_plots:
+        plot_correlation_matrix(results, output_dir)
+        plot_scatter_plots(df_processed, results, output_dir, top_n)
     
-    # 绘制散点图
-    if plot_scatter and len(results) > 0:
-        try:
-            # 重新准备数据用于绘图
-            df_plot = df_combined.copy()
-            
-            # 处理分类变量
-            for target_var in target_vars:
-                if target_var in ['sex', 'race', 'ethnicity'] and target_var in df_plot.columns:
-                    le = LabelEncoder()
-                    df_plot[target_var] = le.fit_transform(df_plot[target_var].astype(str))
-            
-            for target_var, result in results.items():
-                if len(result['all_results']) > 0 and target_var in df_plot.columns:
-                    top_features = result['all_results'].head(5)['feature'].tolist()
-                    
-                    # 确保特征在数据中
-                    available_features = [f for f in top_features if f in df_plot.columns]
-                    
-                    if available_features:
-                        fig, axes = plt.subplots(2, 3, figsize=(15, 10))
-                        axes = axes.flatten()
-                        
-                        for i, feature in enumerate(available_features[:6]):
-                            if i < len(axes):
-                                ax = axes[i]
-                                
-                                # 确保数据长度匹配
-                                valid_data = df_plot[[target_var, feature]].dropna()
-                                if len(valid_data) > 0:
-                                    ax.scatter(valid_data[target_var], valid_data[feature], alpha=0.6)
-                                    ax.set_xlabel(target_var)
-                                    ax.set_ylabel(feature)
-                                    ax.set_title(f'{feature} vs {target_var}')
-                                    
-                                    # 添加趋势线
-                                    if len(valid_data) > 1:
-                                        try:
-                                            z = np.polyfit(valid_data[target_var], valid_data[feature], 1)
-                                            p = np.poly1d(z)
-                                            ax.plot(valid_data[target_var], p(valid_data[target_var]), "r--", alpha=0.8)
-                                        except Exception as e:
-                                            logger.warning(f"Failed to add trend line for {feature}: {e}")
-                                else:
-                                    ax.text(0.5, 0.5, 'No valid data', ha='center', va='center', transform=ax.transAxes)
-                                    ax.set_title(f'{feature} vs {target_var} (No data)')
-                        
-                        plt.tight_layout()
-                        plt.savefig(os.path.join(output_dir, f'scatter_{target_var}.png'), 
-                                   dpi=300, bbox_inches='tight')
-                        plt.close()
-                    else:
-                        logger.warning(f"No available features for scatter plot with {target_var}")
-        except Exception as e:
-            logger.warning(f"Failed to create scatter plots: {e}")
-            import traceback
-            logger.warning(f"Traceback: {traceback.format_exc()}")
+    # 生成摘要
+    summary = generate_summary(results, df_processed, target_vars, method)
     
-    # 新增：绘制相关性条形图
-    if plot_corr_matrix and len(results) > 0:
-        try:
-            for target_var, result in results.items():
-                if len(result['all_results']) > 0:
-                    # 获取前20个最相关的特征
-                    top_features = result['all_results'].head(20)
-                    
-                    plt.figure(figsize=(12, 8))
-                    
-                    # 创建条形图
-                    bars = plt.barh(range(len(top_features)), top_features['correlation'])
-                    
-                    # 根据显著性设置颜色
-                    colors = []
-                    for significance in top_features['significance']:
-                        if significance == '***':
-                            colors.append('red')
-                        elif significance == '**':
-                            colors.append('orange')
-                        elif significance == '*':
-                            colors.append('yellow')
-                        else:
-                            colors.append('lightgray')
-                    
-                    for i, (bar, color) in enumerate(zip(bars, colors)):
-                        bar.set_color(color)
-                    
-                    # 设置标签
-                    plt.yticks(range(len(top_features)), top_features['feature'])
-                    plt.xlabel(f'Correlation Coefficient ({target_var})')
-                    plt.title(f'Top 20 Correlated Features with {target_var}')
-                    
-                    # 添加显著性标记
-                    for i, (corr, significance) in enumerate(zip(top_features['correlation'], top_features['significance'])):
-                        if significance != 'ns':
-                            plt.text(corr + (0.01 if corr > 0 else -0.01), i, significance, 
-                                   va='center', ha='left' if corr > 0 else 'right', fontweight='bold')
-                    
-                    plt.grid(axis='x', alpha=0.3)
-                    plt.tight_layout()
-                    plt.savefig(os.path.join(output_dir, f'correlation_bars_{target_var}.png'), 
-                               dpi=300, bbox_inches='tight')
-                    plt.close()
-        except Exception as e:
-            logger.warning(f"Failed to create correlation bar plots: {e}")
-    
-    # 新增：绘制相关性分布图
-    if plot_corr_matrix and len(results) > 0:
-        try:
-            for target_var, result in results.items():
-                if len(result['all_results']) > 0:
-                    correlations = result['all_results']['correlation']
-                    
-                    plt.figure(figsize=(10, 6))
-                    
-                    # 绘制直方图
-                    plt.hist(correlations, bins=30, alpha=0.7, color='skyblue', edgecolor='black')
-                    plt.axvline(x=0, color='red', linestyle='--', alpha=0.8, label='No correlation')
-                    plt.axvline(x=min_corr, color='orange', linestyle='--', alpha=0.8, label=f'Threshold ({min_corr})')
-                    plt.axvline(x=-min_corr, color='orange', linestyle='--', alpha=0.8)
-                    
-                    plt.xlabel('Correlation Coefficient')
-                    plt.ylabel('Number of Features')
-                    plt.title(f'Distribution of Correlation Coefficients with {target_var}')
-                    plt.legend()
-                    plt.grid(alpha=0.3)
-                    plt.tight_layout()
-                    plt.savefig(os.path.join(output_dir, f'correlation_distribution_{target_var}.png'), 
-                               dpi=300, bbox_inches='tight')
-                    plt.close()
-        except Exception as e:
-            logger.warning(f"Failed to create correlation distribution plots: {e}")
-    
-    # 新增：绘制显著性统计图
-    if plot_corr_matrix and len(results) > 0:
-        try:
-            for target_var, result in results.items():
-                if len(result['all_results']) > 0:
-                    # 统计不同显著性水平的特征数量
-                    significance_counts = result['all_results']['significance'].value_counts()
-                    
-                    plt.figure(figsize=(8, 6))
-                    
-                    # 创建饼图 - 修复标签长度问题
-                    colors = ['red', 'orange', 'yellow', 'lightgray']
-                    labels = ['*** (p<0.001)', '** (p<0.01)', '* (p<0.05)', 'ns (p≥0.05)']
-                    
-                    # 确保所有显著性水平都存在
-                    for label in labels:
-                        if label not in significance_counts.index:
-                            significance_counts[label] = 0
-                    
-                    # 只使用实际存在的显著性水平
-                    actual_significance = significance_counts[significance_counts > 0]
-                    actual_labels = []
-                    actual_colors = []
-                    
-                    for i, label in enumerate(labels):
-                        if label in actual_significance.index:
-                            actual_labels.append(label)
-                            actual_colors.append(colors[i])
-                    
-                    if len(actual_significance) > 0:
-                        plt.pie(actual_significance.values, labels=actual_labels, colors=actual_colors, 
-                               autopct='%1.1f%%', startangle=90)
-                        plt.title(f'Significance Levels of Features vs {target_var}')
-                        plt.axis('equal')
-                        plt.tight_layout()
-                        plt.savefig(os.path.join(output_dir, f'significance_pie_{target_var}.png'), 
-                                   dpi=300, bbox_inches='tight')
-                        plt.close()
-                    else:
-                        logger.warning(f"No significance data available for {target_var}")
-                        plt.close()
-        except Exception as e:
-            logger.warning(f"Failed to create significance pie charts: {e}")
-            import traceback
-            logger.warning(f"Traceback: {traceback.format_exc()}")
-    
-    # 新增：绘制特征类型分析图
-    if plot_corr_matrix and len(results) > 0:
-        try:
-            for target_var, result in results.items():
-                if len(result['all_results']) > 0:
-                    # 分析特征类型（基于特征名称）
-                    feature_types = []
-                    for feature in result['all_results']['feature']:
-                        if '_mean' in feature:
-                            feature_types.append('mean')
-                        elif '_std' in feature:
-                            feature_types.append('std')
-                        elif '_min' in feature:
-                            feature_types.append('min')
-                        elif '_max' in feature:
-                            feature_types.append('max')
-                        elif '_median' in feature:
-                            feature_types.append('median')
-                        elif '_count' in feature:
-                            feature_types.append('count')
-                        else:
-                            feature_types.append('other')
-                    
-                    result['all_results']['feature_type'] = feature_types
-                    
-                    # 按特征类型分组计算平均相关性
-                    type_correlations = result['all_results'].groupby('feature_type')['correlation'].agg(['mean', 'count']).reset_index()
-                    
-                    plt.figure(figsize=(10, 6))
-                    
-                    # 创建条形图
-                    bars = plt.bar(range(len(type_correlations)), type_correlations['mean'])
-                    
-                    # 设置颜色
-                    colors = ['skyblue', 'lightgreen', 'lightcoral', 'gold', 'plum', 'lightgray']
-                    for i, (bar, color) in enumerate(zip(bars, colors[:len(bars)])):
-                        bar.set_color(color)
-                    
-                    plt.xlabel('Feature Type')
-                    plt.ylabel('Average Correlation Coefficient')
-                    plt.title(f'Average Correlation by Feature Type vs {target_var}')
-                    plt.xticks(range(len(type_correlations)), type_correlations['feature_type'])
-                    
-                    # 添加数量标签
-                    for i, (mean_val, count_val) in enumerate(zip(type_correlations['mean'], type_correlations['count'])):
-                        plt.text(i, mean_val + (0.01 if mean_val > 0 else -0.01), f'n={count_val}', 
-                               ha='center', va='bottom' if mean_val > 0 else 'top')
-                    
-                    plt.grid(axis='y', alpha=0.3)
-                    plt.tight_layout()
-                    plt.savefig(os.path.join(output_dir, f'feature_type_analysis_{target_var}.png'), 
-                               dpi=300, bbox_inches='tight')
-                    plt.close()
-        except Exception as e:
-            logger.warning(f"Failed to create feature type analysis plots: {e}")
-    
-    # 生成实验摘要
-    summary_parts = []
-    summary_parts.append(f"Correlation Analysis Results")
-    summary_parts.append(f"Method: {method}")
-    summary_parts.append(f"Minimum correlation threshold: {min_corr}")
-    summary_parts.append(f"")
-    
-    for target_var, result in results.items():
-        summary_parts.append(f"Target Variable: {target_var}")
-        summary_parts.append(f"  Total features analyzed: {result['total_features']}")
-        summary_parts.append(f"  Significant features (|corr| >= {min_corr}): {result['significant_count']}")
-        
-        if len(result['all_results']) > 0:
-            summary_parts.append(f"  Top 5 correlations:")
-            for _, row in result['all_results'].head(5).iterrows():
-                summary_parts.append(f"    {row['feature']}: {row['correlation']:.4f} (p={row['p_value']:.4f})")
-        summary_parts.append("")
-    
-    # 添加可视化文件说明
-    summary_parts.append("Generated Visualization Files:")
-    summary_parts.append("  - correlation_matrix.png: Overall correlation matrix")
-    for target_var in results.keys():
-        summary_parts.append(f"  - scatter_{target_var}.png: Scatter plots for top features")
-        summary_parts.append(f"  - correlation_bars_{target_var}.png: Top 20 correlated features bar chart")
-        summary_parts.append(f"  - correlation_distribution_{target_var}.png: Correlation coefficient distribution")
-        summary_parts.append(f"  - significance_pie_{target_var}.png: Significance levels pie chart")
-        summary_parts.append(f"  - feature_type_analysis_{target_var}.png: Feature type analysis")
-    summary_parts.append("")
-    
-    summary = "\n".join(summary_parts)
-    
+    logger.info(f"Correlation analysis completed, results saved to: {output_dir}")
     return summary
 
 
@@ -686,9 +222,23 @@ def perform_correlation_analysis(df: pd.DataFrame, target_vars: list, method: st
         
         logger.info(f"Analyzing target variable: {target_var}")
         logger.info(f"Number of features to analyze: {len(feature_cols)}")
+        logger.info(f"Target variable type: {df[target_var].dtype}")
+        logger.info(f"Target variable unique values: {df[target_var].nunique()}")
+        logger.info(f"Target variable missing values: {df[target_var].isnull().sum()}")
+        logger.info(f"Sample target values: {df[target_var].head().tolist()}")
+        logger.info(f"Sample feature values (first 3 features):")
+        for i, feature in enumerate(feature_cols[:3]):
+            logger.info(f"  {feature}: type={df[feature].dtype}, missing={df[feature].isnull().sum()}, sample={df[feature].head().tolist()}")
         
         correlations = []
-        for feature in feature_cols:
+        start_time = time.time()
+        
+        for i, feature in enumerate(feature_cols):
+            # 每50个特征输出一次进度
+            if i % 50 == 0:
+                elapsed = time.time() - start_time
+                logger.info(f"进度: {i}/{len(feature_cols)} ({i/len(feature_cols)*100:.1f}%), 耗时: {elapsed:.1f}s")
+            
             # 移除缺失值
             valid_data = df[[feature, target_var]].dropna()
             
@@ -742,15 +292,26 @@ def perform_correlation_analysis(df: pd.DataFrame, target_vars: list, method: st
                 continue
         
         # Create result DataFrame
-        result_df = pd.DataFrame(correlations)
-        result_df = result_df.sort_values('correlation', ascending=False)
-        result_df = result_df[result_df['correlation'] >= min_corr]
+        if len(correlations) > 0:
+            result_df = pd.DataFrame(correlations)
+            result_df = result_df.sort_values('correlation', ascending=False)
+            result_df = result_df[result_df['correlation'] >= min_corr]
+            
+            significant_count = len(result_df[result_df['significance'] != 'ns'])
+            significant_ratio = significant_count / len(feature_cols) if len(feature_cols) > 0 else 0
+        else:
+            # 如果没有相关性结果，创建空的DataFrame
+            result_df = pd.DataFrame(columns=['feature', 'correlation', 'p_value', 'significance', 'n_samples', 'correlation_type'])
+            significant_count = 0
+            significant_ratio = 0.0
+            logger.warning(f"No valid correlations found for target variable {target_var}")
         
         results[target_var] = {
             'all_results': result_df,
             'top_results': result_df.head(top_n),
-            'significant_count': len(result_df[result_df['significance'] != 'ns']),
-            'total_features': len(feature_cols)
+            'significant_count': significant_count,
+            'total_features': len(feature_cols),
+            'significant_ratio': significant_ratio
         }
         
         logger.info(f"Found {len(result_df)} features with correlation >= {min_corr}")
@@ -765,6 +326,9 @@ def perform_correlation_analysis(df: pd.DataFrame, target_vars: list, method: st
     return results
 
 
+
+
+
 def get_significance_level(p_value: float) -> str:
     """Get significance level"""
     if p_value < 0.001:
@@ -777,37 +341,67 @@ def get_significance_level(p_value: float) -> str:
         return 'ns'
 
 
-def save_correlation_results(results: dict, output_dir: str, save_detailed_results: bool = True):
-    """Save correlation analysis results"""
-    for target_var, result in results.items():
-        if save_detailed_results:
-            all_results_path = os.path.join(output_dir, f"correlation_{target_var}_all.csv")
-            result['all_results'].to_csv(all_results_path, index=False)
-        
-        top_results_path = os.path.join(output_dir, f"correlation_{target_var}_top.csv")
-        result['top_results'].to_csv(top_results_path, index=False)
+def save_correlation_results(results: dict, output_dir: str):
+    """Save correlation analysis results with organized file structure"""
     
+    # 创建子目录
+    data_dir = os.path.join(output_dir, "data")
+    plots_dir = os.path.join(output_dir, "plots")
+    os.makedirs(data_dir, exist_ok=True)
+    os.makedirs(plots_dir, exist_ok=True)
+    
+    # 保存每个目标变量的相关性结果
+    for target_var, result in results.items():
+        if len(result['top_results']) > 0:
+            result_file = os.path.join(data_dir, f"correlation_{target_var}.csv")
+            result['top_results'].to_csv(result_file, index=False)
+    
+    # 保存汇总结果
     summary_data = []
     for target_var, result in results.items():
-        # 添加安全检查，避免除零错误
-        total_features = result['total_features']
-        significant_count = result['significant_count']
-        significant_ratio = significant_count / total_features if total_features > 0 else 0.0
-        
         summary_data.append({
             'target_variable': target_var,
-            'total_features': total_features,
-            'significant_features': significant_count,
-            'significant_ratio': significant_ratio
+            'total_features': result['total_features'],
+            'significant_features': result['significant_count'],
+            'significant_ratio': result['significant_ratio']
         })
     
     summary_df = pd.DataFrame(summary_data)
-    summary_path = os.path.join(output_dir, "correlation_summary.csv")
+    summary_path = os.path.join(data_dir, "correlation_summary.csv")
     summary_df.to_csv(summary_path, index=False)
+    
+    # 创建结果索引文件
+    results_index = {
+        "experiment_type": "correlation",
+        "files": {
+            "summary": "data/correlation_summary.csv"
+        },
+        "plots": {},
+        "summary": {
+            "target_variables": list(results.keys()),
+            "total_targets": len(results),
+            "generated_at": datetime.now().isoformat()
+        }
+    }
+    
+    # 添加每个目标变量的文件
+    for target_var, result in results.items():
+        if len(result['top_results']) > 0:
+            results_index["files"][f"correlation_{target_var}"] = f"data/correlation_{target_var}.csv"
+            results_index["plots"][f"correlation_matrix_{target_var}"] = f"plots/correlation_matrix_{target_var}.png"
+            results_index["plots"][f"scatter_plots_{target_var}"] = f"plots/scatter_plots_{target_var}.png"
+    
+    with open(os.path.join(output_dir, "results_index.json"), "w", encoding='utf-8') as f:
+        json.dump(results_index, f, indent=2, ensure_ascii=False)
+    
+    logger.info(f"Correlation results saved to {output_dir} with organized structure")
 
 
 def plot_correlation_matrix(results: dict, output_dir: str):
     """Plot correlation matrix for recording-level features"""
+    plots_dir = os.path.join(output_dir, "plots")
+    os.makedirs(plots_dir, exist_ok=True)
+    
     for target_var, result in results.items():
         if len(result['top_results']) == 0:
             continue
@@ -834,13 +428,16 @@ def plot_correlation_matrix(results: dict, output_dir: str):
         plt.grid(axis='x', alpha=0.3)
         
         plt.tight_layout()
-        plt.savefig(os.path.join(output_dir, f"correlation_matrix_{target_var}.png"), 
+        plt.savefig(os.path.join(plots_dir, f"correlation_matrix_{target_var}.png"), 
                    dpi=300, bbox_inches='tight')
         plt.close()
 
 
 def plot_scatter_plots(df: pd.DataFrame, results: dict, output_dir: str, top_n: int):
     """Plot scatter plots for recording-level features"""
+    plots_dir = os.path.join(output_dir, "plots")
+    os.makedirs(plots_dir, exist_ok=True)
+    
     for target_var, result in results.items():
         if target_var not in df.columns or len(result['top_results']) == 0:
             continue
@@ -884,7 +481,7 @@ def plot_scatter_plots(df: pd.DataFrame, results: dict, output_dir: str, top_n: 
             axes[i].set_visible(False)
         
         plt.tight_layout()
-        plt.savefig(os.path.join(output_dir, f"scatter_plots_{target_var}.png"), 
+        plt.savefig(os.path.join(plots_dir, f"scatter_plots_{target_var}.png"), 
                    dpi=300, bbox_inches='tight')
         plt.close()
 

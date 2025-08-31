@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 import json
+import os
 from task_queue.models import TaskManager, Task, TaskStatus
 
 task_api = Blueprint('task_api', __name__)
@@ -204,6 +205,29 @@ def get_tasks():
         
     except Exception as e:
         print(f"Error in get_tasks: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@task_api.route('/api/system/mode', methods=['GET'])
+def get_system_mode():
+    """获取系统运行模式"""
+    try:
+        use_local_mode = os.getenv('USE_LOCAL_EXECUTOR', 'false').lower() == 'true'
+        
+        mode_info = {
+            'mode': 'local' if use_local_mode else 'celery',
+            'description': '本地执行器模式 (不使用Redis)' if use_local_mode else 'Celery分布式模式 (使用Redis)',
+            'workers': int(os.getenv('LOCAL_EXECUTOR_WORKERS', '4')) if use_local_mode else 'N/A'
+        }
+        
+        return jsonify({
+            'success': True,
+            'mode_info': mode_info
+        }), 200
+        
+    except Exception as e:
         return jsonify({
             'success': False,
             'error': str(e)

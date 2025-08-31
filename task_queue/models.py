@@ -1,5 +1,6 @@
 import json
 import sqlite3
+import os
 from datetime import datetime
 from typing import Dict, Any, Optional
 
@@ -84,10 +85,62 @@ class TaskManager:
             raise e
     
     def _schedule_celery_task(self, task_id: int, task: Task):
-        """Schedule a Celery task"""
+        """Schedule a task (Celery or Local)"""
         try:
             from logging_config import logger
             logger.info(f"_schedule_celery_task called, task_id={task_id}, task_type={task.task_type}")
+            
+            # 检查是否使用本地模式
+            use_local_mode = os.getenv('USE_LOCAL_EXECUTOR', 'false').lower() == 'true'
+            
+            if use_local_mode:
+                logger.info(f"Using local executor mode for task {task_id}")
+                self._schedule_local_task(task_id, task)
+            else:
+                logger.info(f"Using Celery mode for task {task_id}")
+                self._schedule_celery_task_internal(task_id, task)
+                
+        except Exception as e:
+            logger.error(f"Failed to schedule task: {e}")
+            import traceback
+            logger.error(f"Exception details: {traceback.format_exc()}")
+            # If scheduling fails, update task status to FAILED
+            self.update_task_status(task_id, TaskStatus.FAILED, error_message=str(e))
+            raise
+    
+    def _schedule_local_task(self, task_id: int, task: Task):
+        """Schedule a task using simple local executor"""
+        try:
+            from logging_config import logger
+            from .simple_local_executor import get_simple_local_executor
+            
+            logger.info(f"Scheduling simple local task, task_id={task_id}, task_type={task.task_type}")
+            
+            # 获取简单本地执行器
+            simple_local_executor = get_simple_local_executor()
+            
+            # 直接执行任务（同步执行）
+            result = simple_local_executor.submit_task(
+                task_id=task_id,
+                task_type=task.task_type,
+                parameters=task.parameters,
+                dataset_id=task.dataset_id,
+                feature_set_id=task.feature_set_id,
+                experiment_type=task.experiment_type
+            )
+            
+            logger.info(f"Simple local task completed: {task_id}")
+            return result
+            
+        except Exception as e:
+            logger.error(f"Failed to execute simple local task: {e}")
+            raise
+    
+    def _schedule_celery_task_internal(self, task_id: int, task: Task):
+        """Schedule a Celery task (internal method)"""
+        try:
+            from logging_config import logger
+            logger.info(f"_schedule_celery_task_internal called, task_id={task_id}, task_type={task.task_type}")
             
             # Delayed import to avoid circular import
             from .tasks import feature_extraction_task, experiment_task

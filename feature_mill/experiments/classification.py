@@ -25,6 +25,8 @@ from sklearn.metrics import (
 )
 import warnings
 from logging_config import logger  # 使用全局logger
+import json
+from datetime import datetime
 warnings.filterwarnings('ignore')
 
 # Set English font
@@ -42,12 +44,10 @@ def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs)
         output_dir: Output directory
         **kwargs: Extra arguments
             - target_var: Target variable ('age_group', 'sex', 'age_class'), default 'age_group'
-            - age_threshold: Age threshold for binary classification, default 65
+            - age_threshold: Age threshold for binary classification, default 65 (only used for age-related targets)
             - test_size: Test set size, default 0.2
-            - random_state: Random state, default 42
             - n_splits: Number of CV folds, default 5
-            - plot_results: Whether to plot results, default True
-            - plot_feature_importance: Whether to plot feature importance, default True
+            - generate_plots: Whether to generate plots, default True
     
     Returns:
         str: Experiment summary
@@ -58,12 +58,18 @@ def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs)
     
     # Get parameters
     target_var = kwargs.get('target_var', 'age_group')
-    age_threshold = kwargs.get('age_threshold', 65)
     test_size = kwargs.get('test_size', 0.2)
-    random_state = kwargs.get('random_state', 42)
+    random_state = 42  # 固定为42，不再作为用户输入参数
     n_splits = kwargs.get('n_splits', 5)
-    plot_results = kwargs.get('plot_results', True)
-    plot_feature_importance = kwargs.get('plot_feature_importance', True)
+    generate_plots = kwargs.get('generate_plots', True)
+    
+    # 只有当target_var是年龄相关时才使用age_threshold
+    age_threshold = None
+    if target_var in ['age_group', 'age_class']:
+        age_threshold = kwargs.get('age_threshold', 65)
+        logger.info(f"Using age threshold: {age_threshold} for target variable: {target_var}")
+    else:
+        logger.info(f"Age threshold not applicable for target variable: {target_var}")
     
     # Data preprocessing
     df_processed, X, y = preprocess_data(df_feat, df_meta, target_var, age_threshold)
@@ -102,10 +108,8 @@ def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs)
     save_classification_results(results, comparison_results, output_dir)
     
     # Visualizations
-    if plot_results:
+    if generate_plots:
         plot_classification_results(results, output_dir)
-    
-    if plot_feature_importance:
         plot_feature_importance_analysis(results, X_train, output_dir)
     
     # Generate summary
@@ -250,37 +254,87 @@ def compare_models(results: dict) -> pd.DataFrame:
 
 
 def save_classification_results(results: dict, comparison_results: pd.DataFrame, output_dir: str):
-    """Save classification results"""
+    """Save classification results with organized file structure"""
     
-    # Save model comparison
-    comparison_results.to_csv(os.path.join(output_dir, "model_comparison.csv"), index=False)
+    # 创建子目录
+    data_dir = os.path.join(output_dir, "data")
+    plots_dir = os.path.join(output_dir, "plots")
+    os.makedirs(data_dir, exist_ok=True)
+    os.makedirs(plots_dir, exist_ok=True)
     
-    # Save detailed results for each model
+    # 保存每个模型的结果
     for model_name, result in results.items():
-        # Save classification report
-        report = classification_report(result['y_pred'], result['y_pred'], output_dict=True)
-        report_df = pd.DataFrame(report).transpose()
-        report_df.to_csv(os.path.join(output_dir, f"classification_report_{model_name.replace(' ', '_')}.csv"))
-        
-        # Save confusion matrix
-        cm_df = pd.DataFrame(result['confusion_matrix'])
-        cm_df.to_csv(os.path.join(output_dir, f"confusion_matrix_{model_name.replace(' ', '_')}.csv"), index=False)
-        
-        # Save feature importance if available
-        if result['feature_importance'] is not None:
-            importance_df = pd.DataFrame({
-                'feature': range(len(result['feature_importance'])),
-                'importance': result['feature_importance']
-            })
-            importance_df = importance_df.sort_values('importance', ascending=False)
-            importance_df.to_csv(os.path.join(output_dir, f"feature_importance_{model_name.replace(' ', '_')}.csv"), index=False)
+        if result is not None:
+            # 保存模型性能指标
+            performance_file = os.path.join(data_dir, f"performance_{model_name.lower().replace(' ', '_')}.csv")
+            # 从result中提取性能指标
+            performance_data = {
+                'accuracy': result['accuracy'],
+                'precision': result['precision'],
+                'recall': result['recall'],
+                'f1_score': result['f1_score'],
+                'roc_auc': result['roc_auc'],
+                'cv_mean': result['cv_mean'],
+                'cv_std': result['cv_std']
+            }
+            performance_df = pd.DataFrame([performance_data])
+            performance_df.to_csv(performance_file, index=False)
+            
+            # 保存特征重要性（如果有）
+            if 'feature_importance' in result and result['feature_importance'] is not None:
+                importance_file = os.path.join(data_dir, f"importance_{model_name.lower().replace(' ', '_')}.csv")
+                # feature_importance是numpy数组，需要转换为DataFrame
+                importance_array = result['feature_importance']
+                importance_df = pd.DataFrame({
+                    'feature': [f'feature_{i}' for i in range(len(importance_array))],
+                    'importance': importance_array
+                })
+                importance_df = importance_df.sort_values('importance', ascending=False)
+                importance_df.to_csv(importance_file, index=False)
     
-    logger.info(f"[classification] Results saved to {output_dir}")
+    # 保存模型比较结果
+    if comparison_results is not None and len(comparison_results) > 0:
+        comparison_file = os.path.join(data_dir, "models_comparison.csv")
+        comparison_results.to_csv(comparison_file, index=False)
+    
+    # 创建结果索引文件
+    results_index = {
+        "experiment_type": "classification",
+        "files": {
+            "models_comparison": "data/models_comparison.csv"
+        },
+        "plots": {
+            "models_comparison": "plots/models_comparison.png",
+            "feature_importance": "plots/feature_importance_comparison.png",
+            "confusion_matrices": "plots/confusion_matrices.png"
+        },
+        "summary": {
+            "models_used": list(results.keys()),
+            "total_models": len(results),
+            "generated_at": datetime.now().isoformat()
+        }
+    }
+    
+    # 添加每个模型的文件
+    for model_name, result in results.items():
+        if result is not None:
+            model_key = model_name.lower().replace(' ', '_')
+            results_index["files"][f"performance_{model_key}"] = f"data/performance_{model_key}.csv"
+            if 'feature_importance' in result and result['feature_importance'] is not None:
+                results_index["files"][f"importance_{model_key}"] = f"data/importance_{model_key}.csv"
+    
+    with open(os.path.join(output_dir, "results_index.json"), "w", encoding='utf-8') as f:
+        json.dump(results_index, f, indent=2, ensure_ascii=False)
+    
+    logger.info(f"Classification results saved to {output_dir} with organized structure")
 
 
 def plot_classification_results(results: dict, output_dir: str):
     """Plot classification results"""
     logger.info("[classification] Plotting classification results...")
+    
+    plots_dir = os.path.join(output_dir, "plots")
+    os.makedirs(plots_dir, exist_ok=True)
     
     # 1. Model comparison plot
     fig, axes = plt.subplots(2, 2, figsize=(15, 12))
@@ -323,7 +377,7 @@ def plot_classification_results(results: dict, output_dir: str):
         axes[1, 1].set_title('ROC-AUC Comparison')
     
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, "model_comparison_plots.png"), dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.join(plots_dir, "models_comparison.png"), dpi=300, bbox_inches='tight')
     plt.close()
     
     # 2. Confusion matrices
@@ -346,13 +400,16 @@ def plot_classification_results(results: dict, output_dir: str):
         axes[i].set_visible(False)
     
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, "confusion_matrices.png"), dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.join(plots_dir, "confusion_matrices.png"), dpi=300, bbox_inches='tight')
     plt.close()
 
 
 def plot_feature_importance_analysis(results: dict, X_train: pd.DataFrame, output_dir: str):
     """Plot feature importance analysis"""
     logger.info("[classification] Plotting feature importance analysis...")
+    
+    plots_dir = os.path.join(output_dir, "plots")
+    os.makedirs(plots_dir, exist_ok=True)
     
     # Collect feature importance from models that have it
     importance_data = {}
@@ -383,13 +440,14 @@ def plot_feature_importance_analysis(results: dict, X_train: pd.DataFrame, outpu
         axes[i].set_yticklabels(top_features)
         axes[i].set_title(f'Top Features - {model_name}')
         axes[i].set_xlabel('Importance Score')
+        axes[i].invert_yaxis()
     
     # Hide empty subplots
-    for i in range(len(importance_data), 4):
+    for i in range(n_models, 4):
         axes[i].set_visible(False)
     
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, "feature_importance_classification.png"), dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.join(plots_dir, "feature_importance_comparison.png"), dpi=300, bbox_inches='tight')
     plt.close()
 
 

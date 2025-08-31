@@ -7,6 +7,7 @@ import { initializeFeaturesets } from './modules/featuresets.js';
 import { initializeExperiments } from './modules/experiments.js';
 import { initializeFeatureExtraction } from './modules/feature-extraction.js';
 import { initializeTaskQueue } from './modules/task-queue.js';
+import { initializeSystemMode } from './modules/system-mode.js';
 import { showStatus, showProgress } from './modules/ui-utils.js';
 
 // 全局变量
@@ -30,6 +31,7 @@ async function initializeApp() {
         initializeExperiments();
         initializeFeatureExtraction();
         initializeTaskQueue();
+        initializeSystemMode();
         
         // 设置事件监听器
         setupEventListeners();

@@ -870,6 +870,7 @@ def get_experiment_details(experiment_id):
     feature_results = []
     metadata = []
     output_files = []
+    results_index = {}
     
     if task_dict['result']:
         try:
@@ -881,19 +882,29 @@ def get_experiment_details(experiment_id):
             # 检查输出目录
             if task_dict['output_dir'] and os.path.exists(task_dict['output_dir']):
                 try:
-                    for filename in os.listdir(task_dict['output_dir']):
-                        file_path = os.path.join(task_dict['output_dir'], filename)
-                        if os.path.isfile(file_path):
+                    # 首先检查是否有results_index.json文件
+                    results_index_path = os.path.join(task_dict['output_dir'], "results_index.json")
+                    if os.path.exists(results_index_path):
+                        with open(results_index_path, 'r', encoding='utf-8') as f:
+                            results_index = json.load(f)
+                    
+                    # 扫描所有文件
+                    for root, dirs, files in os.walk(task_dict['output_dir']):
+                        for filename in files:
+                            file_path = os.path.join(root, filename)
+                            rel_path = os.path.relpath(file_path, task_dict['output_dir'])
                             stat = os.stat(file_path)
                             file_info = {
                                 'name': filename,
+                                'path': rel_path,
                                 'size': stat.st_size,
                                 'modified': datetime.fromtimestamp(stat.st_mtime).isoformat(),
-                                'type': get_file_type(filename)
+                                'type': get_file_type(filename),
+                                'full_path': file_path
                             }
                             output_files.append(file_info)
                     
-                    # 按文件类型排序
+                    # 按文件类型排序：图片在前，然后是CSV，最后是其他
                     output_files.sort(key=lambda x: get_file_sort_order(x['type']))
                 except Exception as e:
                     print(f"Error listing output files: {e}")
@@ -907,9 +918,10 @@ def get_experiment_details(experiment_id):
         'feature_results': feature_results,
         'metadata': metadata,
         'output_files': output_files,
+        'results_index': results_index,
         'source': 'task'
     })
-    
+
 
 
 @app.route('/api/experiment_summary/<int:experiment_id>')
@@ -1052,6 +1064,88 @@ def get_experiment_file(experiment_id, filename):
             
     except Exception as e:
         return jsonify({'error': f'Failed to read file: {str(e)}'}), 500
+
+@app.route('/api/experiment_image/<int:experiment_id>/<path:image_path>')
+def get_experiment_image(experiment_id, image_path):
+    """Get experiment image file"""
+    conn = get_db_connection()
+    
+    # 从tasks表获取实验的输出目录
+    task = conn.execute('''
+        SELECT output_dir FROM tasks 
+        WHERE id = ? AND task_type = 'experiment'
+    ''', (experiment_id,)).fetchone()
+    conn.close()
+    
+    if not task or not task['output_dir']:
+        return jsonify({'error': 'Experiment output directory not found'}), 404
+    
+    output_dir = task['output_dir']
+    file_path = os.path.join(output_dir, image_path)
+    
+    if not os.path.exists(file_path):
+        return jsonify({'error': 'Image file not found'}), 404
+    
+    try:
+        # 检查文件类型
+        if not get_file_type(image_path) == 'image':
+            return jsonify({'error': 'File is not an image'}), 400
+        
+        # 返回图片文件
+        return send_file(file_path, mimetype='image/png')
+        
+    except Exception as e:
+        return jsonify({'error': f'Failed to read image: {str(e)}'}), 500
+
+@app.route('/api/experiment_data/<int:experiment_id>/<path:data_path>')
+def get_experiment_data(experiment_id, data_path):
+    """Get experiment data file (CSV, JSON, etc.)"""
+    conn = get_db_connection()
+    
+    # 从tasks表获取实验的输出目录
+    task = conn.execute('''
+        SELECT output_dir FROM tasks 
+        WHERE id = ? AND task_type = 'experiment'
+    ''', (experiment_id,)).fetchone()
+    conn.close()
+    
+    if not task or not task['output_dir']:
+        return jsonify({'error': 'Experiment output directory not found'}), 404
+    
+    output_dir = task['output_dir']
+    file_path = os.path.join(output_dir, data_path)
+    
+    if not os.path.exists(file_path):
+        return jsonify({'error': 'Data file not found'}), 404
+    
+    try:
+        file_type = get_file_type(data_path)
+        
+        if file_type == 'csv':
+            # 读取CSV文件并返回JSON格式
+            df = pd.read_csv(file_path)
+            return jsonify({
+                'filename': os.path.basename(data_path),
+                'type': 'csv',
+                'data': df.to_dict('records'),
+                'columns': df.columns.tolist(),
+                'shape': df.shape
+            })
+        elif file_type == 'text' or data_path.endswith('.json'):
+            # 读取文本或JSON文件
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            return jsonify({
+                'filename': os.path.basename(data_path),
+                'type': 'text',
+                'content': content
+            })
+        else:
+            # 其他文件类型下载
+            return send_file(file_path, as_attachment=True, download_name=os.path.basename(data_path))
+            
+    except Exception as e:
+        return jsonify({'error': f'Failed to read data file: {str(e)}'}), 500
 
 def get_file_type(filename):
     """Determine file type based on extension"""

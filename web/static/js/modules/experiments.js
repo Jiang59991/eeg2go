@@ -170,7 +170,35 @@ export function showExperimentDetails(experimentId) {
                 </table>
             `;
             
-            // 填充特征结果
+            // 填充实验摘要统计
+            const statsContainer = document.getElementById('experimentStats');
+            if (data.results_index && data.results_index.summary) {
+                const summary = data.results_index.summary;
+                statsContainer.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Analysis Summary</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Total Features:</strong> ${summary.total_features || 'N/A'}</li>
+                                <li><strong>Top Features Analyzed:</strong> ${summary.top_features_count || 'N/A'}</li>
+                                <li><strong>Generated:</strong> ${summary.generated_at ? new Date(summary.generated_at).toLocaleString() : 'N/A'}</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Output Files</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Data Files:</strong> ${Object.keys(data.results_index.files || {}).length}</li>
+                                <li><strong>Plots:</strong> ${Object.keys(data.results_index.plots || {}).length}</li>
+                                <li><strong>Total Files:</strong> ${data.output_files.length}</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            } else {
+                statsContainer.innerHTML = '<p class="text-muted">No summary statistics available</p>';
+            }
+            
+            // 填充特征结果表格
             const resultsBody = document.getElementById('experimentResultsBody');
             if (data.feature_results && data.feature_results.length > 0) {
                 resultsBody.innerHTML = data.feature_results.map(result => `
@@ -188,6 +216,9 @@ export function showExperimentDetails(experimentId) {
                 resultsBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No feature results available</td></tr>';
             }
             
+            // 显示输出文件
+            displayExperimentFiles(data.output_files, data.results_index, experimentId);
+            
             // 显示模态框
             const modal = new bootstrap.Modal(document.getElementById('experimentModal'));
             modal.show();
@@ -198,6 +229,270 @@ export function showExperimentDetails(experimentId) {
             showStatus('Failed to load experiment details', 'error');
         });
 }
+
+function displayExperimentFiles(outputFiles, resultsIndex, experimentId) {
+    const filesContainer = document.getElementById('experimentFiles');
+    if (!filesContainer) return;
+    
+    if (!outputFiles || outputFiles.length === 0) {
+        filesContainer.innerHTML = '<p class="text-muted">No output files available</p>';
+        return;
+    }
+    
+    // 按类型分组文件
+    const imageFiles = outputFiles.filter(f => f.type === 'image');
+    const dataFiles = outputFiles.filter(f => f.type === 'csv');
+    const otherFiles = outputFiles.filter(f => !['image', 'csv'].includes(f.type));
+    
+    let filesHtml = '';
+    
+    // 根据实验类型显示不同的标题和描述
+    const experimentType = resultsIndex?.experiment_type || 'unknown';
+    const experimentTitles = {
+        'feature_statistics': {
+            title: 'Feature Statistics Analysis',
+            description: 'Statistical analysis of EEG features including distributions, outliers, and quality assessment'
+        },
+        'correlation': {
+            title: 'Correlation Analysis',
+            description: 'Analysis of correlations between EEG features and target variables'
+        },
+        'feature_selection': {
+            title: 'Feature Selection',
+            description: 'Selection of most important features using multiple methods'
+        },
+        'classification': {
+            title: 'Classification Analysis',
+            description: 'Classification tasks using EEG features with model comparison'
+        }
+    };
+    
+    const expInfo = experimentTitles[experimentType] || {
+        title: 'Experiment Results',
+        description: 'Analysis results and visualizations'
+    };
+    
+    filesHtml += `
+        <div class="alert alert-info mb-3">
+            <h6 class="alert-heading"><i class="bi bi-info-circle"></i> ${expInfo.title}</h6>
+            <p class="mb-0 small">${expInfo.description}</p>
+        </div>
+    `;
+    
+    // 显示图片文件
+    if (imageFiles.length > 0) {
+        filesHtml += `
+            <div class="mb-4">
+                <h6><i class="bi bi-images"></i> Visualizations</h6>
+                <div class="row">
+                    ${imageFiles.map(file => `
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-header">
+                                    <small class="text-muted">${file.name}</small>
+                                </div>
+                                <div class="card-body text-center">
+                                    <img src="/api/experiment_image/${experimentId}/${file.path}" 
+                                         class="img-fluid" style="max-height: 300px;" 
+                                         alt="${file.name}"
+                                         onclick="showImageModal(this.src, '${file.name}')">
+                                </div>
+                                <div class="card-footer">
+                                    <small class="text-muted">
+                                        Size: ${(file.size / 1024).toFixed(1)} KB | 
+                                        Modified: ${new Date(file.modified).toLocaleString()}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    // 显示数据文件
+    if (dataFiles.length > 0) {
+        filesHtml += `
+            <div class="mb-4">
+                <h6><i class="bi bi-table"></i> Data Files</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>File</th>
+                                <th>Size</th>
+                                <th>Modified</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${dataFiles.map(file => `
+                                <tr>
+                                    <td>${file.name}</td>
+                                    <td>${(file.size / 1024).toFixed(1)} KB</td>
+                                    <td>${new Date(file.modified).toLocaleString()}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" 
+                                                onclick="viewDataFile(${experimentId}, '${file.path}')">
+                                            <i class="bi bi-eye"></i> View
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary" 
+                                                onclick="downloadFile(${experimentId}, '${file.path}')">
+                                            <i class="bi bi-download"></i> Download
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+    
+    // 显示其他文件
+    if (otherFiles.length > 0) {
+        filesHtml += `
+            <div class="mb-4">
+                <h6><i class="bi bi-file-earmark"></i> Other Files</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>File</th>
+                                <th>Size</th>
+                                <th>Modified</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${otherFiles.map(file => `
+                                <tr>
+                                    <td>${file.name}</td>
+                                    <td>${(file.size / 1024).toFixed(1)} KB</td>
+                                    <td>${new Date(file.modified).toLocaleString()}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-secondary" 
+                                                onclick="downloadFile(${experimentId}, '${file.path}')">
+                                            <i class="bi bi-download"></i> Download
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+    
+    filesContainer.innerHTML = filesHtml;
+}
+
+// 全局函数，用于图片模态框
+window.showImageModal = function(imageSrc, imageName) {
+    const modalHtml = `
+        <div class="modal fade" id="imageModal" tabindex="-1">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">${imageName}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <img src="${imageSrc}" class="img-fluid" alt="${imageName}">
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // 移除已存在的模态框
+    const existingModal = document.getElementById('imageModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // 添加新模态框
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // 显示模态框
+    const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+    modal.show();
+};
+
+// 全局函数，用于查看数据文件
+window.viewDataFile = function(experimentId, filePath) {
+    fetch(`/api/experiment_data/${experimentId}/${filePath}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showStatus(`Error: ${data.error}`, 'error');
+                return;
+            }
+            
+            let content = '';
+            if (data.type === 'csv') {
+                content = `
+                    <h6>${data.filename} (${data.shape[0]} rows × ${data.shape[1]} columns)</h6>
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>${data.columns.map(col => `<th>${col}</th>`).join('')}</tr>
+                            </thead>
+                            <tbody>
+                                ${data.data.slice(0, 50).map(row => 
+                                    `<tr>${data.columns.map(col => `<td>${row[col] || ''}</td>`).join('')}</tr>`
+                                ).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    ${data.data.length > 50 ? `<p class="text-muted">Showing first 50 rows of ${data.data.length} total rows</p>` : ''}
+                `;
+            } else {
+                content = `<pre class="bg-light p-3 rounded">${data.content}</pre>`;
+            }
+            
+            const modalHtml = `
+                <div class="modal fade" id="dataModal" tabindex="-1">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">${data.filename}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                ${content}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 移除已存在的模态框
+            const existingModal = document.getElementById('dataModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // 添加新模态框
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // 显示模态框
+            const modal = new bootstrap.Modal(document.getElementById('dataModal'));
+            modal.show();
+        })
+        .catch(error => {
+            console.error('Failed to load data file:', error);
+            showStatus('Failed to load data file', 'error');
+        });
+};
+
+// 全局函数，用于下载文件
+window.downloadFile = function(experimentId, filePath) {
+    window.open(`/api/experiment_file/${experimentId}/${filePath}`, '_blank');
+};
 
 export function showAddExperimentModal() {
     // 加载实验类型
@@ -263,7 +558,13 @@ export function generateParameterForm(experimentType) {
                 const required = paramConfig.required ? 'required' : '';
                 const requiredMark = paramConfig.required ? '<span class="text-danger">*</span>' : '';
                 
-                formHTML += '<div class="col-md-6 mb-3">';
+                // 为特定参数添加条件显示类
+                let conditionalClass = '';
+                if (paramName === 'age_threshold') {
+                    conditionalClass = 'conditional-param age-dependent';
+                }
+                
+                formHTML += `<div class="col-md-6 mb-3 ${conditionalClass}">`;
                 formHTML += `<label for="${paramName}" class="form-label">${paramConfig.label} ${requiredMark}</label>`;
                 
                 switch (paramConfig.type) {
@@ -314,11 +615,68 @@ export function generateParameterForm(experimentType) {
             
             formHTML += '</div>';
             document.getElementById('parameterForm').innerHTML = formHTML;
+            
+            // 添加动态参数显示逻辑
+            setupDynamicParameterVisibility(experimentType);
         })
         .catch(error => {
             console.error('Failed to load experiment parameters:', error);
             document.getElementById('parameterForm').innerHTML = '<p class="text-danger">Failed to load parameters</p>';
         });
+}
+
+function setupDynamicParameterVisibility(experimentType) {
+    // 为classification实验添加target_var变化监听
+    if (experimentType === 'classification') {
+        const targetVarSelect = document.getElementById('target_var');
+        if (targetVarSelect) {
+            targetVarSelect.addEventListener('change', function() {
+                updateClassificationParameters(this.value);
+            });
+            // 初始化时也调用一次
+            updateClassificationParameters(targetVarSelect.value);
+        }
+    }
+    
+    // 为correlation实验添加target_vars变化监听
+    if (experimentType === 'correlation') {
+        const targetVarsSelect = document.getElementById('target_vars');
+        if (targetVarsSelect) {
+            targetVarsSelect.addEventListener('change', function() {
+                updateCorrelationParameters(this.value);
+            });
+            // 初始化时也调用一次
+            updateCorrelationParameters(targetVarsSelect.value);
+        }
+    }
+}
+
+function updateClassificationParameters(targetVar) {
+    const ageThresholdContainer = document.querySelector('.age-dependent');
+    if (ageThresholdContainer) {
+        if (targetVar === 'age_group' || targetVar === 'age_class') {
+            // 显示年龄阈值参数
+            ageThresholdContainer.classList.remove('hidden');
+            const ageThresholdInput = ageThresholdContainer.querySelector('input');
+            if (ageThresholdInput) {
+                ageThresholdInput.required = true;
+            }
+        } else {
+            // 隐藏年龄阈值参数
+            ageThresholdContainer.classList.add('hidden');
+            const ageThresholdInput = ageThresholdContainer.querySelector('input');
+            if (ageThresholdInput) {
+                ageThresholdInput.required = false;
+                ageThresholdInput.value = ''; // 清空值
+            }
+        }
+    }
+}
+
+function updateCorrelationParameters(targetVars) {
+    // 这里可以添加correlation实验的动态参数逻辑
+    // 例如根据选择的目标变量来调整其他参数
+    console.log('Correlation target variables changed:', targetVars);
 }
 
 // 提交实验
@@ -338,6 +696,13 @@ export function submitExperiment() {
     const inputs = parameterForm.querySelectorAll('input, select');
     
     inputs.forEach(input => {
+        // 检查参数是否被隐藏
+        const paramContainer = input.closest('.conditional-param');
+        if (paramContainer && paramContainer.classList.contains('hidden')) {
+            // 跳过隐藏的参数
+            return;
+        }
+        
         if (input.type === 'checkbox') {
             parameters[input.name] = input.checked;
         } else if (input.type === 'select-multiple') {

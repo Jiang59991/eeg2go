@@ -1,0 +1,28 @@
+{
+  "experiment_type": "classification",
+  "dataset_id": 5,
+  "feature_set_id": 2,
+  "output_dir": "experiments/classification_33_20250831_114422",
+  "extra_args": {
+    "parameters": {
+      "generate_plots": true,
+      "n_splits": "5",
+      "random_state": "42",
+      "target_var": "sex",
+      "test_size": "0.2"
+    }
+  },
+  "run_time": "2025-08-31T11:44:22.694817",
+  "feature_matrix_shape": [
+    47,
+    145
+  ],
+  "metadata_shape": [
+    50,
+    6
+  ],
+  "target_variables": [
+    "age",
+    "sex"
+  ]
+}

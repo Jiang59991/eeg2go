@@ -12,17 +12,25 @@ This module performs comprehensive statistical analysis of EEG features includin
 import os
 import pandas as pd
 import numpy as np
+import matplotlib
+# 设置matplotlib后端为非交互式，避免在没有显示器的环境中出错
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy import stats
 from scipy.stats import skew, kurtosis
 import warnings
 from logging_config import logger  # 使用全局logger
+import json
+from datetime import datetime
 warnings.filterwarnings('ignore')
 
-# Set English font
-plt.rcParams['font.sans-serif'] = ['DejaVu Sans']
-plt.rcParams['axes.unicode_minus'] = False
+# Set English font - 使用更通用的字体设置
+try:
+    plt.rcParams['font.sans-serif'] = ['DejaVu Sans', 'Arial', 'Liberation Sans']
+    plt.rcParams['axes.unicode_minus'] = False
+except Exception as e:
+    logger.warning(f"Font setting failed: {e}")
 
 
 def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs) -> str:
@@ -34,12 +42,10 @@ def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs)
         df_meta: Metadata dataframe (optional for this experiment)
         output_dir: Output directory
         **kwargs: Extra arguments
-            - outlier_method: Outlier detection method ('iqr', 'zscore', 'isolation'), default 'iqr'
+            - outlier_method: Outlier detection method ('iqr', 'zscore', 'isolation_forest'), default 'iqr'
             - outlier_threshold: Outlier threshold, default 1.5
-            - plot_distributions: Whether to plot feature distributions, default True
-            - plot_correlation_heatmap: Whether to plot feature correlation heatmap, default True
-            - plot_outliers: Whether to plot outlier analysis, default True
             - top_n_features: Number of top features to analyze in detail, default 20
+            - generate_plots: Whether to generate plots, default True
     
     Returns:
         str: Experiment summary
@@ -50,10 +56,8 @@ def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs)
     # Get parameters
     outlier_method = kwargs.get('outlier_method', 'iqr')
     outlier_threshold = kwargs.get('outlier_threshold', 1.5)
-    plot_distributions = kwargs.get('plot_distributions', True)
-    plot_correlation_heatmap = kwargs.get('plot_correlation_heatmap', True)
-    plot_outliers = kwargs.get('plot_outliers', True)
     top_n_features = kwargs.get('top_n_features', 20)
+    generate_plots = kwargs.get('generate_plots', True)
     
     # Data preprocessing
     df_processed = preprocess_features(df_feat)
@@ -75,14 +79,17 @@ def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs)
                            feature_importance, output_dir)
     
     # Visualizations
-    if plot_distributions:
-        plot_feature_distributions(df_processed, distribution_analysis, output_dir, top_n_features)
-    
-    if plot_correlation_heatmap:
-        plot_feature_correlation_heatmap(df_processed, output_dir)
-    
-    if plot_outliers:
-        plot_outlier_analysis(df_processed, outlier_analysis, output_dir, top_n_features)
+    if generate_plots:
+        try:
+            logger.info("Starting visualization generation...")
+            plot_feature_distributions(df_processed, distribution_analysis, output_dir, top_n_features)
+            plot_feature_correlation_heatmap(df_processed, output_dir)
+            plot_outlier_analysis(df_processed, outlier_analysis, output_dir, top_n_features)
+            logger.info("All visualizations completed successfully")
+        except Exception as e:
+            logger.error(f"Error during visualization generation: {e}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
     
     # Generate summary
     summary = generate_summary(basic_stats, distribution_analysis, outlier_analysis, 
@@ -266,70 +273,116 @@ def rank_features(df: pd.DataFrame) -> pd.DataFrame:
 def save_statistics_results(basic_stats: dict, distribution_analysis: dict, 
                            outlier_analysis: dict, feature_importance: pd.DataFrame, 
                            output_dir: str):
-    """Save all analysis results"""
+    """Save all analysis results with organized file structure"""
+    
+    # 创建子目录
+    data_dir = os.path.join(output_dir, "data")
+    plots_dir = os.path.join(output_dir, "plots")
+    os.makedirs(data_dir, exist_ok=True)
+    os.makedirs(plots_dir, exist_ok=True)
     
     # Save basic statistics
     basic_stats_df = pd.DataFrame(basic_stats).T
-    basic_stats_df.to_csv(os.path.join(output_dir, "feature_basic_statistics.csv"))
+    basic_stats_df.to_csv(os.path.join(data_dir, "feature_basic_statistics.csv"))
     
     # Save distribution analysis
     dist_df = pd.DataFrame(distribution_analysis).T
-    dist_df.to_csv(os.path.join(output_dir, "feature_distribution_analysis.csv"))
+    dist_df.to_csv(os.path.join(data_dir, "feature_distribution_analysis.csv"))
     
     # Save outlier analysis
     outlier_df = pd.DataFrame(outlier_analysis).T
-    outlier_df.to_csv(os.path.join(output_dir, "feature_outlier_analysis.csv"))
+    outlier_df.to_csv(os.path.join(data_dir, "feature_outlier_analysis.csv"))
     
     # Save feature importance
-    feature_importance.to_csv(os.path.join(output_dir, "feature_importance_ranking.csv"), index=False)
+    feature_importance.to_csv(os.path.join(data_dir, "feature_importance_ranking.csv"), index=False)
     
-    logger.info(f"Results saved to {output_dir}")
+    # 创建结果索引文件
+    results_index = {
+        "experiment_type": "feature_statistics",
+        "files": {
+            "basic_statistics": "data/feature_basic_statistics.csv",
+            "distribution_analysis": "data/feature_distribution_analysis.csv", 
+            "outlier_analysis": "data/feature_outlier_analysis.csv",
+            "feature_importance": "data/feature_importance_ranking.csv"
+        },
+        "plots": {
+            "distributions": "plots/feature_distributions.png",
+            "correlation_heatmap": "plots/feature_correlation_heatmap.png",
+            "outlier_analysis": "plots/outlier_analysis.png"
+        },
+        "summary": {
+            "total_features": len(basic_stats),
+            "top_features_count": len(feature_importance),
+            "generated_at": datetime.now().isoformat()
+        }
+    }
+    
+    with open(os.path.join(output_dir, "results_index.json"), "w", encoding='utf-8') as f:
+        json.dump(results_index, f, indent=2, ensure_ascii=False)
+    
+    logger.info(f"Results saved to {output_dir} with organized structure")
 
 
 def plot_feature_distributions(df: pd.DataFrame, distribution_analysis: dict, 
                               output_dir: str, top_n: int):
     """Plot feature distributions"""
-    logger.info("Plotting feature distributions...")
-    
-    # Get top features by importance
-    top_features = list(distribution_analysis.keys())[:top_n]
-    
-    # Create subplots
-    n_cols = 4
-    n_rows = (len(top_features) + n_cols - 1) // n_cols
-    
-    fig, axes = plt.subplots(n_rows, n_cols, figsize=(15, 3 * n_rows))
-    if n_rows == 1:
-        axes = axes.reshape(1, -1)
-    
-    for i, feature in enumerate(top_features):
-        row = i // n_cols
-        col = i % n_cols
+    try:
+        logger.info("Plotting feature distributions...")
         
-        values = df[feature].dropna()
-        dist_info = distribution_analysis[feature]
+        # Get top features by importance
+        top_features = list(distribution_analysis.keys())[:top_n]
+        logger.info(f"Plotting distributions for {len(top_features)} features")
         
-        # Plot histogram
-        axes[row, col].hist(values, bins=30, alpha=0.7, edgecolor='black')
-        axes[row, col].set_title(f'{feature}\n{dist_info["distribution_type"]}')
-        axes[row, col].set_xlabel('Value')
-        axes[row, col].set_ylabel('Frequency')
+        # Create subplots
+        n_cols = 4
+        n_rows = (len(top_features) + n_cols - 1) // n_cols
         
-        # Add statistics text
-        stats_text = f'μ={np.mean(values):.3f}\nσ={np.std(values):.3f}\nSkew={dist_info["skewness"]:.3f}'
-        axes[row, col].text(0.02, 0.98, stats_text, transform=axes[row, col].transAxes, 
-                           verticalalignment='top', fontsize=8,
-                           bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
-    
-    # Hide empty subplots
-    for i in range(len(top_features), n_rows * n_cols):
-        row = i // n_cols
-        col = i % n_cols
-        axes[row, col].set_visible(False)
-    
-    plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, "feature_distributions.png"), dpi=300, bbox_inches='tight')
-    plt.close()
+        fig, axes = plt.subplots(n_rows, n_cols, figsize=(15, 3 * n_rows))
+        if n_rows == 1:
+            axes = axes.reshape(1, -1)
+        
+        for i, feature in enumerate(top_features):
+            row = i // n_cols
+            col = i % n_cols
+            
+            values = df[feature].dropna()
+            dist_info = distribution_analysis[feature]
+            
+            # Plot histogram
+            axes[row, col].hist(values, bins=30, alpha=0.7, edgecolor='black')
+            axes[row, col].set_title(f'{feature}\n{dist_info["distribution_type"]}')
+            axes[row, col].set_xlabel('Value')
+            axes[row, col].set_ylabel('Frequency')
+            
+            # Add statistics text
+            stats_text = f'μ={np.mean(values):.3f}\nσ={np.std(values):.3f}\nSkew={dist_info["skewness"]:.3f}'
+            axes[row, col].text(0.02, 0.98, stats_text, transform=axes[row, col].transAxes, 
+                               verticalalignment='top', fontsize=8,
+                               bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+        
+        # Hide empty subplots
+        for i in range(len(top_features), n_rows * n_cols):
+            row = i // n_cols
+            col = i % n_cols
+            axes[row, col].set_visible(False)
+        
+        plt.tight_layout()
+        plots_dir = os.path.join(output_dir, "plots")
+        os.makedirs(plots_dir, exist_ok=True)
+        output_path = os.path.join(plots_dir, "feature_distributions.png")
+        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.close()
+        logger.info(f"Feature distributions plot saved to: {output_path}")
+        
+    except Exception as e:
+        logger.error(f"Error in plot_feature_distributions: {e}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        # 确保关闭图形
+        try:
+            plt.close('all')
+        except:
+            pass
 
 
 def plot_feature_correlation_heatmap(df: pd.DataFrame, output_dir: str):
@@ -346,7 +399,9 @@ def plot_feature_correlation_heatmap(df: pd.DataFrame, output_dir: str):
                 square=True, linewidths=0.5, cbar_kws={"shrink": .8})
     plt.title('Feature Correlation Matrix')
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, "feature_correlation_heatmap.png"), dpi=300, bbox_inches='tight')
+    plots_dir = os.path.join(output_dir, "plots")
+    os.makedirs(plots_dir, exist_ok=True)
+    plt.savefig(os.path.join(plots_dir, "feature_correlation_heatmap.png"), dpi=300, bbox_inches='tight')
     plt.close()
 
 
@@ -375,7 +430,9 @@ def plot_outlier_analysis(df: pd.DataFrame, outlier_analysis: dict,
         axes[i].set_ylabel('Value')
     
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, "outlier_analysis.png"), dpi=300, bbox_inches='tight')
+    plots_dir = os.path.join(output_dir, "plots")
+    os.makedirs(plots_dir, exist_ok=True)
+    plt.savefig(os.path.join(plots_dir, "outlier_analysis.png"), dpi=300, bbox_inches='tight')
     plt.close()
 
 

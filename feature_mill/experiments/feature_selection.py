@@ -25,6 +25,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import cross_val_score
 import warnings
 from logging_config import logger  # 使用全局logger
+import json
+from datetime import datetime
 warnings.filterwarnings('ignore')
 
 # Set English font
@@ -45,8 +47,7 @@ def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs)
             - n_features: Number of features to select, default 20
             - variance_threshold: Variance threshold for variance-based selection, default 0.01
             - correlation_threshold: Correlation threshold for correlation-based selection, default 0.95
-            - plot_selection_results: Whether to plot selection results, default True
-            - plot_feature_importance: Whether to plot feature importance, default True
+            - generate_plots: Whether to generate plots, default True
     
     Returns:
         str: Experiment summary
@@ -60,8 +61,7 @@ def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs)
     n_features = kwargs.get('n_features', 20)
     variance_threshold = kwargs.get('variance_threshold', 0.01)
     correlation_threshold = kwargs.get('correlation_threshold', 0.95)
-    plot_selection_results = kwargs.get('plot_selection_results', True)
-    plot_feature_importance = kwargs.get('plot_feature_importance', True)
+    generate_plots = kwargs.get('generate_plots', True)
     
     # Data preprocessing
     df_processed, X, y = preprocess_data(df_feat, df_meta, target_var)
@@ -97,16 +97,14 @@ def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs)
     save_selection_results(selection_results, comparison_results, output_dir)
     
     # Visualizations
-    if plot_selection_results:
+    if generate_plots:
         plot_selection_comparison(selection_results, output_dir)
-    
-    if plot_feature_importance:
         plot_feature_importance_analysis(selection_results, X, y, output_dir)
     
     # Generate summary
     summary = generate_summary(selection_results, comparison_results, df_processed, target_var)
     
-    logger.info(f"Feature selection completed, results saved to: {output_dir}")
+    logger.info(f"Feature selection experiment completed, results saved to: {output_dir}")
     return summary
 
 
@@ -287,11 +285,11 @@ def principal_component_analysis(X: pd.DataFrame, n_features: int) -> dict:
     }
 
 
-def compare_selection_methods(selection_results: dict, X: pd.DataFrame, y: pd.Series) -> dict:
+def compare_selection_methods(selection_results: dict, X: pd.DataFrame, y: pd.Series) -> pd.DataFrame:
     """Compare different feature selection methods"""
     logger.info("Comparing selection methods...")
     
-    comparison = {}
+    comparison_data = []
     
     for method_name, result in selection_results.items():
         if 'selected_features' not in result:
@@ -312,71 +310,107 @@ def compare_selection_methods(selection_results: dict, X: pd.DataFrame, y: pd.Se
             model = LinearRegression()
             scores = cross_val_score(model, X_selected, y, cv=5, scoring='r2')
             
-            comparison[method_name] = {
-                'n_features': len(selected_features),
-                'mean_cv_score': np.mean(scores),
-                'std_cv_score': np.std(scores),
-                'selected_features': selected_features
-            }
+            comparison_data.append({
+                'Method': method_name,
+                'N_Features': len(selected_features),
+                'Mean_CV_Score': np.mean(scores),
+                'Std_CV_Score': np.std(scores),
+                'Selected_Features': ', '.join(selected_features)
+            })
         except Exception as e:
             logger.error(f"Error evaluating {method_name}: {e}")
-            comparison[method_name] = {
-                'n_features': len(selected_features),
-                'mean_cv_score': np.nan,
-                'std_cv_score': np.nan,
-                'selected_features': selected_features
-            }
+            comparison_data.append({
+                'Method': method_name,
+                'N_Features': len(selected_features),
+                'Mean_CV_Score': np.nan,
+                'Std_CV_Score': np.nan,
+                'Selected_Features': ', '.join(selected_features)
+            })
     
-    return comparison
+    return pd.DataFrame(comparison_data)
 
 
-def save_selection_results(selection_results: dict, comparison_results: dict, output_dir: str):
-    """Save feature selection results"""
+def save_selection_results(selection_results: dict, comparison_results: pd.DataFrame, output_dir: str):
+    """Save feature selection results with organized file structure"""
     
-    # Save detailed results for each method
+    # 创建子目录
+    data_dir = os.path.join(output_dir, "data")
+    plots_dir = os.path.join(output_dir, "plots")
+    os.makedirs(data_dir, exist_ok=True)
+    os.makedirs(plots_dir, exist_ok=True)
+    
+    # 保存每种方法的结果
     for method_name, result in selection_results.items():
-        if 'selected_features' in result:
-            df_result = pd.DataFrame({
-                'method': [result['method']] * len(result['selected_features']),
-                'selected_features': result['selected_features']
-            })
-            df_result.to_csv(os.path.join(output_dir, f"selection_{method_name}.csv"), index=False)
+        if result is not None and len(result) > 0:
+            result_file = os.path.join(data_dir, f"selection_{method_name}.csv")
+            # 将字典转换为DataFrame
+            if isinstance(result, dict):
+                # 创建包含选择特征的DataFrame
+                selected_features = result.get('selected_features', [])
+                removed_features = result.get('removed_features', [])
+                
+                # 创建结果DataFrame
+                result_data = {
+                    'method': [result.get('method', method_name)],
+                    'n_selected': [result.get('n_selected', len(selected_features))],
+                    'threshold': [result.get('threshold', 'N/A')],
+                    'selected_features': [', '.join(selected_features)],
+                    'removed_features': [', '.join(removed_features)]
+                }
+                
+                # 如果有特征重要性信息，也保存
+                if 'feature_importance' in result:
+                    importance_data = result['feature_importance']
+                    if isinstance(importance_data, dict):
+                        result_data['feature_importance'] = [json.dumps(importance_data)]
+                    else:
+                        result_data['feature_importance'] = [str(importance_data)]
+                
+                result_df = pd.DataFrame(result_data)
+                result_df.to_csv(result_file, index=False)
+            else:
+                # 如果result已经是DataFrame，直接保存
+                result.to_csv(result_file, index=False)
     
-    # Save comparison results
-    comparison_df = pd.DataFrame(comparison_results).T
-    comparison_df.to_csv(os.path.join(output_dir, "selection_methods_comparison.csv"))
+    # 保存方法比较结果
+    if comparison_results is not None and len(comparison_results) > 0:
+        comparison_file = os.path.join(data_dir, "selection_methods_comparison.csv")
+        comparison_results.to_csv(comparison_file, index=False)
     
-    # Save summary of all selected features
-    all_selected = {}
+    # 创建结果索引文件
+    results_index = {
+        "experiment_type": "feature_selection",
+        "files": {
+            "methods_comparison": "data/selection_methods_comparison.csv"
+        },
+        "plots": {
+            "selection_comparison": "plots/selection_methods_comparison.png",
+            "feature_importance": "plots/feature_importance_comparison.png"
+        },
+        "summary": {
+            "methods_used": list(selection_results.keys()),
+            "total_methods": len(selection_results),
+            "generated_at": datetime.now().isoformat()
+        }
+    }
+    
+    # 添加每种方法的文件
     for method_name, result in selection_results.items():
-        if 'selected_features' in result:
-            all_selected[method_name] = result['selected_features']
+        if result is not None and len(result) > 0:
+            results_index["files"][f"selection_{method_name}"] = f"data/selection_{method_name}.csv"
     
-    # Find common features across methods
-    if all_selected:
-        all_features = set()
-        for features in all_selected.values():
-            all_features.update(features)
-        
-        feature_summary = []
-        for feature in sorted(all_features):
-            methods_using = [method for method, features in all_selected.items() if feature in features]
-            feature_summary.append({
-                'feature': feature,
-                'methods_using': ', '.join(methods_using),
-                'n_methods': len(methods_using)
-            })
-        
-        feature_summary_df = pd.DataFrame(feature_summary)
-        feature_summary_df = feature_summary_df.sort_values('n_methods', ascending=False)
-        feature_summary_df.to_csv(os.path.join(output_dir, "feature_selection_summary.csv"), index=False)
+    with open(os.path.join(output_dir, "results_index.json"), "w", encoding='utf-8') as f:
+        json.dump(results_index, f, indent=2, ensure_ascii=False)
     
-    logger.info(f"Results saved to {output_dir}")
+    logger.info(f"Feature selection results saved to {output_dir} with organized structure")
 
 
 def plot_selection_comparison(selection_results: dict, output_dir: str):
     """Plot comparison of different selection methods"""
     logger.info("Plotting selection comparison...")
+    
+    plots_dir = os.path.join(output_dir, "plots")
+    os.makedirs(plots_dir, exist_ok=True)
     
     # Compare number of selected features
     methods = []
@@ -400,13 +434,16 @@ def plot_selection_comparison(selection_results: dict, output_dir: str):
                 str(value), ha='center', va='bottom')
     
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, "selection_methods_comparison.png"), dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.join(plots_dir, "selection_methods_comparison.png"), dpi=300, bbox_inches='tight')
     plt.close()
 
 
 def plot_feature_importance_analysis(selection_results: dict, X: pd.DataFrame, y: pd.Series, output_dir: str):
     """Plot feature importance analysis"""
     logger.info("Plotting feature importance analysis...")
+    
+    plots_dir = os.path.join(output_dir, "plots")
+    os.makedirs(plots_dir, exist_ok=True)
     
     # Collect feature importance from different methods
     importance_data = {}
@@ -446,11 +483,11 @@ def plot_feature_importance_analysis(selection_results: dict, X: pd.DataFrame, y
         axes[i].set_visible(False)
     
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, "feature_importance_analysis.png"), dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.join(plots_dir, "feature_importance_analysis.png"), dpi=300, bbox_inches='tight')
     plt.close()
 
 
-def generate_summary(selection_results: dict, comparison_results: dict, 
+def generate_summary(selection_results: dict, comparison_results: pd.DataFrame, 
                     df_processed: pd.DataFrame, target_var: str) -> str:
     """Generate experiment summary"""
     
@@ -496,12 +533,13 @@ Most Commonly Selected Features (across methods):
     for feature, count in top_common_features:
         summary += f"- {feature}: selected by {count} methods\n"
     
-    if comparison_results:
-        best_method = max(comparison_results.items(), 
-                         key=lambda x: x[1]['mean_cv_score'] if not np.isnan(x[1]['mean_cv_score']) else -1)
+    if not comparison_results.empty:
+        # 找到最佳方法
+        best_idx = comparison_results['Mean_CV_Score'].idxmax()
+        best_method = comparison_results.loc[best_idx]
         summary += f"""
 Model Performance Comparison:
-- Best performing method: {best_method[0]} (CV R² = {best_method[1]['mean_cv_score']:.3f} ± {best_method[1]['std_cv_score']:.3f})
+- Best performing method: {best_method['Method']} (CV R² = {best_method['Mean_CV_Score']:.3f} ± {best_method['Std_CV_Score']:.3f})
 """
     
     summary += """

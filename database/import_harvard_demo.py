@@ -133,12 +133,9 @@ def import_harvard_edf_for_hospital(conn, hospital_id, dataset_name, max_import_
         subject_id = subj_folder
         subject_path = os.path.join(hospital_path, subj_folder)
 
-        # Check if the subject already exists (in the same dataset)
-        c.execute("SELECT subject_id FROM subjects WHERE subject_id = ? AND dataset_id = ?", 
+        # Insert subject if not exists (use INSERT OR IGNORE to avoid constraint violations)
+        c.execute("INSERT OR IGNORE INTO subjects (subject_id, dataset_id) VALUES (?, ?)", 
                  (subject_id, dataset_id))
-        if not c.fetchone():
-            c.execute("INSERT INTO subjects (subject_id, dataset_id) VALUES (?, ?)", 
-                     (subject_id, dataset_id))
 
         # 1. First check if there is a direct EEG folder
         direct_eeg_path = os.path.join(subject_path, "eeg")

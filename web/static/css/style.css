@@ -75,6 +75,32 @@ body {
     transform: translateX(2px);
 }
 
+/* System mode status styles */
+#systemModeStatus {
+    margin-bottom: 15px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    line-height: 1.3;
+}
+
+#systemModeStatus small {
+    display: block;
+}
+
+#systemModeStatus .bi {
+    margin-right: 4px;
+}
+
+#systemModeStatus strong {
+    font-weight: 600;
+}
+
+#systemModeStatus .text-muted {
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
+
 /* Main content area styles */
 .main-content {
     padding: 20px;

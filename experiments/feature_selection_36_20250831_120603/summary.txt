@@ -1,0 +1,39 @@
+
+Feature Selection Analysis Summary
+==================================
+
+Dataset Overview:
+- Total features: 148
+- Target variable: age
+
+Selection Methods Applied:
+- Variance-based: 63 features (42.6%)
+- Correlation-based: 77 features (52.0%)
+- Univariate (f_regression): 20 features (13.5%)
+- Univariate (mutual_info): 20 features (13.5%)
+- Lasso-based: 18 features (12.2%)
+- Recursive Feature Elimination: 20 features (13.5%)
+- Principal Component Analysis: 20 features (13.5%)
+
+Most Commonly Selected Features (across methods):
+- fx226_bp_rel_delta_F3_F3_median: selected by 6 methods
+- fx240_bp_rel_alpha_C3_C3_max: selected by 4 methods
+- fx244_bp_rel_beta_F3_F3_max: selected by 4 methods
+- fx248_bp_rel_beta_O1_O1_max: selected by 4 methods
+- fx230_bp_rel_delta_O1_O1_std: selected by 4 methods
+- fx242_bp_rel_alpha_O1_O1_std: selected by 4 methods
+- fx226_bp_rel_delta_F3_F3_mean: selected by 3 methods
+- fx227_bp_rel_delta_F4_F4_median: selected by 3 methods
+- fx228_bp_rel_delta_C3_C3_median: selected by 3 methods
+- fx230_bp_rel_delta_O1_O1_mean: selected by 3 methods
+
+Model Performance Comparison:
+- Best performing method: rfe (CV R² = 0.387 ± 0.352)
+
+Key Findings:
+- Multiple feature selection methods applied
+- Feature importance rankings generated
+- Cross-validation performance evaluated
+- Common features across methods identified
+
+Results saved to output directory.

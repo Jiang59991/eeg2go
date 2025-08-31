@@ -368,7 +368,14 @@ class Experiment1Analyzer:
         
         for i, (metric, name) in enumerate(zip(metrics, metric_names)):
             values = [results[pipeline]['oof_scores'][metric] for pipeline in available_pipelines]
-            pipeline_names = [p.split('__')[-1] for p in available_pipelines]  # 提取pipeline名称
+            # 将pipeline名称映射为简短的P0, P1, P2, P3
+            pipeline_mapping = {
+                'P0_minimal_hp': 'P0',
+                'P1_hp_avg_reref': 'P1', 
+                'P2_hp_notch50': 'P2',
+                'P3_hp_ica_auto': 'P3'
+            }
+            pipeline_names = [pipeline_mapping.get(p.split('__')[-1], p.split('__')[-1]) for p in available_pipelines]
             
             axes[i].bar(pipeline_names, values, color=['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728'])
             axes[i].set_title(f'{name} Comparison')
@@ -386,7 +393,14 @@ class Experiment1Analyzer:
         plt.show()
         
         # 2. 统计显著性热图
-        pipeline_names = [p.split('__')[-1] for p in available_pipelines]
+        # 将pipeline名称映射为简短的P0, P1, P2, P3
+        pipeline_mapping = {
+            'P0_minimal_hp': 'P0',
+            'P1_hp_avg_reref': 'P1', 
+            'P2_hp_notch50': 'P2',
+            'P3_hp_ica_auto': 'P3'
+        }
+        pipeline_names = [pipeline_mapping.get(p.split('__')[-1], p.split('__')[-1]) for p in available_pipelines]
         auc_scores = [results[pipeline]['oof_scores']['auc'] for pipeline in available_pipelines]
         
         # 计算差异矩阵
@@ -408,8 +422,17 @@ class Experiment1Analyzer:
         plt.show()
         
         # 3. 详细结果表格
+        # 将pipeline名称映射为简短的P0, P1, P2, P3
+        pipeline_mapping = {
+            'P0_minimal_hp': 'P0',
+            'P1_hp_avg_reref': 'P1', 
+            'P2_hp_notch50': 'P2',
+            'P3_hp_ica_auto': 'P3'
+        }
+        pipeline_names = [pipeline_mapping.get(p.split('__')[-1], p.split('__')[-1]) for p in self.featuresets]
+        
         results_df = pd.DataFrame({
-            'Pipeline': [p.split('__')[-1] for p in self.featuresets],
+            'Pipeline': pipeline_names,
             'AUC': [results[p]['oof_scores']['auc'] for p in self.featuresets],
             'Accuracy': [results[p]['oof_scores']['accuracy'] for p in self.featuresets],
             'F1 Score': [results[p]['oof_scores']['f1'] for p in self.featuresets],
