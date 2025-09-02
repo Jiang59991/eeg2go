@@ -1,0 +1,30 @@
+{
+  "experiment_type": "correlation",
+  "dataset_id": 4,
+  "feature_set_id": 2,
+  "output_dir": "experiments/correlation_17_20250831_090734",
+  "extra_args": {
+    "parameters": {
+      "generate_plots": true,
+      "method": "pearson",
+      "min_corr": "0.3",
+      "target_vars": [
+        "age"
+      ],
+      "top_n": "20"
+    }
+  },
+  "run_time": "2025-08-31T09:07:34.047773",
+  "feature_matrix_shape": [
+    37,
+    145
+  ],
+  "metadata_shape": [
+    50,
+    6
+  ],
+  "target_variables": [
+    "age",
+    "sex"
+  ]
+}

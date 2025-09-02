@@ -152,31 +152,43 @@ def process_recording_result(recording_id: int, fx_values: dict, db_path: str):
     return feature_row, recording_successful_features, recording_failed_features
 
 
-def check_features_exist_in_db(dataset_id: int, feature_set_id: int, db_path: str) -> bool:
+def check_features_exist_in_db(dataset_id: int, feature_set_id: int, db_path: str, min_coverage: float = 0.95) -> dict:
     """
-    Check if all features for all recordings in the dataset are already computed and stored in database
+    Check if features for the dataset exist in database with coverage information
     
     Args:
         dataset_id: Dataset ID
         feature_set_id: Feature set ID
         db_path: Database path
+        min_coverage: Minimum coverage ratio to consider features as "available" (default: 0.95)
     
     Returns:
-        bool: True if all features exist, False otherwise
+        dict: Coverage information with keys:
+            - exists: bool - True if coverage >= min_coverage
+            - coverage_ratio: float - Actual coverage ratio
+            - missing_count: int - Number of missing feature values
+            - total_expected: int - Total expected feature values
+            - can_use_existing: bool - Whether existing data can be used
     """
     logger.info(f"Checking if features exist in database: dataset_id={dataset_id}, feature_set_id={feature_set_id}")
     
     conn = sqlite3.connect(db_path)
-    c = conn.cursor()
     
     try:
         # Get all recording IDs for the dataset
+        c = conn.cursor()
         c.execute("SELECT id FROM recordings WHERE dataset_id = ?", (dataset_id,))
         recording_ids = [row[0] for row in c.fetchall()]
         
         if not recording_ids:
             logger.warning(f"No recordings found for dataset {dataset_id}")
-            return False
+            return {
+                'exists': False,
+                'coverage_ratio': 0.0,
+                'missing_count': 0,
+                'total_expected': 0,
+                'can_use_existing': False
+            }
         
         # Get all feature definition IDs for the feature set
         c.execute("""
@@ -187,7 +199,13 @@ def check_features_exist_in_db(dataset_id: int, feature_set_id: int, db_path: st
         
         if not fxdef_ids:
             logger.warning(f"No feature definitions found for feature set {feature_set_id}")
-            return False
+            return {
+                'exists': False,
+                'coverage_ratio': 0.0,
+                'missing_count': 0,
+                'total_expected': 0,
+                'can_use_existing': False
+            }
         
         logger.info(f"Checking {len(recording_ids)} recordings × {len(fxdef_ids)} features = {len(recording_ids) * len(fxdef_ids)} total combinations")
         
@@ -204,37 +222,89 @@ def check_features_exist_in_db(dataset_id: int, feature_set_id: int, db_path: st
         
         logger.info(f"Found {actual_count} feature values, expected {expected_count}")
         
-        # Check if we have 95% coverage of expected values
+        # Calculate coverage ratio
         coverage_ratio = actual_count / expected_count if expected_count > 0 else 0
-        exists = coverage_ratio >= 0.95
+        missing_count = expected_count - actual_count
+        
+        # Determine if we can use existing data
+        can_use_existing = coverage_ratio >= min_coverage
+        exists = actual_count == expected_count  # 100% coverage
         
         if exists:
-            logger.info(f"Sufficient features exist in database (coverage: {coverage_ratio:.2%})")
+            logger.info(f"✅ All features exist in database (coverage: {coverage_ratio:.2%})")
+        elif can_use_existing:
+            logger.info(f"✅ High coverage features available (coverage: {coverage_ratio:.2%}, missing: {missing_count}) - can use existing data")
         else:
-            logger.info(f"Features missing in database (coverage: {coverage_ratio:.2%}, missing: {expected_count - actual_count})")
+            logger.info(f"❌ Insufficient coverage in database (coverage: {coverage_ratio:.2%}, missing: {missing_count}) - need to compute features")
         
-        return exists
+        return {
+            'exists': exists,
+            'coverage_ratio': coverage_ratio,
+            'missing_count': missing_count,
+            'total_expected': expected_count,
+            'can_use_existing': can_use_existing
+        }
         
     except Exception as e:
         logger.error(f"Error checking features in database: {e}")
-        return False
+        return {
+            'exists': False,
+            'coverage_ratio': 0.0,
+            'missing_count': 0,
+            'total_expected': 0,
+            'can_use_existing': False
+        }
     finally:
         conn.close()
 
 
-def extract_features_from_db(dataset_id: int, feature_set_id: int, db_path: str) -> pd.DataFrame:
+def extract_features_with_coverage(dataset_id: int, feature_set_id: int, db_path: str, 
+                                  min_coverage: float = 0.95) -> pd.DataFrame:
     """
-    Extract feature matrix directly from database without computing
+    Extract feature matrix from database with coverage handling
     
     Args:
         dataset_id: Dataset ID
         feature_set_id: Feature set ID
         db_path: Database path
+        min_coverage: Minimum coverage ratio to consider features as available
     
     Returns:
         pd.DataFrame: Feature matrix with recording-level statistics
     """
-    logger.info(f"Extracting features directly from database: dataset_id={dataset_id}, feature_set_id={feature_set_id}")
+    logger.info(f"Extracting features with coverage handling: dataset_id={dataset_id}, feature_set_id={feature_set_id}")
+    
+    # Check coverage
+    coverage_info = check_features_exist_in_db(dataset_id, feature_set_id, db_path, min_coverage)
+    
+    if not coverage_info['can_use_existing']:
+        raise ValueError(f"Insufficient coverage ({coverage_info['coverage_ratio']:.2%}) to use existing data. Need to compute features.")
+    
+    if coverage_info['exists']:
+        # 100% coverage - use existing data directly
+        logger.info("100% coverage - extracting all features from database")
+        return extract_features_from_db(dataset_id, feature_set_id, db_path)
+    else:
+        # High coverage but some missing - extract what we have and handle missing values
+        logger.info(f"High coverage ({coverage_info['coverage_ratio']:.2%}) - extracting available features and handling missing values")
+        return extract_features_from_db_partial(dataset_id, feature_set_id, db_path, coverage_info)
+
+
+def extract_features_from_db_partial(dataset_id: int, feature_set_id: int, db_path: str, 
+                                   coverage_info: dict) -> pd.DataFrame:
+    """
+    Extract feature matrix from database when some features are missing
+    
+    Args:
+        dataset_id: Dataset ID
+        feature_set_id: Feature set ID
+        db_path: Database path
+        coverage_info: Coverage information from check_features_exist_in_db
+    
+    Returns:
+        pd.DataFrame: Feature matrix with recording-level statistics, missing values handled
+    """
+    logger.info(f"Extracting features with partial coverage: {coverage_info['coverage_ratio']:.2%}")
     
     conn = sqlite3.connect(db_path)
     
@@ -365,7 +435,12 @@ def extract_features_from_db(dataset_id: int, feature_set_id: int, db_path: str)
         
         # Convert to DataFrame
         df = pd.DataFrame(feature_rows)
-        logger.info(f"Feature matrix extracted from database: {df.shape}")
+        logger.info(f"Feature matrix extracted from database (partial coverage): {df.shape}")
+        
+        # Log coverage information
+        total_possible_features = len(recording_ids) * len(fxdefs)
+        actual_features = df.shape[1] - 1  # Subtract recording_id column
+        logger.info(f"Coverage achieved: {actual_features}/{total_possible_features} ({actual_features/total_possible_features:.2%})")
         
         return df
         
@@ -376,26 +451,30 @@ def extract_features_from_db(dataset_id: int, feature_set_id: int, db_path: str)
         conn.close()
 
 
-def extract_feature_matrix_direct(dataset_id: int, feature_set_id: int, db_path: str) -> pd.DataFrame:
+def extract_feature_matrix_direct(dataset_id: int, feature_set_id: int, db_path: str, 
+                                 min_coverage: float = 0.95) -> pd.DataFrame:
     """
-    Extract feature matrix directly from database, with recording-level aggregation
+    Extract feature matrix directly from database, with recording-level aggregation and coverage handling
     
     Args:
         dataset_id: Dataset ID
         feature_set_id: Feature set ID
         db_path: Database path
+        min_coverage: Minimum coverage ratio to consider existing data as usable (default: 0.95)
     
     Returns:
         pd.DataFrame: Feature matrix with recording-level statistics
     """
-    logger.info(f"Extracting feature matrix directly from database: dataset_id={dataset_id}, feature_set_id={feature_set_id}")
+    logger.info(f"Extracting feature matrix with coverage handling: dataset_id={dataset_id}, feature_set_id={feature_set_id}")
     
-    # First, check if all features already exist in database
-    if check_features_exist_in_db(dataset_id, feature_set_id, db_path):
-        logger.info("All features found in database, extracting directly...")
-        return extract_features_from_db(dataset_id, feature_set_id, db_path)
+    # First, check if features exist in database with sufficient coverage
+    coverage_info = check_features_exist_in_db(dataset_id, feature_set_id, db_path, min_coverage)
     
-    logger.info("Features not found in database, computing features...")
+    if coverage_info['can_use_existing']:
+        logger.info(f"Using existing data with {coverage_info['coverage_ratio']:.2%} coverage")
+        return extract_features_with_coverage(dataset_id, feature_set_id, db_path, min_coverage)
+    
+    logger.info(f"Insufficient coverage ({coverage_info['coverage_ratio']:.2%}), computing missing features...")
     
     # Get recording IDs
     recording_ids = get_recording_ids_for_dataset(dataset_id, db_path)
@@ -604,12 +683,13 @@ def get_relevant_metadata(dataset_id: int, db_path: str, target_vars: list = Non
             elif var in ['seizure', 'spindles', 'status', 'normal', 'abnormal']:
                 dynamic_fields.append(f"rm.{var}")
     else:
-        # If no target variables specified, only get essential fields (age)
-        # 不自动包含sex等敏感字段
+        # If no target variables specified, get all common fields
         dynamic_fields = [
-            "s.age",  # 只包含基本的age字段
+            "s.age", "s.sex", "s.race", "s.ethnicity",
+            "s.visit_count", "s.icd10_count", "s.medication_count",
+            "rm.age_days", "rm.seizure", "rm.spindles", 
+            "rm.status", "rm.normal", "rm.abnormal"
         ]
-        logger.warning("No target variables specified, only loading basic age metadata")
     
     # Remove duplicates and build query
     all_fields = base_fields + list(set(dynamic_fields))
@@ -637,7 +717,8 @@ def run_experiment(
     feature_set_id: int,
     output_dir: str,
     extra_args: dict = None,
-    db_path: str = DEFAULT_DB_PATH
+    db_path: str = DEFAULT_DB_PATH,
+    min_coverage: float = 0.95
 ):
     """
     Main function to run experiments
@@ -649,6 +730,7 @@ def run_experiment(
         output_dir (str): Result save path
         extra_args (dict): Additional parameters passed to experiment function
         db_path (str): Database path
+        min_coverage (float): Minimum coverage ratio to use existing data (default: 0.95)
     
     Returns:
         dict: Experiment result summary
@@ -657,6 +739,7 @@ def run_experiment(
     logger.info(f"Starting experiment: {experiment_type}")
     logger.info(f"Dataset ID: {dataset_id}, Feature Set ID: {feature_set_id}")
     logger.info(f"Output directory: {output_dir}")
+    logger.info(f"Minimum coverage threshold: {min_coverage:.1%}")
     
     # Step 1: Prepare output directory
     os.makedirs(output_dir, exist_ok=True)
@@ -664,7 +747,7 @@ def run_experiment(
     # Step 2: Extract feature matrix
     logger.info(f"Extracting feature matrix...")
     try:
-        df_feat = extract_feature_matrix_direct(dataset_id, feature_set_id, db_path)
+        df_feat = extract_feature_matrix_direct(dataset_id, feature_set_id, db_path, min_coverage)
         logger.info(f"Feature matrix extraction completed: {df_feat.shape}")
     except Exception as e:
         logger.error(f"Feature matrix extraction failed: {e}")
@@ -674,16 +757,7 @@ def run_experiment(
     logger.info(f"Loading metadata...")
     try:
         # Get target variables from extra arguments
-        # 只获取用户明确指定的目标变量，不添加默认值
-        target_vars = extra_args.get('target_vars', []) if extra_args else []
-        
-        # 如果没有指定目标变量，记录警告但不自动添加
-        if not target_vars:
-            logger.warning("No target variables specified in extra_args. This may cause issues.")
-            # 为了兼容性，默认只获取age，不包含sex
-            target_vars = ['age']
-        
-        logger.info(f"Target variables for metadata loading: {target_vars}")
+        target_vars = extra_args.get('target_vars', ['age', 'sex']) if extra_args else ['age', 'sex']
         df_meta = get_relevant_metadata(dataset_id, db_path, target_vars)
         logger.info(f"Metadata loading completed: {df_meta.shape}")
     except Exception as e:
@@ -697,6 +771,7 @@ def run_experiment(
         "feature_set_id": feature_set_id,
         "output_dir": output_dir,
         "extra_args": extra_args or {},
+        "min_coverage": min_coverage,
         "run_time": start_time.isoformat(),
         "feature_matrix_shape": df_feat.shape,
         "metadata_shape": df_meta.shape,

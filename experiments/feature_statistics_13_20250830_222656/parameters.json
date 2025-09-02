@@ -1,0 +1,27 @@
+{
+  "experiment_type": "feature_statistics",
+  "dataset_id": 4,
+  "feature_set_id": 2,
+  "output_dir": "experiments/feature_statistics_13_20250830_222656",
+  "extra_args": {
+    "parameters": {
+      "generate_plots": true,
+      "outlier_method": "iqr",
+      "outlier_threshold": "1.5",
+      "top_n_features": "20"
+    }
+  },
+  "run_time": "2025-08-30T22:26:56.828203",
+  "feature_matrix_shape": [
+    37,
+    145
+  ],
+  "metadata_shape": [
+    50,
+    6
+  ],
+  "target_variables": [
+    "age",
+    "sex"
+  ]
+}

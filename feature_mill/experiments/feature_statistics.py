@@ -1,12 +1,14 @@
 """
-Feature Statistics Analysis Experiment Module
+Feature Profiling / QA Experiment Module
 
-This module performs comprehensive statistical analysis of EEG features including:
-- Basic statistics (mean, std, min, max, skewness, kurtosis)
-- Distribution analysis
-- Feature quality assessment
-- Outlier detection
-- Feature importance ranking
+This module performs comprehensive feature quality assessment and data health profiling:
+- Feature quality metrics (missing rates, zero variance, extreme values)
+- Data health indicators (completeness, consistency, validity)
+- Distribution characteristics for quality assessment
+- Outlier patterns for data integrity
+- Feature profiling summary for data quality assurance
+
+Focus: "Is the feature data healthy?" - not "How do features relate to targets?"
 """
 
 import os
@@ -35,7 +37,7 @@ except Exception as e:
 
 def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs) -> str:
     """
-    Run feature statistics analysis experiment
+    Run feature profiling and quality assessment experiment
     
     Args:
         df_feat: Feature matrix dataframe
@@ -46,11 +48,12 @@ def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs)
             - outlier_threshold: Outlier threshold, default 1.5
             - top_n_features: Number of top features to analyze in detail, default 20
             - generate_plots: Whether to generate plots, default True
+            - quality_thresholds: Dict of quality thresholds, default {'missing': 0.9, 'zero_var': 0.0, 'extreme': 0.1}
     
     Returns:
         str: Experiment summary
     """
-    logger.info(f"Start feature statistics analysis experiment")
+    logger.info(f"Start feature profiling and quality assessment experiment")
     logger.info(f"Feature matrix shape: {df_feat.shape}")
     
     # Get parameters
@@ -58,30 +61,42 @@ def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs)
     outlier_threshold = kwargs.get('outlier_threshold', 1.5)
     top_n_features = kwargs.get('top_n_features', 20)
     generate_plots = kwargs.get('generate_plots', True)
+    quality_thresholds = kwargs.get('quality_thresholds', {
+        'missing': 0.9,      # 90% missing threshold
+        'zero_var': 0.0,     # 0 variance threshold
+        'extreme': 0.1       # 10% extreme values threshold
+    })
     
     # Data preprocessing
     df_processed = preprocess_features(df_feat)
     
-    # Basic statistics
+    # Feature quality assessment (core functionality)
+    quality_metrics = assess_feature_quality(df_processed, quality_thresholds)
+    
+    # Basic statistics for quality context
     basic_stats = calculate_basic_statistics(df_processed)
     
-    # Distribution analysis
+    # Distribution analysis for quality assessment
     distribution_analysis = analyze_distributions(df_processed)
     
-    # Outlier analysis
+    # Outlier analysis for data integrity
     outlier_analysis = detect_outliers(df_processed, outlier_method, outlier_threshold)
     
-    # Feature importance ranking
-    feature_importance = rank_features(df_processed)
+    # Feature variability ranking (for quality prioritization)
+    feature_variability = rank_features_by_variability(df_processed)
+    
+    # Data health summary
+    data_health_summary = generate_data_health_summary(quality_metrics, df_processed)
     
     # Save results
-    save_statistics_results(basic_stats, distribution_analysis, outlier_analysis, 
-                           feature_importance, output_dir)
+    save_quality_assessment_results(quality_metrics, basic_stats, distribution_analysis, 
+                                   outlier_analysis, feature_variability, data_health_summary, output_dir)
     
     # Visualizations
     if generate_plots:
         try:
             logger.info("Starting visualization generation...")
+            plot_quality_metrics(quality_metrics, output_dir)
             plot_feature_distributions(df_processed, distribution_analysis, output_dir, top_n_features)
             plot_feature_correlation_heatmap(df_processed, output_dir)
             plot_outlier_analysis(df_processed, outlier_analysis, output_dir, top_n_features)
@@ -92,35 +107,119 @@ def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs)
             logger.error(f"Traceback: {traceback.format_exc()}")
     
     # Generate summary
-    summary = generate_summary(basic_stats, distribution_analysis, outlier_analysis, 
-                              feature_importance, df_processed)
+    summary = generate_summary(quality_metrics, basic_stats, distribution_analysis, 
+                              outlier_analysis, feature_variability, data_health_summary, df_processed)
     
-    logger.info(f"Feature statistics analysis completed, results saved to: {output_dir}")
+    logger.info(f"Feature profiling and quality assessment completed, results saved to: {output_dir}")
     return summary
 
 
 def preprocess_features(df_feat: pd.DataFrame) -> pd.DataFrame:
-    """Preprocess feature matrix"""
+    """Preprocess feature matrix for quality assessment"""
     df_processed = df_feat.copy()
     
     # Remove recording_id column for analysis
     if 'recording_id' in df_processed.columns:
         df_processed = df_processed.drop(columns=['recording_id'])
     
-    # Remove columns with too many missing values
-    missing_threshold = 0.5
-    missing_ratio = df_processed.isnull().sum() / len(df_processed)
-    columns_to_drop = missing_ratio[missing_ratio > missing_threshold].index
-    df_processed = df_processed.drop(columns=columns_to_drop)
-    
-    # Remove non-numeric columns
+    # Keep all columns for quality assessment (don't drop high missing columns yet)
+    # Only remove non-numeric columns
     df_processed = df_processed.select_dtypes(include=[np.number])
-    
-    # Fill missing values with median
-    df_processed = df_processed.fillna(df_processed.median())
     
     logger.info(f"Processed data shape: {df_processed.shape}")
     return df_processed
+
+
+def assess_feature_quality(df: pd.DataFrame, thresholds: dict) -> dict:
+    """Assess feature quality and data health"""
+    logger.info("Assessing feature quality and data health...")
+    
+    quality_metrics = {}
+    
+    for column in df.columns:
+        values = df[column].dropna()
+        total_count = len(df[column])
+        
+        if total_count == 0:
+            continue
+        
+        # Missing value analysis
+        missing_count = df[column].isnull().sum()
+        missing_rate = missing_count / total_count
+        
+        # Zero variance detection
+        if len(values) > 0:
+            variance = np.var(values)
+            zero_variance = variance == 0
+            coefficient_variation = np.std(values) / np.mean(values) if np.mean(values) != 0 else np.inf
+        else:
+            variance = np.nan
+            zero_variance = True
+            coefficient_variation = np.nan
+        
+        # Extreme value analysis
+        if len(values) > 0:
+            q1, q3 = np.percentile(values, [25, 75])
+            iqr = q3 - q1
+            lower_bound = q1 - 1.5 * iqr
+            upper_bound = q3 + 1.5 * iqr
+            extreme_count = len(values[(values < lower_bound) | (values > upper_bound)])
+            extreme_rate = extreme_count / len(values)
+        else:
+            extreme_count = 0
+            extreme_rate = 0
+        
+        # Quality flags
+        high_missing = missing_rate > thresholds['missing']
+        has_zero_variance = zero_variance
+        high_extreme = extreme_rate > thresholds['extreme']
+        
+        # Overall quality score (0-100, higher is better)
+        quality_score = 100
+        if high_missing:
+            quality_score -= 30
+        if has_zero_variance:
+            quality_score -= 25
+        if high_extreme:
+            quality_score -= 20
+        if missing_rate > 0.5:  # Additional penalty for moderate missing
+            quality_score -= 15
+        
+        quality_score = max(0, quality_score)
+        
+        quality_metrics[column] = {
+            'total_count': total_count,
+            'missing_count': missing_count,
+            'missing_rate': missing_rate,
+            'zero_variance': zero_variance,
+            'variance': variance,
+            'coefficient_variation': coefficient_variation,
+            'extreme_count': extreme_count,
+            'extreme_rate': extreme_rate,
+            'quality_flags': {
+                'high_missing': high_missing,
+                'zero_variance': has_zero_variance,
+                'high_extreme': high_extreme
+            },
+            'quality_score': quality_score,
+            'quality_grade': get_quality_grade(quality_score)
+        }
+    
+    return quality_metrics
+
+
+def get_quality_grade(score: float) -> str:
+    """Convert quality score to letter grade"""
+    if score >= 90:
+        return 'A'
+    elif score >= 80:
+        return 'B'
+    elif score >= 70:
+        return 'C'
+    elif score >= 60:
+        return 'D'
+    else:
+        return 'F'
 
 
 def calculate_basic_statistics(df: pd.DataFrame) -> dict:
@@ -153,7 +252,7 @@ def calculate_basic_statistics(df: pd.DataFrame) -> dict:
 
 
 def analyze_distributions(df: pd.DataFrame) -> dict:
-    """Analyze feature distributions"""
+    """Analyze feature distributions for quality assessment"""
     logger.info("Analyzing distributions...")
     
     distribution_analysis = {}
@@ -196,7 +295,7 @@ def analyze_distributions(df: pd.DataFrame) -> dict:
 
 
 def detect_outliers(df: pd.DataFrame, method: str, threshold: float) -> dict:
-    """Detect outliers in features"""
+    """Detect outliers in features for data integrity assessment"""
     logger.info(f"Detecting outliers using {method} method...")
     
     outlier_analysis = {}
@@ -236,9 +335,9 @@ def detect_outliers(df: pd.DataFrame, method: str, threshold: float) -> dict:
     return outlier_analysis
 
 
-def rank_features(df: pd.DataFrame) -> pd.DataFrame:
-    """Rank features by importance/variability"""
-    logger.info("Ranking features by importance...")
+def rank_features_by_variability(df: pd.DataFrame) -> pd.DataFrame:
+    """Rank features by variability for quality prioritization"""
+    logger.info("Ranking features by variability...")
     
     feature_scores = []
     
@@ -247,12 +346,12 @@ def rank_features(df: pd.DataFrame) -> pd.DataFrame:
         if len(values) == 0:
             continue
         
-        # Calculate various importance metrics
+        # Calculate variability metrics
         variance = np.var(values)
         cv = np.std(values) / np.mean(values) if np.mean(values) != 0 else 0
         range_val = np.max(values) - np.min(values)
         
-        # Combined score (weighted average)
+        # Combined variability score (weighted average)
         score = (0.4 * variance + 0.3 * abs(cv) + 0.3 * range_val)
         
         feature_scores.append({
@@ -260,26 +359,119 @@ def rank_features(df: pd.DataFrame) -> pd.DataFrame:
             'variance': variance,
             'coefficient_of_variation': cv,
             'range': range_val,
-            'importance_score': score
+            'variability_score': score
         })
     
-    # Create DataFrame and sort by importance score
-    feature_importance_df = pd.DataFrame(feature_scores)
-    feature_importance_df = feature_importance_df.sort_values('importance_score', ascending=False)
+    # Create DataFrame and sort by variability score
+    feature_variability_df = pd.DataFrame(feature_scores)
+    feature_variability_df = feature_variability_df.sort_values('variability_score', ascending=False)
     
-    return feature_importance_df
+    return feature_variability_df
 
 
-def save_statistics_results(basic_stats: dict, distribution_analysis: dict, 
-                           outlier_analysis: dict, feature_importance: pd.DataFrame, 
-                           output_dir: str):
-    """Save all analysis results with organized file structure"""
+def generate_data_health_summary(quality_metrics: dict, df: pd.DataFrame) -> dict:
+    """Generate comprehensive data health summary"""
+    logger.info("Generating data health summary...")
+    
+    total_features = len(quality_metrics)
+    if total_features == 0:
+        return {}
+    
+    # Quality distribution
+    quality_scores = [metrics['quality_score'] for metrics in quality_metrics.values()]
+    quality_grades = [metrics['quality_grade'] for metrics in quality_metrics.values()]
+    
+    # Count by grade
+    grade_counts = {}
+    for grade in ['A', 'B', 'C', 'D', 'F']:
+        grade_counts[grade] = quality_grades.count(grade)
+    
+    # Problematic features
+    high_missing_count = sum(1 for metrics in quality_metrics.values() 
+                            if metrics['quality_flags']['high_missing'])
+    zero_variance_count = sum(1 for metrics in quality_metrics.values() 
+                             if metrics['quality_flags']['zero_variance'])
+    high_extreme_count = sum(1 for metrics in quality_metrics.values() 
+                            if metrics['quality_flags']['high_extreme'])
+    
+    # Missing data summary
+    missing_rates = [metrics['missing_rate'] for metrics in quality_metrics.values()]
+    avg_missing_rate = np.mean(missing_rates) if missing_rates else 0
+    
+    # Overall health score
+    overall_health_score = np.mean(quality_scores) if quality_scores else 0
+    overall_health_grade = get_quality_grade(overall_health_score)
+    
+    health_summary = {
+        'total_features': total_features,
+        'overall_health_score': overall_health_score,
+        'overall_health_grade': overall_health_grade,
+        'quality_distribution': {
+            'grade_counts': grade_counts,
+            'avg_quality_score': np.mean(quality_scores) if quality_scores else 0,
+            'min_quality_score': np.min(quality_scores) if quality_scores else 0,
+            'max_quality_score': np.max(quality_scores) if quality_scores else 0
+        },
+        'data_quality_issues': {
+            'high_missing_features': high_missing_count,
+            'zero_variance_features': zero_variance_count,
+            'high_extreme_features': high_extreme_count,
+            'problematic_features_ratio': (high_missing_count + zero_variance_count + high_extreme_count) / total_features
+        },
+        'missing_data_summary': {
+            'average_missing_rate': avg_missing_rate,
+            'features_with_missing': sum(1 for metrics in quality_metrics.values() if metrics['missing_rate'] > 0),
+            'severely_missing_features': high_missing_count
+        },
+        'recommendations': generate_quality_recommendations(quality_metrics, overall_health_score)
+    }
+    
+    return health_summary
+
+
+def generate_quality_recommendations(quality_metrics: dict, overall_score: float) -> list:
+    """Generate quality improvement recommendations"""
+    recommendations = []
+    
+    if overall_score < 70:
+        recommendations.append("Overall data quality is poor. Consider data collection improvements.")
+    
+    # Check for specific issues
+    high_missing_features = [name for name, metrics in quality_metrics.items() 
+                            if metrics['quality_flags']['high_missing']]
+    if high_missing_features:
+        recommendations.append(f"Remove or impute {len(high_missing_features)} features with >90% missing values")
+    
+    zero_var_features = [name for name, metrics in quality_metrics.items() 
+                        if metrics['quality_flags']['zero_variance']]
+    if zero_var_features:
+        recommendations.append(f"Remove {len(zero_var_features)} features with zero variance")
+    
+    if overall_score >= 80:
+        recommendations.append("Data quality is good. Minor improvements may be needed.")
+    
+    return recommendations
+
+
+def save_quality_assessment_results(quality_metrics: dict, basic_stats: dict, 
+                                   distribution_analysis: dict, outlier_analysis: dict, 
+                                   feature_variability: pd.DataFrame, data_health_summary: dict,
+                                   output_dir: str):
+    """Save all quality assessment results with organized file structure"""
     
     # 创建子目录
     data_dir = os.path.join(output_dir, "data")
     plots_dir = os.path.join(output_dir, "plots")
     os.makedirs(data_dir, exist_ok=True)
     os.makedirs(plots_dir, exist_ok=True)
+    
+    # Save quality metrics (core output)
+    quality_metrics_df = pd.DataFrame(quality_metrics).T
+    quality_metrics_df.to_csv(os.path.join(data_dir, "feature_quality_metrics.csv"))
+    
+    # Save data health summary
+    health_summary_df = pd.DataFrame([data_health_summary])
+    health_summary_df.to_csv(os.path.join(data_dir, "data_health_summary.csv"), index=False)
     
     # Save basic statistics
     basic_stats_df = pd.DataFrame(basic_stats).T
@@ -293,26 +485,31 @@ def save_statistics_results(basic_stats: dict, distribution_analysis: dict,
     outlier_df = pd.DataFrame(outlier_analysis).T
     outlier_df.to_csv(os.path.join(data_dir, "feature_outlier_analysis.csv"))
     
-    # Save feature importance
-    feature_importance.to_csv(os.path.join(data_dir, "feature_importance_ranking.csv"), index=False)
+    # Save feature variability ranking
+    feature_variability.to_csv(os.path.join(data_dir, "feature_variability_ranking.csv"), index=False)
     
     # 创建结果索引文件
     results_index = {
         "experiment_type": "feature_statistics",
+        "experiment_purpose": "Feature Profiling / Quality Assessment",
         "files": {
+            "quality_metrics": "data/feature_quality_metrics.csv",
+            "data_health_summary": "data/data_health_summary.csv",
             "basic_statistics": "data/feature_basic_statistics.csv",
             "distribution_analysis": "data/feature_distribution_analysis.csv", 
             "outlier_analysis": "data/feature_outlier_analysis.csv",
-            "feature_importance": "data/feature_importance_ranking.csv"
+            "feature_variability": "data/feature_variability_ranking.csv"
         },
         "plots": {
+            "quality_metrics": "plots/quality_metrics.png",
             "distributions": "plots/feature_distributions.png",
             "correlation_heatmap": "plots/feature_correlation_heatmap.png",
             "outlier_analysis": "plots/outlier_analysis.png"
         },
         "summary": {
-            "total_features": len(basic_stats),
-            "top_features_count": len(feature_importance),
+            "total_features": len(quality_metrics),
+            "overall_health_score": data_health_summary.get('overall_health_score', 0),
+            "overall_health_grade": data_health_summary.get('overall_health_grade', 'N/A'),
             "generated_at": datetime.now().isoformat()
         }
     }
@@ -320,7 +517,75 @@ def save_statistics_results(basic_stats: dict, distribution_analysis: dict,
     with open(os.path.join(output_dir, "results_index.json"), "w", encoding='utf-8') as f:
         json.dump(results_index, f, indent=2, ensure_ascii=False)
     
-    logger.info(f"Results saved to {output_dir} with organized structure")
+    logger.info(f"Quality assessment results saved to {output_dir} with organized structure")
+
+
+def plot_quality_metrics(quality_metrics: dict, output_dir: str):
+    """Plot quality metrics overview"""
+    try:
+        logger.info("Plotting quality metrics...")
+        
+        # Prepare data for plotting
+        features = list(quality_metrics.keys())
+        quality_scores = [metrics['quality_score'] for metrics in quality_metrics.values()]
+        missing_rates = [metrics['missing_rate'] for metrics in quality_metrics.values()]
+        
+        # Create subplots
+        fig, axes = plt.subplots(2, 2, figsize=(15, 12))
+        
+        # 1. Quality score distribution
+        axes[0, 0].hist(quality_scores, bins=20, alpha=0.7, edgecolor='black')
+        axes[0, 0].set_title('Feature Quality Score Distribution')
+        axes[0, 0].set_xlabel('Quality Score')
+        axes[0, 0].set_ylabel('Number of Features')
+        axes[0, 0].axvline(np.mean(quality_scores), color='red', linestyle='--', 
+                           label=f'Mean: {np.mean(quality_scores):.1f}')
+        axes[0, 0].legend()
+        
+        # 2. Missing rate distribution
+        axes[0, 1].hist(missing_rates, bins=20, alpha=0.7, edgecolor='black')
+        axes[0, 1].set_title('Feature Missing Rate Distribution')
+        axes[0, 1].set_xlabel('Missing Rate')
+        axes[0, 1].set_ylabel('Number of Features')
+        axes[0, 1].axvline(np.mean(missing_rates), color='red', linestyle='--',
+                           label=f'Mean: {np.mean(missing_rates):.1%}')
+        axes[0, 1].legend()
+        
+        # 3. Quality vs Missing rate scatter
+        axes[1, 0].scatter(missing_rates, quality_scores, alpha=0.6)
+        axes[1, 0].set_title('Quality Score vs Missing Rate')
+        axes[1, 0].set_xlabel('Missing Rate')
+        axes[1, 0].set_ylabel('Quality Score')
+        
+        # 4. Quality grade distribution
+        grade_counts = {}
+        for metrics in quality_metrics.values():
+            grade = metrics['quality_grade']
+            grade_counts[grade] = grade_counts.get(grade, 0) + 1
+        
+        grades = list(grade_counts.keys())
+        counts = list(grade_counts.values())
+        axes[1, 1].bar(grades, counts, alpha=0.7)
+        axes[1, 1].set_title('Feature Quality Grade Distribution')
+        axes[1, 1].set_xlabel('Quality Grade')
+        axes[1, 1].set_ylabel('Number of Features')
+        
+        plt.tight_layout()
+        plots_dir = os.path.join(output_dir, "plots")
+        os.makedirs(plots_dir, exist_ok=True)
+        output_path = os.path.join(plots_dir, "quality_metrics.png")
+        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.close()
+        logger.info(f"Quality metrics plot saved to: {output_path}")
+        
+    except Exception as e:
+        logger.error(f"Error in plot_quality_metrics: {e}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        try:
+            plt.close('all')
+        except:
+            pass
 
 
 def plot_feature_distributions(df: pd.DataFrame, distribution_analysis: dict, 
@@ -436,42 +701,66 @@ def plot_outlier_analysis(df: pd.DataFrame, outlier_analysis: dict,
     plt.close()
 
 
-def generate_summary(basic_stats: dict, distribution_analysis: dict, 
-                    outlier_analysis: dict, feature_importance: pd.DataFrame, 
-                    df: pd.DataFrame) -> str:
-    """Generate experiment summary"""
+def generate_summary(quality_metrics: dict, basic_stats: dict, distribution_analysis: dict, 
+                    outlier_analysis: dict, feature_variability: pd.DataFrame, 
+                    data_health_summary: dict, df: pd.DataFrame) -> str:
+    """Generate experiment summary focused on data quality"""
     
-    total_features = len(basic_stats)
+    total_features = len(quality_metrics)
+    if total_features == 0:
+        return "No features to analyze."
+    
+    # Quality summary
+    quality_scores = [metrics['quality_score'] for metrics in quality_metrics.values()]
+    avg_quality = np.mean(quality_scores)
+    
+    # Problematic features
+    high_missing_count = sum(1 for metrics in quality_metrics.values() 
+                            if metrics['quality_flags']['high_missing'])
+    zero_variance_count = sum(1 for metrics in quality_metrics.values() 
+                             if metrics['quality_flags']['zero_variance'])
+    high_extreme_count = sum(1 for metrics in quality_metrics.values() 
+                            if metrics['quality_flags']['high_extreme'])
+    
+    # Distribution summary
     normal_features = sum(1 for info in distribution_analysis.values() if info['is_normal'])
-    high_outlier_features = sum(1 for info in outlier_analysis.values() 
-                               if info['outlier_percentage'] > 10)
     
-    top_features = feature_importance.head(10)['feature'].tolist()
+    # Top variability features
+    top_features = feature_variability.head(10)['feature'].tolist()
     
     summary = f"""
-Feature Statistics Analysis Summary
-==================================
+Feature Profiling / Quality Assessment Summary
+==============================================
 
 Dataset Overview:
 - Total features analyzed: {total_features}
 - Total samples: {len(df)}
 
-Distribution Analysis:
+Data Health Assessment:
+- Overall Health Score: {data_health_summary.get('overall_health_score', 0):.1f}/100
+- Overall Health Grade: {data_health_summary.get('overall_health_grade', 'N/A')}
+- Average Feature Quality: {avg_quality:.1f}/100
+
+Quality Issues Identified:
+- Features with >90% missing values: {high_missing_count} ({high_missing_count/total_features*100:.1f}%)
+- Features with zero variance: {zero_variance_count} ({zero_variance_count/total_features*100:.1f}%)
+- Features with >10% extreme values: {high_extreme_count} ({high_extreme_count/total_features*100:.1f}%)
+
+Distribution Characteristics:
 - Normal-like distributions: {normal_features} ({normal_features/total_features*100:.1f}%)
 - Non-normal distributions: {total_features - normal_features} ({(total_features-normal_features)/total_features*100:.1f}%)
 
-Outlier Analysis:
-- Features with >10% outliers: {high_outlier_features} ({high_outlier_features/total_features*100:.1f}%)
-- Average outlier percentage: {np.mean([info['outlier_percentage'] for info in outlier_analysis.values()]):.1f}%
-
-Top 10 Most Important Features:
+Top 10 Most Variable Features:
 {chr(10).join([f"{i+1}. {feature}" for i, feature in enumerate(top_features)])}
 
+Quality Recommendations:
+{chr(10).join([f"- {rec}" for rec in data_health_summary.get('recommendations', [])])}
+
 Key Findings:
-- Feature variability analysis completed
-- Distribution characteristics identified
-- Outlier patterns analyzed
-- Feature importance ranking generated
+- Feature quality profiling completed
+- Data health assessment performed
+- Quality improvement recommendations generated
+- Distribution characteristics analyzed for quality context
 
 Results saved to output directory.
 """

@@ -44,11 +44,7 @@ def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs)
         output_dir: Output directory
         **kwargs: Extra arguments
             - target_var: Target variable ('age_group', 'sex', 'age_class'), default 'age_group'
-            - age_threshold: Age threshold for binary classification. Can be:
-              * A number (e.g., 65)
-              * 'median' (use median age as threshold)
-              * 'mean' (use mean age as threshold)
-              Default: 65 (only used for age-related targets)
+            - age_threshold: Age threshold for binary classification, default 65 (only used for age-related targets)
             - test_size: Test set size, default 0.2
             - n_splits: Number of CV folds, default 5
             - generate_plots: Whether to generate plots, default True
@@ -60,38 +56,18 @@ def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs)
     logger.info(f"Feature matrix shape: {df_feat.shape}")
     logger.info(f"Metadata shape: {df_meta.shape}")
     
-    # Get parameters - 支持嵌套的parameters结构
-    # 检查是否有嵌套的parameters结构
-    if 'parameters' in kwargs:
-        params = kwargs['parameters']
-        logger.info(f"Found nested parameters structure: {list(params.keys())}")
-    else:
-        params = kwargs
-        logger.info(f"Using direct parameters structure: {list(params.keys())}")
-    
-    target_var = params.get('target_var', 'age_group')
-    
-    # 使用通用参数类型转换函数
-    test_size = convert_param_type(params.get('test_size'), float, 0.2, 'test_size')
+    # Get parameters
+    target_var = kwargs.get('target_var', 'age_group')
+    test_size = kwargs.get('test_size', 0.2)
     random_state = 42  # 固定为42，不再作为用户输入参数
-    n_splits = convert_param_type(params.get('n_splits'), int, 5, 'n_splits')
-    generate_plots = convert_param_type(params.get('generate_plots'), bool, True, 'generate_plots')
+    n_splits = kwargs.get('n_splits', 5)
+    generate_plots = kwargs.get('generate_plots', True)
     
     # 只有当target_var是年龄相关时才使用age_threshold
     age_threshold = None
     if target_var in ['age_group', 'age_class']:
-        age_threshold = params.get('age_threshold', 65)
+        age_threshold = kwargs.get('age_threshold', 65)
         logger.info(f"Using age threshold: {age_threshold} for target variable: {target_var}")
-        
-        # 处理age_threshold参数
-        if isinstance(age_threshold, str):
-            if age_threshold.lower() in ['median', 'mean']:
-                logger.info(f"Using dynamic threshold: {age_threshold}")
-            else:
-                age_threshold = convert_param_type(age_threshold, float, 65, 'age_threshold')
-        elif age_threshold is None:
-            logger.warning(f"Age threshold is None, using default value 65")
-            age_threshold = 65
     else:
         logger.info(f"Age threshold not applicable for target variable: {target_var}")
     
@@ -143,35 +119,6 @@ def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs)
     return summary
 
 
-def convert_param_type(param_value, expected_type, default_value, param_name):
-    """Convert parameter value to expected type with error handling"""
-    if param_value is None:
-        logger.warning(f"Parameter {param_name} is None, using default value {default_value}")
-        return default_value
-    
-    if isinstance(param_value, expected_type):
-        return param_value
-    
-    try:
-        if expected_type == float:
-            converted = float(param_value)
-        elif expected_type == int:
-            converted = int(float(param_value))  # 先转float再转int，处理"5.0"这种情况
-        elif expected_type == bool:
-            if isinstance(param_value, str):
-                converted = param_value.lower() in ['true', '1', 'yes', 'on']
-            else:
-                converted = bool(param_value)
-        else:
-            converted = param_value
-        
-        logger.info(f"Converted {param_name} from {type(param_value).__name__} '{param_value}' to {expected_type.__name__} {converted}")
-        return converted
-    except (ValueError, TypeError) as e:
-        logger.warning(f"Could not convert {param_name} '{param_name}' to {expected_type.__name__}, using default {default_value}. Error: {e}")
-        return default_value
-
-
 def preprocess_data(df_feat: pd.DataFrame, df_meta: pd.DataFrame, 
                    target_var: str, age_threshold: int) -> tuple:
     """Preprocess data for classification"""
@@ -187,31 +134,8 @@ def preprocess_data(df_feat: pd.DataFrame, df_meta: pd.DataFrame,
         # Binary classification: young vs old
         age_col = 'age' if 'age' in df_combined.columns else 'age_days'
         if age_col in df_combined.columns:
-            ages = df_combined[age_col]
-            
-            # 支持动态阈值
-            if age_threshold == 'median':
-                actual_threshold = ages.median()
-                logger.info(f"Using median age as threshold: {actual_threshold:.1f}")
-            elif age_threshold == 'mean':
-                actual_threshold = ages.mean()
-                logger.info(f"Using mean age as threshold: {actual_threshold:.1f}")
-            else:
-                actual_threshold = age_threshold
-                logger.info(f"Using specified age threshold: {actual_threshold}")
-            
-            # 显示年龄分布信息
-            logger.info(f"Age distribution: min={ages.min()}, max={ages.max()}, mean={ages.mean():.1f}, median={ages.median():.1f}")
-            logger.info(f"Age threshold: {actual_threshold}")
-            
-            y = (ages >= actual_threshold).astype(int)
+            y = (df_combined[age_col] >= age_threshold).astype(int)
             y = y.map({0: 'Young', 1: 'Old'})
-            
-            # 显示分类结果
-            class_counts = y.value_counts()
-            logger.info(f"Class distribution: {class_counts.to_dict()}")
-            logger.info(f"Class balance: Young={class_counts.get('Young', 0)}, Old={class_counts.get('Old', 0)}")
-            
         else:
             raise ValueError(f"Age column not found for age_group classification")
     
