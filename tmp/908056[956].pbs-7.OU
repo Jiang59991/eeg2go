@@ -1,0 +1,30 @@
+Job ID: 908056[956].pbs-7
+Array Index: 956
+Start time: Tue  2 Sep 09:19:58 BST 2025
+Running in: /rds/general/user/zj724/home/eeg2go
+Using task file: /rds/general/user/zj724/home/eeg2go/tmp/eeg_features_tasks_20250901_124036.txt
+Processing: recording=4669, feature_set=2 (exp1_bp_rel__P0_minimal_hp)
+[2025-09-02 09:20:28] [INFO] [eeg2go] Starting run_feature_set for recording_id=4669, feature_set_id=2
+[2025-09-02 09:24:39] [INFO] [eeg2go] [load_recording] Recording 4669: 83360.0s, 30 channels, 200.0 Hz
+[2025-09-02 09:24:39] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1908.0 MB
+[2025-09-02 09:24:39] [WARNING] [eeg2go] [load_recording] Recording 4669 is too large (1907.96 MB), exceeding limit of 1024.00 MB. Skipping.
+[2025-09-02 09:24:39] [WARNING] [eeg2go] [SKIP] Recording 4669: Recording too large to process (1907.96 MB)
+[2025-09-02 09:25:58] [ERROR] [eeg2go] Failed to insert fxid=226: database is locked
+[2025-09-02 09:27:33] [ERROR] [eeg2go] Failed to insert fxid=227: database is locked
+[2025-09-02 09:28:46] [ERROR] [eeg2go] Failed to insert fxid=228: database is locked
+[2025-09-02 09:29:56] [ERROR] [eeg2go] Failed to insert fxid=229: database is locked
+[2025-09-02 09:31:14] [ERROR] [eeg2go] Failed to insert fxid=230: database is locked
+[2025-09-02 09:32:07] [INFO] [eeg2go] Saved 24 feature values for recording 4669 (successful: 0, failed: 24)
+[2025-09-02 09:32:07] [INFO] [eeg2go] Completed run_feature_set for recording_id=4669, feature_set_id=2
+success 4669
+Completed: recording=4669, feature_set=2
+End time: Tue  2 Sep 09:32:08 BST 2025
+
+====================================
+CPU Time used: 00:00:12
+CPU Percent: 8%
+Memory usage: 172656kb
+Approx Power usage: 0.0
+Walltime usage: 00:12:13
+
+====================================

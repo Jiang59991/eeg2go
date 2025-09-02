@@ -1,0 +1,25 @@
+Job ID: 908056[991].pbs-7
+Array Index: 991
+Start time: Tue  2 Sep 10:19:27 BST 2025
+Running in: /rds/general/user/zj724/home/eeg2go
+Using task file: /rds/general/user/zj724/home/eeg2go/tmp/eeg_features_tasks_20250901_124036.txt
+Processing: recording=4692, feature_set=2 (exp1_bp_rel__P0_minimal_hp)
+[2025-09-02 10:20:05] [INFO] [eeg2go] Starting run_feature_set for recording_id=4692, feature_set_id=2
+[2025-09-02 10:35:22] [INFO] [eeg2go] [load_recording] Recording 4692: 58592.0s, 22 channels, 200.0 Hz
+[2025-09-02 10:35:22] [INFO] [eeg2go] [load_recording] Estimated memory usage: 983.4 MB
+[2025-09-02 10:35:22] [INFO] [eeg2go] [load_recording] Large file detected, using memory mapping
+[2025-09-02 10:35:31] [INFO] [eeg2go] [load_recording] Renaming channels: {'T3': 'T7', 'T5': 'P7', 'T4': 'T8', 'T6': 'P8', 'EKG': 'ECG'}
+[2025-09-02 11:23:49] [INFO] [eeg2go] Saved 24 feature values for recording 4692 (successful: 24, failed: 0)
+[2025-09-02 11:23:49] [INFO] [eeg2go] Completed run_feature_set for recording_id=4692, feature_set_id=2
+success 4692
+Completed: recording=4692, feature_set=2
+End time: Tue  2 Sep 11:23:50 BST 2025
+
+====================================
+CPU Time used: 00:02:08
+CPU Percent: 26%
+Memory usage: 12653484kb
+Approx Power usage: 0.0004
+Walltime usage: 01:04:25
+
+====================================

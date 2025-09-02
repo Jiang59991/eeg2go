@@ -1,0 +1,24 @@
+Job ID: 908056[977].pbs-7
+Array Index: 977
+Start time: Tue  2 Sep 09:47:23 BST 2025
+Running in: /rds/general/user/zj724/home/eeg2go
+Using task file: /rds/general/user/zj724/home/eeg2go/tmp/eeg_features_tasks_20250901_124036.txt
+Processing: recording=5263, feature_set=2 (exp1_bp_rel__P0_minimal_hp)
+[2025-09-02 09:47:57] [INFO] [eeg2go] Starting run_feature_set for recording_id=5263, feature_set_id=2
+[2025-09-02 09:49:41] [INFO] [eeg2go] [load_recording] Recording 5263: 11409.0s, 23 channels, 200.0 Hz
+[2025-09-02 09:49:41] [INFO] [eeg2go] [load_recording] Estimated memory usage: 200.2 MB
+[2025-09-02 09:49:42] [INFO] [eeg2go] [load_recording] Renaming channels: {'T3': 'T7', 'T5': 'P7', 'T4': 'T8', 'T6': 'P8', 'EKG': 'ECG'}
+[2025-09-02 10:45:29] [INFO] [eeg2go] Saved 24 feature values for recording 5263 (successful: 24, failed: 0)
+[2025-09-02 10:45:29] [INFO] [eeg2go] Completed run_feature_set for recording_id=5263, feature_set_id=2
+success 5263
+Completed: recording=5263, feature_set=2
+End time: Tue  2 Sep 10:45:30 BST 2025
+
+====================================
+CPU Time used: 00:00:54
+CPU Percent: 15%
+Memory usage: 2744720kb
+Approx Power usage: 0.0
+Walltime usage: 00:58:09
+
+====================================

@@ -1,0 +1,25 @@
+Job ID: 908056[761].pbs-7
+Array Index: 761
+Start time: Tue  2 Sep 02:46:40 BST 2025
+Running in: /rds/general/user/zj724/home/eeg2go
+Using task file: /rds/general/user/zj724/home/eeg2go/tmp/eeg_features_tasks_20250901_124036.txt
+Processing: recording=4777, feature_set=2 (exp1_bp_rel__P0_minimal_hp)
+[2025-09-02 02:47:14] [INFO] [eeg2go] Starting run_feature_set for recording_id=4777, feature_set_id=2
+[2025-09-02 02:52:09] [INFO] [eeg2go] [load_recording] Recording 4777: 70679.0s, 22 channels, 200.0 Hz
+[2025-09-02 02:52:09] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1186.3 MB
+[2025-09-02 02:52:09] [WARNING] [eeg2go] [load_recording] Recording 4777 is too large (1186.32 MB), exceeding limit of 1024.00 MB. Skipping.
+[2025-09-02 02:52:09] [WARNING] [eeg2go] [SKIP] Recording 4777: Recording too large to process (1186.32 MB)
+[2025-09-02 02:52:51] [INFO] [eeg2go] Saved 24 feature values for recording 4777 (successful: 0, failed: 24)
+[2025-09-02 02:52:51] [INFO] [eeg2go] Completed run_feature_set for recording_id=4777, feature_set_id=2
+success 4777
+Completed: recording=4777, feature_set=2
+End time: Tue  2 Sep 02:52:51 BST 2025
+
+====================================
+CPU Time used: 00:00:08
+CPU Percent: 8%
+Memory usage: 157524kb
+Approx Power usage: 0.0
+Walltime usage: 00:06:14
+
+====================================

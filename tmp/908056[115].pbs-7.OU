@@ -1,0 +1,26 @@
+Job ID: 908056[115].pbs-7
+Array Index: 115
+Start time: Mon  1 Sep 13:05:58 BST 2025
+Running in: /rds/general/user/zj724/home/eeg2go
+Using task file: /rds/general/user/zj724/home/eeg2go/tmp/eeg_features_tasks_20250901_124036.txt
+Processing: recording=4787, feature_set=2 (exp1_bp_rel__P0_minimal_hp)
+[2025-09-01 13:06:26] [INFO] [eeg2go] Starting run_feature_set for recording_id=4787, feature_set_id=2
+[2025-09-01 13:07:38] [INFO] [eeg2go] [load_recording] Recording 4787: 3924.0s, 30 channels, 200.0 Hz
+[2025-09-01 13:07:38] [INFO] [eeg2go] [load_recording] Estimated memory usage: 89.8 MB
+[2025-09-01 13:07:43] [INFO] [eeg2go] [load_recording] Renaming channels: {'T3': 'T7', 'T5': 'P7', 'T4': 'T8', 'T6': 'P8'}
+[2025-09-01 13:13:14] [ERROR] [eeg2go] Failed to insert fxid=226: database is locked
+[2025-09-01 13:14:14] [ERROR] [eeg2go] Failed to insert fxid=227: database is locked
+[2025-09-01 13:14:39] [INFO] [eeg2go] Saved 24 feature values for recording 4787 (successful: 24, failed: 0)
+[2025-09-01 13:14:40] [INFO] [eeg2go] Completed run_feature_set for recording_id=4787, feature_set_id=2
+success 4787
+Completed: recording=4787, feature_set=2
+End time: Mon  1 Sep 13:14:40 BST 2025
+
+====================================
+CPU Time used: 00:00:38
+CPU Percent: 27%
+Memory usage: 1343068kb
+Approx Power usage: 0.0
+Walltime usage: 00:08:45
+
+====================================

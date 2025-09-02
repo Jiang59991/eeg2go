@@ -1,0 +1,26 @@
+Job ID: 908056[71].pbs-7
+Array Index: 71
+Start time: Mon  1 Sep 12:50:02 BST 2025
+Running in: /rds/general/user/zj724/home/eeg2go
+Using task file: /rds/general/user/zj724/home/eeg2go/tmp/eeg_features_tasks_20250901_124036.txt
+Processing: recording=4332, feature_set=2 (exp1_bp_rel__P0_minimal_hp)
+[2025-09-01 12:50:33] [INFO] [eeg2go] Starting run_feature_set for recording_id=4332, feature_set_id=2
+[2025-09-01 12:51:43] [INFO] [eeg2go] [load_recording] Recording 4332: 50077.0s, 30 channels, 200.0 Hz
+[2025-09-01 12:51:43] [INFO] [eeg2go] [load_recording] Estimated memory usage: 1146.2 MB
+[2025-09-01 12:51:43] [WARNING] [eeg2go] [load_recording] Recording 4332 is too large (1146.17 MB), exceeding limit of 1024.00 MB. Skipping.
+[2025-09-01 12:51:43] [WARNING] [eeg2go] [SKIP] Recording 4332: Recording too large to process (1146.17 MB)
+[2025-09-01 12:52:52] [ERROR] [eeg2go] Failed to insert fxid=226: database is locked
+[2025-09-01 12:53:49] [INFO] [eeg2go] Saved 24 feature values for recording 4332 (successful: 0, failed: 24)
+[2025-09-01 12:53:49] [INFO] [eeg2go] Completed run_feature_set for recording_id=4332, feature_set_id=2
+success 4332
+Completed: recording=4332, feature_set=2
+End time: Mon  1 Sep 12:53:50 BST 2025
+
+====================================
+CPU Time used: 00:00:11
+CPU Percent: 9%
+Memory usage: 156420kb
+Approx Power usage: 0.0
+Walltime usage: 00:03:53
+
+====================================

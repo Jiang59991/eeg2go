@@ -1,0 +1,16 @@
+Job ID: 907621[616].pbs-7
+Array Index: 616
+Start time: Mon  1 Sep 11:55:44 BST 2025
+Running in: /rds/general/user/zj724/home/eeg2go
+Error: Task file not found in /rds/general/user/zj724/home/eeg2go/tmp
+Available task files:
+No .txt files found
+
+====================================
+CPU Time used: 00:00:00
+CPU Percent: 0%
+Memory usage: 0b
+Approx Power usage: 0.0
+Walltime usage: 00:00:05
+
+====================================

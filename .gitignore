@@ -9,4 +9,6 @@ __pycache__/
 *.pyo
 *.pyd
 outputs/exp2/exp2_epoch_matrix.csv
-tmp/
+tmp/database/*.db-*
+*.db-wal
+*.db-shm
