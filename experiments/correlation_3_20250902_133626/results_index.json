@@ -1,0 +1,22 @@
+{
+  "experiment_type": "correlation",
+  "files": {
+    "summary": "data/correlation_summary.csv",
+    "correlation_age": "data/correlation_age.csv",
+    "correlation_sex": "data/correlation_sex.csv"
+  },
+  "plots": {
+    "correlation_matrix_age": "plots/correlation_matrix_age.png",
+    "scatter_plots_age": "plots/scatter_plots_age.png",
+    "correlation_matrix_sex": "plots/correlation_matrix_sex.png",
+    "scatter_plots_sex": "plots/scatter_plots_sex.png"
+  },
+  "summary": {
+    "target_variables": [
+      "age",
+      "sex"
+    ],
+    "total_targets": 2,
+    "generated_at": "2025-09-02T13:36:54.697883"
+  }
+}

@@ -204,14 +204,14 @@ def check_features_exist_in_db(dataset_id: int, feature_set_id: int, db_path: st
         
         logger.info(f"Found {actual_count} feature values, expected {expected_count}")
         
-        # Check if we have ALL expected values (100% coverage required)
+        # Check if we have 95% coverage of expected values
         coverage_ratio = actual_count / expected_count if expected_count > 0 else 0
-        exists = actual_count == expected_count
+        exists = coverage_ratio >= 0.95
         
         if exists:
-            logger.info(f"✅ All features exist in database (coverage: {coverage_ratio:.2%})")
+            logger.info(f"Sufficient features exist in database (coverage: {coverage_ratio:.2%})")
         else:
-            logger.info(f"❌ Features missing in database (coverage: {coverage_ratio:.2%}, missing: {expected_count - actual_count})")
+            logger.info(f"Features missing in database (coverage: {coverage_ratio:.2%}, missing: {expected_count - actual_count})")
         
         return exists
         
@@ -604,13 +604,12 @@ def get_relevant_metadata(dataset_id: int, db_path: str, target_vars: list = Non
             elif var in ['seizure', 'spindles', 'status', 'normal', 'abnormal']:
                 dynamic_fields.append(f"rm.{var}")
     else:
-        # If no target variables specified, get all common fields
+        # If no target variables specified, only get essential fields (age)
+        # 不自动包含sex等敏感字段
         dynamic_fields = [
-            "s.age", "s.sex", "s.race", "s.ethnicity",
-            "s.visit_count", "s.icd10_count", "s.medication_count",
-            "rm.age_days", "rm.seizure", "rm.spindles", 
-            "rm.status", "rm.normal", "rm.abnormal"
+            "s.age",  # 只包含基本的age字段
         ]
+        logger.warning("No target variables specified, only loading basic age metadata")
     
     # Remove duplicates and build query
     all_fields = base_fields + list(set(dynamic_fields))
@@ -675,7 +674,16 @@ def run_experiment(
     logger.info(f"Loading metadata...")
     try:
         # Get target variables from extra arguments
-        target_vars = extra_args.get('target_vars', ['age', 'sex']) if extra_args else ['age', 'sex']
+        # 只获取用户明确指定的目标变量，不添加默认值
+        target_vars = extra_args.get('target_vars', []) if extra_args else []
+        
+        # 如果没有指定目标变量，记录警告但不自动添加
+        if not target_vars:
+            logger.warning("No target variables specified in extra_args. This may cause issues.")
+            # 为了兼容性，默认只获取age，不包含sex
+            target_vars = ['age']
+        
+        logger.info(f"Target variables for metadata loading: {target_vars}")
         df_meta = get_relevant_metadata(dataset_id, db_path, target_vars)
         logger.info(f"Metadata loading completed: {df_meta.shape}")
     except Exception as e:

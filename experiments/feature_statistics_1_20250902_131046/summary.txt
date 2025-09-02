@@ -1,0 +1,35 @@
+
+Feature Statistics Analysis Summary
+==================================
+
+Dataset Overview:
+- Total features analyzed: 144
+- Total samples: 879
+
+Distribution Analysis:
+- Normal-like distributions: 0 (0.0%)
+- Non-normal distributions: 144 (100.0%)
+
+Outlier Analysis:
+- Features with >10% outliers: 10 (6.9%)
+- Average outlier percentage: 4.7%
+
+Top 10 Most Important Features:
+1. fx229_bp_rel_delta_C4_C4_count
+2. fx239_bp_rel_alpha_F4_F4_count
+3. fx241_bp_rel_alpha_C4_C4_count
+4. fx240_bp_rel_alpha_C3_C3_count
+5. fx243_bp_rel_alpha_O2_O2_count
+6. fx246_bp_rel_beta_C3_C3_count
+7. fx238_bp_rel_alpha_F3_F3_count
+8. fx242_bp_rel_alpha_O1_O1_count
+9. fx234_bp_rel_theta_C3_C3_count
+10. fx235_bp_rel_theta_C4_C4_count
+
+Key Findings:
+- Feature variability analysis completed
+- Distribution characteristics identified
+- Outlier patterns analyzed
+- Feature importance ranking generated
+
+Results saved to output directory.

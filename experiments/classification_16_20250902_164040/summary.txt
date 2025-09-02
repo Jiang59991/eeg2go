@@ -1,0 +1,32 @@
+
+Classification Experiment Summary
+================================
+
+Dataset Overview:
+- Total samples: 879
+- Total features: 146
+- Target variable: age_group
+
+Model Performance:
+- Best model: Gradient Boosting (Accuracy: 0.705)
+- Average accuracy across models: 0.670
+- Average F1-score across models: 0.654
+
+Individual Model Results:
+- Logistic Regression: Accuracy=0.659, F1=0.647, CV=0.654±0.032
+- Random Forest: Accuracy=0.665, F1=0.658, CV=0.663±0.029
+- Gradient Boosting: Accuracy=0.705, F1=0.690, CV=0.666±0.038
+- SVM: Accuracy=0.653, F1=0.619, CV=0.674±0.043
+
+Key Findings:
+- 4 different classification models evaluated
+- Cross-validation performed with 5 folds
+- Feature importance analysis completed
+- Confusion matrices generated
+
+Best performing model: Gradient Boosting
+- Test Accuracy: 0.705
+- Test F1-Score: 0.690
+- Cross-validation Accuracy: 0.666 ± 0.038
+
+Results saved to output directory.

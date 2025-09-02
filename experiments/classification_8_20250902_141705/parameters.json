@@ -1,0 +1,26 @@
+{
+  "experiment_type": "classification",
+  "dataset_id": 7,
+  "feature_set_id": 2,
+  "output_dir": "experiments/classification_8_20250902_141705",
+  "extra_args": {
+    "parameters": {
+      "generate_plots": true,
+      "n_splits": "5",
+      "target_var": "sex",
+      "test_size": "0.2"
+    }
+  },
+  "run_time": "2025-09-02T14:17:05.598111",
+  "feature_matrix_shape": [
+    879,
+    145
+  ],
+  "metadata_shape": [
+    1000,
+    5
+  ],
+  "target_variables": [
+    "age"
+  ]
+}

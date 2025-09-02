@@ -1,0 +1,27 @@
+{
+  "experiment_type": "feature_selection",
+  "dataset_id": 7,
+  "feature_set_id": 2,
+  "output_dir": "experiments/feature_selection_11_20250902_142510",
+  "extra_args": {
+    "parameters": {
+      "correlation_threshold": "0.95",
+      "generate_plots": true,
+      "n_features": "20",
+      "target_var": "age",
+      "variance_threshold": "0.01"
+    }
+  },
+  "run_time": "2025-09-02T14:25:10.055424",
+  "feature_matrix_shape": [
+    879,
+    145
+  ],
+  "metadata_shape": [
+    1000,
+    5
+  ],
+  "target_variables": [
+    "age"
+  ]
+}

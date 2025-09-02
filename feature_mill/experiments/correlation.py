@@ -47,11 +47,18 @@ def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs)
         str: 实验摘要
     """
     # 获取参数
-    target_vars = kwargs.get('target_vars', ['age', 'sex'])
+    target_vars = kwargs.get('target_vars', ['age'])  # 默认只分析age，不自动包含sex
     method = kwargs.get('method', 'pearson')
     min_corr = kwargs.get('min_corr', 0.3)
     top_n = kwargs.get('top_n', 20)
     generate_plots = kwargs.get('generate_plots', True)
+    
+    # 验证target_vars参数
+    if not target_vars:
+        logger.warning("No target variables specified, defaulting to ['age']")
+        target_vars = ['age']
+    
+    logger.info(f"Target variables to analyze: {target_vars}")
     
     logger.info(f"Start correlation analysis experiment")
     logger.info(f"Feature matrix shape: {df_feat.shape}")
@@ -61,15 +68,30 @@ def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs)
     os.makedirs(output_dir, exist_ok=True)
     
     # 合并特征矩阵和元数据
+    logger.info(f"Before merge - Feature matrix shape: {df_feat.shape}")
+    logger.info(f"Before merge - Metadata shape: {df_meta.shape}")
+    logger.info(f"Feature matrix recording_id range: {df_feat['recording_id'].min()} to {df_feat['recording_id'].max()}")
+    logger.info(f"Metadata recording_id range: {df_meta['recording_id'].min()} to {df_meta['recording_id'].max()}")
+    
+    # 检查recording_id的唯一性
+    feat_unique_ids = df_feat['recording_id'].nunique()
+    meta_unique_ids = df_meta['recording_id'].nunique()
+    logger.info(f"Feature matrix unique recording_ids: {feat_unique_ids}")
+    logger.info(f"Metadata unique recording_ids: {meta_unique_ids}")
+    
+    # 使用inner join确保数据对齐
     df_combined = pd.merge(df_feat, df_meta, on='recording_id', how='inner')
     
-    logger.info(f"Correlation analysis completed, results saved to: {output_dir}")
+    logger.info(f"After merge - Combined data shape: {df_combined.shape}")
+    logger.info(f"Number of recordings after merge: {len(df_combined)}")
+    
+    # 验证数据对齐
+    if len(df_combined) != len(df_feat):
+        logger.warning(f"WARNING: Data alignment issue! Feature matrix has {len(df_feat)} rows, but merged data has {len(df_combined)} rows")
+        logger.warning("This suggests some recording_ids in feature matrix don't exist in metadata")
     
     # 数据预处理
     df_processed = df_combined.copy()
-    
-    logger.info(f"Merged data shape: {df_combined.shape}")
-    logger.info(f"Number of recordings: {len(df_combined)}")
     
     # 处理缺失值
     missing_ratio = df_processed.isnull().sum() / len(df_processed)
@@ -98,16 +120,57 @@ def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs)
     logger.info(f"Numeric columns: {len(numeric_columns)}")
     logger.info(f"Non-numeric columns: {len(non_numeric_columns)}")
     
-    # 处理分类变量
+    # 处理分类变量（只处理目标变量，不处理其他分类变量）
     for col in non_numeric_columns:
-        if col in df_processed.columns and col != 'recording_id':
+        if col in df_processed.columns and col != 'recording_id' and col in target_vars:
+            logger.info(f"Processing categorical target variable: {col}")
             le = LabelEncoder()
             df_processed[col] = le.fit_transform(df_processed[col].astype(str))
+        elif col in df_processed.columns and col != 'recording_id':
+            logger.debug(f"Skipping non-target categorical variable: {col}")
+            # 移除非目标变量的分类列，避免后续处理问题
+            df_processed = df_processed.drop(columns=[col])
+            logger.info(f"Removed non-target categorical variable: {col}")
     
     # 填充缺失值
     df_processed = df_processed.fillna(df_processed.median())
     
+    # 数据质量检查
+    logger.info("Data quality check after preprocessing:")
+    
+    # 检查无穷大值
+    inf_counts = df_processed.isin([np.inf, -np.inf]).sum()
+    if inf_counts.sum() > 0:
+        logger.warning(f"Found infinite values in columns: {inf_counts[inf_counts > 0].to_dict()}")
+    
+    # 检查NaN值
+    nan_counts = df_processed.isnull().sum()
+    if nan_counts.sum() > 0:
+        logger.warning(f"Found NaN values in columns: {nan_counts[nan_counts > 0].to_dict()}")
+    
+    # 检查零方差特征（排除目标变量）
+    zero_var_features = []
+    for col in df_processed.columns:
+        if col not in ['recording_id'] + target_vars:
+            if df_processed[col].std() == 0:
+                zero_var_features.append(col)
+    
+    if zero_var_features:
+        logger.warning(f"Found {len(zero_var_features)} features with zero variance: {zero_var_features[:5]}")
+    
+    # 检查目标变量的数据质量
+    logger.info("Target variables data quality:")
+    for target_var in target_vars:
+        if target_var in df_processed.columns:
+            target_data = df_processed[target_var]
+            logger.info(f"  {target_var}: type={target_data.dtype}, unique_values={target_data.nunique()}, missing={target_data.isnull().sum()}")
+            if target_data.dtype == 'object':
+                logger.info(f"    Sample values: {target_data.dropna().unique()[:5].tolist()}")
+    
     logger.info(f"Final processed data shape: {df_processed.shape}")
+    
+    # 验证数据对齐的正确性
+    validate_data_alignment(df_feat, df_meta, df_processed, target_vars)
     
     # 执行相关性分析
     results = perform_correlation_analysis(df_processed, target_vars, method, min_corr, top_n)
@@ -117,8 +180,8 @@ def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs)
     
     # 可视化
     if generate_plots:
-        plot_correlation_matrix(results, output_dir)
-        plot_scatter_plots(df_processed, results, output_dir, top_n)
+        plot_correlation_matrix(results, output_dir, min_corr)
+        plot_scatter_plots(df_processed, results, output_dir, top_n, min_corr)
     
     # 生成摘要
     summary = generate_summary(results, df_processed, target_vars, method)
@@ -127,18 +190,86 @@ def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs)
     return summary
 
 
+def validate_data_alignment(df_feat: pd.DataFrame, df_meta: pd.DataFrame, df_processed: pd.DataFrame, target_vars: list):
+    """Validate that data alignment is correct"""
+    logger.info("=" * 50)
+    logger.info("DATA ALIGNMENT VALIDATION")
+    logger.info("=" * 50)
+    
+    # 检查recording_id的一致性
+    feat_ids = set(df_feat['recording_id'].unique())
+    meta_ids = set(df_meta['recording_id'].unique())
+    processed_ids = set(df_processed['recording_id'].unique())
+    
+    # 交集：两个数据集都有的recording_ids
+    common_ids = feat_ids.intersection(meta_ids)
+    
+    # 只在feature matrix中有的
+    feat_only = feat_ids - meta_ids
+    # 只在metadata中有的
+    meta_only = meta_ids - feat_ids
+    
+    logger.info(f"Feature matrix unique recording_ids: {len(feat_ids)}")
+    logger.info(f"Metadata unique recording_ids: {len(meta_ids)}")
+    logger.info(f"Common recording_ids: {len(common_ids)}")
+    logger.info(f"Only in feature matrix: {len(feat_only)}")
+    logger.info(f"Only in metadata: {len(feat_only)}")
+    logger.info(f"Final processed recording_ids: {len(processed_ids)}")
+    
+    if len(feat_only) > 0:
+        logger.warning(f"WARNING: {len(feat_only)} recording_ids in feature matrix not found in metadata")
+        logger.warning(f"Sample missing IDs: {list(feat_only)[:5]}")
+    
+    if len(meta_only) > 0:
+        logger.warning(f"WARNING: {len(meta_only)} recording_ids in metadata not found in feature matrix")
+        logger.warning(f"Sample missing IDs: {list(meta_only)[:5]}")
+    
+    # 验证目标变量的分布
+    for target_var in target_vars:
+        if target_var in df_processed.columns:
+            target_values = df_processed[target_var]
+            logger.info(f"Target variable '{target_var}' statistics:")
+            logger.info(f"  - Non-null values: {target_values.count()}")
+            logger.info(f"  - Unique values: {target_values.nunique()}")
+            logger.info(f"  - Range: {target_values.min()} to {target_values.max()}")
+            logger.info(f"  - Sample values: {target_values.dropna().head(3).tolist()}")
+    
+    logger.info("=" * 50)
+
+
 def merge_features_and_metadata(df_feat: pd.DataFrame, df_meta: pd.DataFrame) -> pd.DataFrame:
-    """Merge feature matrix and metadata"""
+    """Merge feature matrix and metadata with proper alignment"""
     if 'recording_id' not in df_feat.columns:
         raise ValueError("Feature matrix missing 'recording_id' column")
+    if 'recording_id' not in df_meta.columns:
+        raise ValueError("Metadata missing 'recording_id' column")
     
+    # 确保recording_id是整数类型
     df_feat['recording_id'] = df_feat['recording_id'].astype(int)
     df_meta['recording_id'] = df_meta['recording_id'].astype(int)
     
+    # 检查数据完整性
+    feat_missing = df_feat['recording_id'].isnull().sum()
+    meta_missing = df_meta['recording_id'].isnull().sum()
+    
+    if feat_missing > 0:
+        logger.warning(f"Feature matrix has {feat_missing} missing recording_ids")
+    if meta_missing > 0:
+        logger.warning(f"Metadata has {meta_missing} missing recording_ids")
+    
+    # 使用inner join确保数据对齐
     df_combined = pd.merge(df_feat, df_meta, on='recording_id', how='inner')
     
-    logger.info(f"Merged data shape: {df_combined.shape}")
-    logger.info(f"Number of recordings: {len(df_combined)}")
+    # 验证合并结果
+    if len(df_combined) == 0:
+        raise ValueError("No matching recording_ids found between feature matrix and metadata!")
+    
+    if len(df_combined) < len(df_feat):
+        logger.warning(f"Data loss detected: {len(df_feat) - len(df_combined)} recordings from feature matrix were not found in metadata")
+    
+    logger.info(f"Successfully merged {len(df_combined)} recordings")
+    logger.info(f"Final merged data shape: {df_combined.shape}")
+    
     return df_combined
 
 
@@ -195,10 +326,14 @@ def perform_correlation_analysis(df: pd.DataFrame, target_vars: list, method: st
     # 添加调试信息
     logger.info(f"Target variables: {target_vars}")
     
-    # Get feature columns (exclude recording_id and target_vars)
+    # Get feature columns (exclude recording_id, target_vars, and count-related features)
     feature_cols = [col for col in df.columns if col not in ['recording_id'] + target_vars]
     
+    # 排除count相关的特征，这些通常不是有意义的特征值
+    feature_cols = [col for col in feature_cols if not col.endswith('_count')]
+    
     logger.info(f"Feature columns: {len(feature_cols)}")
+    logger.info(f"Excluded count-related features, remaining features: {len(feature_cols)}")
     
     # 检查是否有特征列
     if len(feature_cols) == 0:
@@ -226,9 +361,21 @@ def perform_correlation_analysis(df: pd.DataFrame, target_vars: list, method: st
         logger.info(f"Target variable unique values: {df[target_var].nunique()}")
         logger.info(f"Target variable missing values: {df[target_var].isnull().sum()}")
         logger.info(f"Sample target values: {df[target_var].head().tolist()}")
+        
+        # 验证数据对齐：检查特征和目标变量的长度是否一致
+        target_length = len(df[target_var])
+        logger.info(f"Target variable length: {target_length}")
+        logger.info(f"DataFrame total length: {len(df)}")
+        
+        if target_length != len(df):
+            logger.error(f"ERROR: Data alignment issue! Target variable length ({target_length}) != DataFrame length ({len(df)})")
+        
         logger.info(f"Sample feature values (first 3 features):")
         for i, feature in enumerate(feature_cols[:3]):
-            logger.info(f"  {feature}: type={df[feature].dtype}, missing={df[feature].isnull().sum()}, sample={df[feature].head().tolist()}")
+            feature_length = len(df[feature])
+            logger.info(f"  {feature}: type={df[feature].dtype}, length={feature_length}, missing={df[feature].isnull().sum()}, sample={df[feature].head().tolist()}")
+            if feature_length != target_length:
+                logger.error(f"    ERROR: Feature {feature} length ({feature_length}) != target length ({target_length})")
         
         correlations = []
         start_time = time.time()
@@ -243,30 +390,72 @@ def perform_correlation_analysis(df: pd.DataFrame, target_vars: list, method: st
             valid_data = df[[feature, target_var]].dropna()
             
             if len(valid_data) < 10:  # 至少需要10个有效数据点
+                logger.debug(f"Skipping {feature}: insufficient valid data points ({len(valid_data)} < 10)")
+                continue
+            
+            # 数据质量检查
+            feature_values = valid_data[feature]
+            target_values = valid_data[target_var]
+            
+            # 检查是否有足够的变异
+            if feature_values.std() == 0:
+                logger.debug(f"Skipping {feature}: feature has zero variance")
+                continue
+            
+            if target_values.std() == 0:
+                logger.debug(f"Skipping {feature}: target variable has zero variance")
+                continue
+            
+            # 检查是否有无穷大或NaN值
+            if np.any(np.isinf(feature_values)) or np.any(np.isnan(feature_values)):
+                logger.debug(f"Skipping {feature}: feature contains inf or NaN values")
+                continue
+            
+            if np.any(np.isinf(target_values)) or np.any(np.isnan(target_values)):
+                logger.debug(f"Skipping {feature}: target variable contains inf or NaN values")
                 continue
             
             try:
+                # 额外的数据质量检查：确保数据适合相关性分析
+                if len(feature_values) < 3:
+                    logger.debug(f"Skipping {feature}: insufficient data points for correlation")
+                    continue
+                
+                # 检查数据是否都是数值型
+                if not np.issubdtype(feature_values.dtype, np.number) or not np.issubdtype(target_values.dtype, np.number):
+                    logger.debug(f"Skipping {feature}: non-numeric data types")
+                    continue
+                
                 if target_var in ['sex', 'race', 'ethnicity']:
                     # 对于分类变量，使用点双列相关系数（point-biserial correlation）
                     # 这相当于皮尔逊相关系数，但更适合二分类变量
-                    corr, p_value = stats.pearsonr(valid_data[feature], valid_data[target_var])
+                    corr, p_value = stats.pearsonr(feature_values, target_values)
                     correlation_type = 'point-biserial'
                 else:
                     # 对于连续变量，使用指定的相关系数方法
                     if method == 'pearson':
-                        corr, p_value = stats.pearsonr(valid_data[feature], valid_data[target_var])
+                        corr, p_value = stats.pearsonr(feature_values, target_values)
                         correlation_type = 'pearson'
                     elif method == 'spearman':
-                        corr, p_value = stats.spearmanr(valid_data[feature], valid_data[target_var])
+                        corr, p_value = stats.spearmanr(feature_values, target_values)
                         correlation_type = 'spearman'
                     else:
                         logger.warning(f"Unknown correlation method: {method}, using pearson")
-                        corr, p_value = stats.pearsonr(valid_data[feature], valid_data[target_var])
+                        corr, p_value = stats.pearsonr(feature_values, target_values)
                         correlation_type = 'pearson'
                 
-                # 检查p-value是否有效
-                if np.isnan(p_value) or p_value < 0 or p_value > 1:
-                    logger.warning(f"Invalid p-value for feature {feature}: {p_value}")
+                # 严格检查相关系数和p-value是否有效
+                if np.isnan(corr) or np.isinf(corr):
+                    logger.debug(f"Skipping {feature}: invalid correlation coefficient ({corr})")
+                    continue
+                
+                if np.isnan(p_value) or np.isinf(p_value):
+                    logger.debug(f"Skipping {feature}: invalid p-value ({p_value})")
+                    continue
+                
+                # 检查p-value范围（应该是0到1之间）
+                if not (0 <= p_value <= 1):
+                    logger.debug(f"Skipping {feature}: p-value out of range ({p_value})")
                     continue
                 
                 # 判断显著性
@@ -288,14 +477,20 @@ def perform_correlation_analysis(df: pd.DataFrame, target_vars: list, method: st
                     'correlation_type': correlation_type
                 })
             except Exception as e:
-                logger.warning(f"Failed to calculate correlation for feature {feature}: {e}")
+                logger.debug(f"Failed to calculate correlation for feature {feature}: {e}")
+                # 记录更详细的错误信息用于调试
+                if len(valid_data) > 0:
+                    logger.debug(f"  Feature stats: mean={feature_values.mean():.6f}, std={feature_values.std():.6f}, range=[{feature_values.min():.6f}, {feature_values.max():.6f}]")
+                    logger.debug(f"  Target stats: mean={target_values.mean():.6f}, std={target_values.std():.6f}, range=[{target_values.min():.6f}, {target_values.max():.6f}]")
                 continue
         
         # Create result DataFrame
         if len(correlations) > 0:
             result_df = pd.DataFrame(correlations)
-            result_df = result_df.sort_values('correlation', ascending=False)
-            result_df = result_df[result_df['correlation'] >= min_corr]
+            # 按绝对相关性排序，这样可以更好地展示最重要的特征
+            result_df = result_df.sort_values('correlation', key=abs, ascending=False)
+            # 使用绝对值来过滤相关性，这样可以捕获正相关和负相关
+            result_df = result_df[result_df['correlation'].abs() >= min_corr]
             
             significant_count = len(result_df[result_df['significance'] != 'ns'])
             significant_ratio = significant_count / len(feature_cols) if len(feature_cols) > 0 else 0
@@ -314,7 +509,7 @@ def perform_correlation_analysis(df: pd.DataFrame, target_vars: list, method: st
             'significant_ratio': significant_ratio
         }
         
-        logger.info(f"Found {len(result_df)} features with correlation >= {min_corr}")
+        logger.info(f"Found {len(result_df)} features with |correlation| >= {min_corr}")
         logger.info(f"Significant features: {results[target_var]['significant_count']}")
         
         # 添加调试：显示前几个相关性结果
@@ -322,6 +517,22 @@ def perform_correlation_analysis(df: pd.DataFrame, target_vars: list, method: st
             logger.info(f"Top correlations:")
             for _, row in result_df.head(5).iterrows():
                 logger.info(f"  {row['feature']}: corr={row['correlation']:.4f}, p={row['p_value']:.4f}")
+        else:
+            logger.info(f"No features found with |correlation| >= {min_corr}")
+            # 显示一些相关性较低的特征作为参考
+            if len(correlations) > 0:
+                temp_df = pd.DataFrame(correlations)
+                temp_df = temp_df.sort_values('correlation', key=abs, ascending=False)
+                logger.info(f"Top 3 features by absolute correlation (below threshold):")
+                for _, row in temp_df.head(3).iterrows():
+                    logger.info(f"  {row['feature']}: corr={row['correlation']:.4f}, p={row['p_value']:.4f}")
+        
+        # 数据质量总结
+        logger.info(f"Data quality summary for {target_var}:")
+        logger.info(f"  - Total features analyzed: {len(feature_cols)}")
+        logger.info(f"  - Features with valid correlations: {len(correlations)}")
+        logger.info(f"  - Features meeting threshold: {len(result_df)}")
+        logger.info(f"  - Success rate: {len(correlations)/len(feature_cols)*100:.1f}%")
     
     return results
 
@@ -352,9 +563,15 @@ def save_correlation_results(results: dict, output_dir: str):
     
     # 保存每个目标变量的相关性结果
     for target_var, result in results.items():
+        # 即使没有满足阈值的结果，也创建文件（可能为空）
+        result_file = os.path.join(data_dir, f"correlation_{target_var}.csv")
         if len(result['top_results']) > 0:
-            result_file = os.path.join(data_dir, f"correlation_{target_var}.csv")
             result['top_results'].to_csv(result_file, index=False)
+        else:
+            # 创建空的DataFrame并保存
+            empty_df = pd.DataFrame(columns=['feature', 'correlation', 'p_value', 'significance', 'n_samples', 'correlation_type'])
+            empty_df.to_csv(result_file, index=False)
+            logger.info(f"Created empty correlation file for {target_var} (no features met threshold)")
     
     # 保存汇总结果
     summary_data = []
@@ -386,10 +603,9 @@ def save_correlation_results(results: dict, output_dir: str):
     
     # 添加每个目标变量的文件
     for target_var, result in results.items():
-        if len(result['top_results']) > 0:
-            results_index["files"][f"correlation_{target_var}"] = f"data/correlation_{target_var}.csv"
-            results_index["plots"][f"correlation_matrix_{target_var}"] = f"plots/correlation_matrix_{target_var}.png"
-            results_index["plots"][f"scatter_plots_{target_var}"] = f"plots/scatter_plots_{target_var}.png"
+        results_index["files"][f"correlation_{target_var}"] = f"data/correlation_{target_var}.csv"
+        results_index["plots"][f"correlation_matrix_{target_var}"] = f"plots/correlation_matrix_{target_var}.png"
+        results_index["plots"][f"scatter_plots_{target_var}"] = f"plots/scatter_plots_{target_var}.png"
     
     with open(os.path.join(output_dir, "results_index.json"), "w", encoding='utf-8') as f:
         json.dump(results_index, f, indent=2, ensure_ascii=False)
@@ -397,35 +613,56 @@ def save_correlation_results(results: dict, output_dir: str):
     logger.info(f"Correlation results saved to {output_dir} with organized structure")
 
 
-def plot_correlation_matrix(results: dict, output_dir: str):
+def plot_correlation_matrix(results: dict, output_dir: str, min_corr: float = 0.3):
     """Plot correlation matrix for recording-level features"""
     plots_dir = os.path.join(output_dir, "plots")
     os.makedirs(plots_dir, exist_ok=True)
     
     for target_var, result in results.items():
-        if len(result['top_results']) == 0:
-            continue
-        
         plt.figure(figsize=(12, 8))
         
-        top_features = result['top_results']['feature'].tolist()
-        correlations = result['top_results']['correlation'].tolist()
-        p_values = result['top_results']['p_value'].tolist()
-        
-        colors = ['red' if p < 0.05 else 'lightcoral' for p in p_values]
-        
-        bars = plt.barh(range(len(top_features)), correlations, color=colors)
-        
-        for i, (corr, p_val) in enumerate(zip(correlations, p_values)):
-            if p_val < 0.05:
-                plt.text(corr + (0.01 if corr > 0 else -0.01), i, 
-                        get_significance_level(p_val), 
-                        va='center', ha='left' if corr > 0 else 'right')
-        
-        plt.yticks(range(len(top_features)), top_features)
-        plt.xlabel(f'Correlation ({target_var})')
-        plt.title(f'Top correlated recording-level features with {target_var}')
-        plt.grid(axis='x', alpha=0.3)
+        if len(result['top_results']) == 0:
+            # 即使没有满足阈值的结果，也生成一个提示图
+            plt.text(0.5, 0.5, f'No features met the correlation threshold for {target_var}\n\n'
+                     f'Total features analyzed: {result["total_features"]}\n'
+                     f'Significant features: {result["significant_count"]}\n'
+                     f'Try lowering the min_corr threshold or check data quality.',
+                     ha='center', va='center', transform=plt.gca().transAxes,
+                     fontsize=14, bbox=dict(boxstyle="round,pad=0.3", facecolor="lightgray"))
+            plt.title(f'Correlation Analysis Results for {target_var} - No Significant Correlations')
+            plt.axis('off')
+        else:
+            # 有结果时正常绘制
+            top_features = result['top_results']['feature'].tolist()
+            correlations = result['top_results']['correlation'].tolist()
+            p_values = result['top_results']['p_value'].tolist()
+            
+            # 为负相关添加不同颜色
+            colors = []
+            for corr, p_val in zip(correlations, p_values):
+                if p_val < 0.05:
+                    if corr > 0:
+                        colors.append('red')  # 显著正相关
+                    else:
+                        colors.append('blue')  # 显著负相关
+                else:
+                    if corr > 0:
+                        colors.append('lightcoral')  # 非显著正相关
+                    else:
+                        colors.append('lightblue')  # 非显著负相关
+            
+            bars = plt.barh(range(len(top_features)), correlations, color=colors)
+            
+            for i, (corr, p_val) in enumerate(zip(correlations, p_values)):
+                if p_val < 0.05:
+                    plt.text(corr + (0.01 if corr > 0 else -0.01), i, 
+                            get_significance_level(p_val), 
+                            va='center', ha='left' if corr > 0 else 'right')
+            
+            plt.yticks(range(len(top_features)), top_features)
+            plt.xlabel(f'Correlation ({target_var})')
+            plt.title(f'Top correlated recording-level features with {target_var} (|r| ≥ {min_corr})')
+            plt.grid(axis='x', alpha=0.3)
         
         plt.tight_layout()
         plt.savefig(os.path.join(plots_dir, f"correlation_matrix_{target_var}.png"), 
@@ -433,13 +670,30 @@ def plot_correlation_matrix(results: dict, output_dir: str):
         plt.close()
 
 
-def plot_scatter_plots(df: pd.DataFrame, results: dict, output_dir: str, top_n: int):
+def plot_scatter_plots(df: pd.DataFrame, results: dict, output_dir: str, top_n: int, min_corr: float = 0.3):
     """Plot scatter plots for recording-level features"""
     plots_dir = os.path.join(output_dir, "plots")
     os.makedirs(plots_dir, exist_ok=True)
     
     for target_var, result in results.items():
-        if target_var not in df.columns or len(result['top_results']) == 0:
+        if target_var not in df.columns:
+            continue
+        
+        if len(result['top_results']) == 0:
+            # 即使没有满足阈值的结果，也生成一个提示图
+            plt.figure(figsize=(10, 6))
+            plt.text(0.5, 0.5, f'No features met the correlation threshold for {target_var}\n\n'
+                     f'Total features analyzed: {result["total_features"]}\n'
+                     f'Significant features: {result["significant_count"]}\n'
+                     f'Try lowering the min_corr threshold or check data quality.',
+                     ha='center', va='center', transform=plt.gca().transAxes,
+                     fontsize=12, bbox=dict(boxstyle="round,pad=0.3", facecolor="lightgray"))
+            plt.title(f'Scatter Plot Analysis for {target_var} - No Significant Correlations')
+            plt.axis('off')
+            plt.tight_layout()
+            plt.savefig(os.path.join(plots_dir, f"scatter_plots_{target_var}.png"), 
+                       dpi=300, bbox_inches='tight')
+            plt.close()
             continue
         
         top_features = result['top_results']['feature'].head(min(top_n, 6)).tolist()

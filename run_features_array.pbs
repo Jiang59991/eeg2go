@@ -6,7 +6,9 @@
 #PBS -o tmp/
 #PBS -e tmp/
 
-cd $PBS_O_WORKDIR
+# 如果PBS_O_WORKDIR为空，使用当前工作目录
+WORK_DIR="${PBS_O_WORKDIR:-$(pwd)}"
+cd "$WORK_DIR"
 
 echo "Job ID: $PBS_JOBID"
 echo "Array Index: $PBS_ARRAY_INDEX"
@@ -22,11 +24,17 @@ if [ -n "$EEG2GO_LOG_FILE" ]; then
 fi
 
 # 从任务文件中读取当前任务的信息
-TASK_FILE="$PBS_O_WORKDIR/tmp/experiment1_tasks.txt"
+# 查找最新的任务文件
+# 如果PBS_O_WORKDIR为空，使用当前工作目录
+WORK_DIR="${PBS_O_WORKDIR:-$(pwd)}"
+TASK_FILE=$(find "$WORK_DIR/tmp" -name "eeg_features_tasks_*.txt" | sort | tail -1)
 if [ ! -f "$TASK_FILE" ]; then
-    echo "Error: Task file $TASK_FILE not found"
+    echo "Error: Task file not found in $WORK_DIR/tmp"
+    echo "Available task files:"
+    ls -la "$WORK_DIR/tmp"/*.txt 2>/dev/null || echo "No .txt files found"
     exit 1
 fi
+echo "Using task file: $TASK_FILE"
 
 # 读取当前array index对应的任务
 TASK_LINE=$(sed -n "${PBS_ARRAY_INDEX}p" "$TASK_FILE")

@@ -1,0 +1,18 @@
+{
+  "experiment_type": "correlation",
+  "files": {
+    "summary": "data/correlation_summary.csv",
+    "correlation_age": "data/correlation_age.csv"
+  },
+  "plots": {
+    "correlation_matrix_age": "plots/correlation_matrix_age.png",
+    "scatter_plots_age": "plots/scatter_plots_age.png"
+  },
+  "summary": {
+    "target_variables": [
+      "age"
+    ],
+    "total_targets": 1,
+    "generated_at": "2025-09-02T14:07:58.376867"
+  }
+}
