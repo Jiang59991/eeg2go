@@ -12,3 +12,4 @@ outputs/exp2/exp2_epoch_matrix.csv
 tmp/database/*.db-*
 *.db-wal
 *.db-shm
+dump.rdb
