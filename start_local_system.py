@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-启动本地模式系统
-不使用Redis，全部在本机运行完成
+Start local mode system
+No Redis required, all tasks run locally
 """
 import os
 import sys
@@ -9,7 +9,7 @@ import signal
 import time
 from datetime import datetime
 
-# 设置环境变量，启用本地模式
+# Set environment variables to enable local mode
 os.environ['USE_LOCAL_EXECUTOR'] = 'true'
 
 # Add project root directory to Python path
@@ -21,35 +21,35 @@ from logging_config import logger
 from task_queue.local_executor import get_local_executor, shutdown_local_executor
 
 def signal_handler(signum, frame):
-    """信号处理器，用于优雅关闭"""
+    """Signal handler for graceful shutdown"""
     logger.info(f"Received signal {signum}, shutting down...")
     shutdown_local_executor()
     sys.exit(0)
 
 def main():
-    """主函数"""
+    """Main function"""
     print("=" * 60)
-    print("EEG2Go 本地模式系统启动")
+    print("EEG2Go Local Mode System Starting")
     print("=" * 60)
-    print(f"启动时间: {datetime.now()}")
-    print("模式: 本地执行器 (不使用Redis)")
+    print(f"Start time: {datetime.now()}")
+    print("Mode: Local Executor (No Redis)")
     print("=" * 60)
     
-    # 设置信号处理器
+    # Set signal handlers
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     
     try:
-        # 初始化本地执行器
+        # Initialize local executor
         logger.info("Initializing local executor...")
         local_executor = get_local_executor()
         
-        print("本地执行器已启动")
-        print("系统已准备就绪，可以接收任务")
-        print("按 Ctrl+C 退出")
+        print("Local executor started")
+        print("System ready to receive tasks")
+        print("Press Ctrl+C to exit")
         print("-" * 60)
         
-        # 保持系统运行
+        # Keep system running
         while True:
             time.sleep(1)
             
@@ -60,7 +60,7 @@ def main():
     finally:
         logger.info("Shutting down local system...")
         shutdown_local_executor()
-        print("系统已关闭")
+        print("System shutdown complete")
 
 if __name__ == "__main__":
     main()

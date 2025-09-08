@@ -1,0 +1,23 @@
+{
+  "experiment_type": "feature_statistics",
+  "experiment_purpose": "Feature Profiling / Quality Assessment",
+  "files": {
+    "quality_metrics": "data/feature_quality_metrics.csv",
+    "data_health_summary": "data/data_health_summary.csv",
+    "basic_statistics": "data/feature_basic_statistics.csv",
+    "distribution_analysis": "data/feature_distribution_analysis.csv",
+    "outlier_analysis": "data/feature_outlier_analysis.csv",
+    "feature_variability": "data/feature_variability_ranking.csv"
+  },
+  "plots": {
+    "quality_metrics": "plots/quality_metrics.png",
+    "distributions": "plots/feature_distributions.png",
+    "outlier_analysis": "plots/outlier_analysis.png"
+  },
+  "summary": {
+    "total_features": 144,
+    "overall_health_score": 98.61111111111111,
+    "overall_health_grade": "A",
+    "generated_at": "2025-09-03T00:36:04.736504"
+  }
+}

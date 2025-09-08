@@ -35,7 +35,7 @@ except Exception as e:
     logger.warning(f"Font setting failed: {e}")
 
 
-def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs) -> str:
+def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs) -> dict:
     """
     Run feature profiling and quality assessment experiment
     
@@ -51,15 +51,15 @@ def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs)
             - quality_thresholds: Dict of quality thresholds, default {'missing': 0.9, 'zero_var': 0.0, 'extreme': 0.1}
     
     Returns:
-        str: Experiment summary
+        dict: Experiment result with structured data for frontend display
     """
     logger.info(f"Start feature profiling and quality assessment experiment")
     logger.info(f"Feature matrix shape: {df_feat.shape}")
     
     # Get parameters
     outlier_method = kwargs.get('outlier_method', 'iqr')
-    outlier_threshold = kwargs.get('outlier_threshold', 1.5)
-    top_n_features = kwargs.get('top_n_features', 20)
+    outlier_threshold = float(kwargs.get('outlier_threshold', 1.5))
+    top_n_features = int(kwargs.get('top_n_features', 20))
     generate_plots = kwargs.get('generate_plots', True)
     quality_thresholds = kwargs.get('quality_thresholds', {
         'missing': 0.9,      # 90% missing threshold
@@ -98,7 +98,6 @@ def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs)
             logger.info("Starting visualization generation...")
             plot_quality_metrics(quality_metrics, output_dir)
             plot_feature_distributions(df_processed, distribution_analysis, output_dir, top_n_features)
-            plot_feature_correlation_heatmap(df_processed, output_dir)
             plot_outlier_analysis(df_processed, outlier_analysis, output_dir, top_n_features)
             logger.info("All visualizations completed successfully")
         except Exception as e:
@@ -106,12 +105,12 @@ def run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs)
             import traceback
             logger.error(f"Traceback: {traceback.format_exc()}")
     
-    # Generate summary
-    summary = generate_summary(quality_metrics, basic_stats, distribution_analysis, 
-                              outlier_analysis, feature_variability, data_health_summary, df_processed)
+    # Generate structured summary for frontend
+    summary_data = generate_structured_summary(quality_metrics, basic_stats, distribution_analysis, 
+                                              outlier_analysis, feature_variability, data_health_summary, df_processed)
     
     logger.info(f"Feature profiling and quality assessment completed, results saved to: {output_dir}")
-    return summary
+    return summary_data
 
 
 def preprocess_features(df_feat: pd.DataFrame) -> pd.DataFrame:
@@ -503,7 +502,6 @@ def save_quality_assessment_results(quality_metrics: dict, basic_stats: dict,
         "plots": {
             "quality_metrics": "plots/quality_metrics.png",
             "distributions": "plots/feature_distributions.png",
-            "correlation_heatmap": "plots/feature_correlation_heatmap.png",
             "outlier_analysis": "plots/outlier_analysis.png"
         },
         "summary": {
@@ -650,24 +648,6 @@ def plot_feature_distributions(df: pd.DataFrame, distribution_analysis: dict,
             pass
 
 
-def plot_feature_correlation_heatmap(df: pd.DataFrame, output_dir: str):
-    """Plot feature correlation heatmap"""
-    logger.info("Plotting correlation heatmap...")
-    
-    # Calculate correlation matrix
-    corr_matrix = df.corr()
-    
-    # Plot heatmap
-    plt.figure(figsize=(12, 10))
-    mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
-    sns.heatmap(corr_matrix, mask=mask, annot=False, cmap='coolwarm', center=0,
-                square=True, linewidths=0.5, cbar_kws={"shrink": .8})
-    plt.title('Feature Correlation Matrix')
-    plt.tight_layout()
-    plots_dir = os.path.join(output_dir, "plots")
-    os.makedirs(plots_dir, exist_ok=True)
-    plt.savefig(os.path.join(plots_dir, "feature_correlation_heatmap.png"), dpi=300, bbox_inches='tight')
-    plt.close()
 
 
 def plot_outlier_analysis(df: pd.DataFrame, outlier_analysis: dict, 
@@ -701,14 +681,18 @@ def plot_outlier_analysis(df: pd.DataFrame, outlier_analysis: dict,
     plt.close()
 
 
-def generate_summary(quality_metrics: dict, basic_stats: dict, distribution_analysis: dict, 
-                    outlier_analysis: dict, feature_variability: pd.DataFrame, 
-                    data_health_summary: dict, df: pd.DataFrame) -> str:
-    """Generate experiment summary focused on data quality"""
+def generate_structured_summary(quality_metrics: dict, basic_stats: dict, distribution_analysis: dict, 
+                               outlier_analysis: dict, feature_variability: pd.DataFrame, 
+                               data_health_summary: dict, df: pd.DataFrame) -> dict:
+    """Generate structured summary data for frontend display"""
     
     total_features = len(quality_metrics)
     if total_features == 0:
-        return "No features to analyze."
+        return {
+            "status": "error",
+            "message": "No features to analyze",
+            "summary_text": "No features to analyze"
+        }
     
     # Quality summary
     quality_scores = [metrics['quality_score'] for metrics in quality_metrics.values()]
@@ -728,7 +712,24 @@ def generate_summary(quality_metrics: dict, basic_stats: dict, distribution_anal
     # Top variability features
     top_features = feature_variability.head(10)['feature'].tolist()
     
-    summary = f"""
+    # Top worst features (by quality score)
+    worst_features = []
+    for feature_name, metrics in quality_metrics.items():
+        worst_features.append({
+            'feature': feature_name,
+            'quality_score': metrics['quality_score'],
+            'quality_grade': metrics['quality_grade'],
+            'missing_rate': metrics['missing_rate'],
+            'zero_variance': metrics['zero_variance'],
+            'extreme_rate': metrics['extreme_rate']
+        })
+    
+    # Sort by quality score (ascending - worst first)
+    worst_features.sort(key=lambda x: x['quality_score'])
+    top_worst_features = worst_features[:5]  # Top 5 worst features
+    
+    # Generate text summary
+    summary_text = f"""
 Feature Profiling / Quality Assessment Summary
 ==============================================
 
@@ -765,4 +766,36 @@ Key Findings:
 Results saved to output directory.
 """
     
-    return summary 
+    # Return structured data for frontend
+    return {
+        "status": "success",
+        "summary_text": summary_text,
+        "frontend_summary": {
+            "total_features": total_features,
+            "total_samples": len(df),
+            "overall_health_score": data_health_summary.get('overall_health_score', 0),
+            "overall_health_grade": data_health_summary.get('overall_health_grade', 'N/A'),
+            "average_quality_score": avg_quality,
+            "quality_distribution": {
+                "grade_a": sum(1 for metrics in quality_metrics.values() if metrics['quality_grade'] == 'A'),
+                "grade_b": sum(1 for metrics in quality_metrics.values() if metrics['quality_grade'] == 'B'),
+                "grade_c": sum(1 for metrics in quality_metrics.values() if metrics['quality_grade'] == 'C'),
+                "grade_d": sum(1 for metrics in quality_metrics.values() if metrics['quality_grade'] == 'D'),
+                "grade_f": sum(1 for metrics in quality_metrics.values() if metrics['quality_grade'] == 'F')
+            },
+            "quality_issues": {
+                "high_missing_features": high_missing_count,
+                "zero_variance_features": zero_variance_count,
+                "high_extreme_features": high_extreme_count,
+                "problematic_features_ratio": (high_missing_count + zero_variance_count + high_extreme_count) / total_features
+            },
+            "distribution_characteristics": {
+                "normal_features": normal_features,
+                "non_normal_features": total_features - normal_features,
+                "normal_percentage": normal_features / total_features * 100
+            },
+            "top_variable_features": top_features[:5],  # Top 5 for frontend display
+            "top_worst_features": top_worst_features,  # Top 5 worst features
+            "recommendations": data_health_summary.get('recommendations', [])
+        }
+    } 

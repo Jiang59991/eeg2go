@@ -1,55 +1,55 @@
 #!/usr/bin/env python3
 """
-切换到本地模式的脚本
+Script to switch to local mode
 """
 
 import os
 import sys
 
 def switch_to_local_mode():
-    """切换到本地模式"""
-    print("正在切换到本地模式...")
+    """Switch to local mode"""
+    print("Switching to local mode...")
     
-    # 设置环境变量
+    # Set environment variables
     os.environ['USE_LOCAL_EXECUTOR'] = 'true'
-    os.environ['LOCAL_EXECUTOR_WORKERS'] = '1'  # 本地模式使用单线程
+    os.environ['LOCAL_EXECUTOR_WORKERS'] = '1'  # Local mode uses single thread
     
-    print("环境变量已设置:")
+    print("Environment variables set:")
     print(f"  USE_LOCAL_EXECUTOR = {os.environ.get('USE_LOCAL_EXECUTOR', 'not set')}")
     print(f"  LOCAL_EXECUTOR_WORKERS = {os.environ.get('LOCAL_EXECUTOR_WORKERS', 'not set')}")
     
-    # 启动本地系统
-    print("\n启动本地模式系统...")
+    # Start local system
+    print("\nStarting local mode system...")
     os.system('python start_local_system.py')
 
 def switch_to_celery_mode():
-    """切换到Celery模式"""
-    print("正在切换到Celery模式...")
+    """Switch to Celery mode"""
+    print("Switching to Celery mode...")
     
-    # 清除环境变量
+    # Clear environment variables
     if 'USE_LOCAL_EXECUTOR' in os.environ:
         del os.environ['USE_LOCAL_EXECUTOR']
     if 'LOCAL_EXECUTOR_WORKERS' in os.environ:
         del os.environ['LOCAL_EXECUTOR_WORKERS']
     
-    print("环境变量已清除，将使用默认的Celery模式")
-    print("请手动启动Celery worker和web应用")
+    print("Environment variables cleared, will use default Celery mode")
+    print("Please manually start Celery worker and web application")
 
 def show_current_mode():
-    """显示当前模式"""
+    """Show current mode"""
     use_local = os.environ.get('USE_LOCAL_EXECUTOR', 'false').lower() == 'true'
-    mode = "本地模式" if use_local else "Celery模式"
+    mode = "Local Mode" if use_local else "Celery Mode"
     workers = os.environ.get('LOCAL_EXECUTOR_WORKERS', 'N/A')
     
-    print(f"当前系统模式: {mode}")
-    print(f"本地执行器工作线程数: {workers}")
+    print(f"Current system mode: {mode}")
+    print(f"Local executor worker threads: {workers}")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("用法:")
-        print("  python switch_to_local_mode.py local    # 切换到本地模式")
-        print("  python switch_to_local_mode.py celery   # 切换到Celery模式")
-        print("  python switch_to_local_mode.py status   # 显示当前模式")
+        print("Usage:")
+        print("  python switch_to_local_mode.py local    # Switch to local mode")
+        print("  python switch_to_local_mode.py celery   # Switch to Celery mode")
+        print("  python switch_to_local_mode.py status   # Show current mode")
         sys.exit(1)
     
     command = sys.argv[1].lower()
@@ -61,5 +61,5 @@ if __name__ == "__main__":
     elif command == 'status':
         show_current_mode()
     else:
-        print(f"未知命令: {command}")
+        print(f"Unknown command: {command}")
         sys.exit(1)

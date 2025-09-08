@@ -1,0 +1,50 @@
+============================================================
+DATASET INFORMATION
+============================================================
+Total Recordings: 2329
+Total Subjects: 2329
+Recordings per Subject: 1.00
+
+Label Distribution:
+  Normal (0): 1331 (57.1%)
+  Abnormal (1): 998 (42.9%)
+  Class Ratio: 998:1331 (42.9% abnormal)
+
+Feature Information:
+  P0_minimal_hp: 24 features, 2329 samples
+  P1_hp_avg_reref: 24 features, 2329 samples
+  P2_hp_notch50: 24 features, 2329 samples
+  P3_hp_ica_auto: 24 features, 2329 samples
+
+Data Completeness:
+  P0_minimal_hp: 0.23% missing values
+  P1_hp_avg_reref: 0.32% missing values
+  P2_hp_notch50: 0.04% missing values
+  P3_hp_ica_auto: 0.00% missing values
+
+Data Quality Statistics:
+  P0_minimal_hp: 0 constant features out of 24
+  P1_hp_avg_reref: 0 constant features out of 24
+  P2_hp_notch50: 0 constant features out of 24
+  P3_hp_ica_auto: 0 constant features out of 24
+
+Channel Coverage (P0 baseline pipeline):
+  F3: 100.0% [0.9]
+  F4: 100.0% [0.3]
+  C3: 100.0% [0.1]
+  C4: 100.0% [0.1]
+  O1: 100.0% [0.1]
+  O2: 100.0% [0.0]
+============================================================
+
+============================================================
+FOLD STATISTICS
+============================================================
+Cross-validation fold statistics:
+\FoldTotMed{}: 466
+\FoldTotMin{} / \FoldTotMax{}: 465 / 466
+\FoldAbnMed{}: 206
+\FoldAbnMin{} / \FoldAbnMax{}: 177 / 208
+\FoldNorMed{}: 260
+\FoldNorMin{} / \FoldNorMax{}: 258 / 289
+============================================================

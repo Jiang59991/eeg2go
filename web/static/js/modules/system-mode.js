@@ -82,7 +82,7 @@ export async function getSystemMode() {
 }
 
 /**
- * 检查是否为本地模式
+ * Check if system is in local mode
  */
 export async function isLocalMode() {
     const modeInfo = await getSystemMode();

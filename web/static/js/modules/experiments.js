@@ -170,9 +170,46 @@ export function showExperimentDetails(experimentId) {
                 </table>
             `;
             
-            // 填充实验摘要统计
+            // 填充实验摘要统计 - 优先从数据库调取，然后从任务结果调取
             const statsContainer = document.getElementById('experimentStats');
-            if (data.results_index && data.results_index.summary) {
+            let summaryHtml = '';
+            
+            if (data.experiment.result) {
+                // 优先从任务结果中提取结构化数据
+                try {
+                    const resultData = JSON.parse(data.experiment.result);
+                    
+                    if (resultData.frontend_summary) {
+                        summaryHtml = generateSummaryFromTaskResult(data.experiment.experiment_type, resultData.frontend_summary);
+                        console.log('Using task result frontend_summary for summary');
+                    } else if (data.feature_results && data.feature_results.length > 0) {
+                        // 如果没有frontend_summary，回退到feature_results
+                        const experimentType = data.experiment.experiment_type;
+                        summaryHtml = generateExperimentSummary(experimentType, data.feature_results);
+                        console.log('Using database feature results for summary (fallback)');
+                    } else if (resultData.summary && resultData.summary.frontend_summary) {
+                        summaryHtml = generateSummaryFromTaskResult(data.experiment.experiment_type, resultData.summary.frontend_summary);
+                        console.log('Using nested task result frontend_summary for summary');
+                } else if (resultData.summary) {
+                        // 兼容旧格式的文本摘要
+                        if (typeof resultData.summary === 'string') {
+                            summaryHtml = generateLegacySummary(data.experiment.experiment_type, resultData.summary);
+                            console.log('Using legacy text summary');
+                        } else if (typeof resultData.summary === 'object') {
+                            // 如果summary是对象，尝试提取有用的信息
+                            summaryHtml = generateObjectSummary(data.experiment.experiment_type, resultData.summary);
+                            console.log('Using object summary');
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Failed to parse task result:', e);
+                }
+            }
+            
+            if (summaryHtml) {
+                statsContainer.innerHTML = summaryHtml;
+            } else if (data.results_index && data.results_index.summary) {
+                // 兼容旧格式
                 const summary = data.results_index.summary;
                 statsContainer.innerHTML = `
                     <div class="row">
@@ -198,20 +235,65 @@ export function showExperimentDetails(experimentId) {
                 statsContainer.innerHTML = '<p class="text-muted">No summary statistics available</p>';
             }
             
-            // 填充特征结果表格
+            // 填充特征结果表格 - 只显示具体的特征结果，过滤掉汇总数据
             const resultsBody = document.getElementById('experimentResultsBody');
             if (data.feature_results && data.feature_results.length > 0) {
-                resultsBody.innerHTML = data.feature_results.map(result => `
-                    <tr>
-                        <td>${result.rank_position || 'N/A'}</td>
-                        <td>${result.feature_shortname || 'N/A'}</td>
-                        <td>${result.feature_channels || 'N/A'}</td>
-                        <td>${result.target_variable || 'N/A'}</td>
-                        <td>${result.metric_name || 'N/A'}</td>
-                        <td>${result.metric_value ? result.metric_value.toFixed(4) : 'N/A'}</td>
-                        <td>${result.significance_level || 'N/A'}</td>
-                    </tr>
-                `).join('');
+                console.log('原始特征结果数据:', data.feature_results);
+                
+                // 过滤掉汇总数据，只保留具体的特征结果
+                const filteredResults = data.feature_results.filter(result => {
+                    // 跳过汇总数据 - 修复过滤逻辑
+                    if (result.metric_name === 'significant_features_count' ||
+                        result.metric_name === 'significant_associations' ||
+                        result.metric_name === 'csv_content' ||
+                        result.feature_name === 'overall_significant_associations' ||
+                        (result.feature_name && result.feature_name.startsWith('associations_')) ||
+                        (result.feature_name && result.feature_name.startsWith('csv_data_'))) {
+                        console.log('过滤掉汇总数据:', result);
+                        return false;
+                    }
+                    
+                    // 对于 correlation 实验，保留具体的特征结果
+                    if (data.experiment.experiment_type === 'correlation') {
+                        const isValid = result.feature_name && 
+                                      result.metric_name === 'correlation_coefficient' &&
+                                      result.rank_position > 0 &&
+                                      !result.feature_name.startsWith('summary_') &&
+                                      !result.feature_name.startsWith('overall_');
+                        
+                        if (isValid) {
+                            console.log('保留 correlation 特征结果:', result);
+                        } else {
+                            console.log('过滤掉 correlation 特征结果:', result);
+                        }
+                        
+                        return isValid;
+                    }
+                    
+                    // 对于其他实验类型，保持原有逻辑
+                    return result.feature_name && 
+                           result.metric_name !== 'significant_features_count' &&
+                           result.metric_name !== 'significant_associations' &&
+                           result.rank_position > 0;
+                });
+                
+                console.log('过滤后的特征结果:', filteredResults);
+                
+                if (filteredResults.length > 0) {
+                    resultsBody.innerHTML = filteredResults.map(result => `
+                        <tr>
+                            <td>${result.rank_position || 'N/A'}</td>
+                            <td>${result.feature_name || result.feature_shortname || 'N/A'}</td>
+                            <td>${result.feature_channels || 'N/A'}</td>
+                            <td>${result.target_variable || 'N/A'}</td>
+                            <td>${result.metric_name || 'N/A'}</td>
+                            <td>${result.metric_value ? result.metric_value.toFixed(4) : 'N/A'}</td>
+                            <td>${result.significance_level || 'N/A'}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    resultsBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No detailed feature results available. Check Summary Statistics below for overview.</td></tr>';
+                }
             } else {
                 resultsBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No feature results available</td></tr>';
             }
@@ -228,6 +310,772 @@ export function showExperimentDetails(experimentId) {
             console.error('Failed to load experiment details:', error);
             showStatus('Failed to load experiment details', 'error');
         });
+}
+
+// 根据实验类型生成摘要HTML
+function generateExperimentSummary(experimentType, featureResults) {
+    let summaryHtml = '<div class="row">';
+    
+    switch (experimentType) {
+        case 'feature_statistics':
+            summaryHtml += generateStatisticsSummary(featureResults);
+            break;
+        case 'correlation':
+            summaryHtml += generateCorrelationSummary(featureResults);
+            break;
+        case 'classification':
+            summaryHtml += generateClassificationSummary(featureResults);
+            break;
+        default:
+            summaryHtml += generateGenericSummary(featureResults);
+    }
+    
+    summaryHtml += '</div>';
+    return summaryHtml;
+}
+
+// 生成特征统计摘要
+function generateStatisticsSummary(featureResults) {
+    const overallHealth = featureResults.find(r => r.feature_name === 'overall_dataset_health');
+    const qualityDist = featureResults.filter(r => r.target_variable === 'quality_distribution');
+    const qualityIssues = featureResults.filter(r => r.target_variable === 'quality_issues');
+    
+    let html = `
+        <div class="col-md-6">
+            <h6><i class="bi bi-clipboard-data"></i> Data Health Summary</h6>
+            <div class="card bg-light">
+                <div class="card-body p-3">
+                    ${overallHealth ? `
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span><strong>Overall Health Score:</strong></span>
+                            <span class="badge bg-${getHealthScoreColor(overallHealth.metric_value)} fs-6">
+                                ${(overallHealth.metric_value * 100).toFixed(1)}%
+                            </span>
+                        </div>
+                    ` : ''}
+                    ${qualityDist.length > 0 ? `
+                        <div class="mb-2">
+                            <strong>Quality Distribution:</strong>
+                            <div class="mt-1">
+                                ${qualityDist.map(q => `
+                                    <span class="badge bg-secondary me-1">
+                                        ${q.feature_name.replace('quality_grade_', '')}: ${q.metric_value}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <h6><i class="bi bi-exclamation-triangle"></i> Quality Issues</h6>
+            <div class="card bg-light">
+                <div class="card-body p-3">
+                    ${qualityIssues.length > 0 ? qualityIssues.map(issue => `
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span>${formatIssueName(issue.feature_name)}:</span>
+                            <span class="badge bg-warning">${issue.metric_value}</span>
+                        </div>
+                    `).join('') : '<p class="text-muted mb-0">No major issues detected</p>'}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    return html;
+}
+
+// 生成关联性分析摘要
+function generateCorrelationSummary(featureResults) {
+    // 处理新的数据格式：从featureResults中提取correlation数据
+    const correlationResults = featureResults.filter(r => r.result_type === 'correlation' && r.metric_name === 'correlation_coefficient');
+    const significantResults = correlationResults.filter(r => r.significance_level && r.significance_level !== 'ns');
+    
+    // 按target_variable分组
+    const targetGroups = {};
+    correlationResults.forEach(result => {
+        const target = result.target_variable;
+        if (!targetGroups[target]) {
+            targetGroups[target] = [];
+        }
+        targetGroups[target].push(result);
+    });
+    
+    // 计算每个target的显著特征数量
+    const targetStats = {};
+    Object.keys(targetGroups).forEach(target => {
+        const targetResults = targetGroups[target];
+        const significantCount = targetResults.filter(r => r.significance_level && r.significance_level !== 'ns').length;
+        const totalCount = targetResults.length;
+        targetStats[target] = {
+            significant_count: significantCount,
+            total_count: totalCount,
+            significant_ratio: totalCount > 0 ? significantCount / totalCount : 0
+        };
+    });
+    
+    let html = `
+        <div class="col-md-6">
+            <h6><i class="bi bi-graph-up"></i> Overall Associations</h6>
+            <div class="card bg-light">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span><strong>Significant Features:</strong></span>
+                        <span class="badge bg-success fs-6">${significantResults.length}</span>
+                    </div>
+                    <div class="text-muted small">
+                        Features with q < 0.05 after FDR correction
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <h6><i class="bi bi-target"></i> Per-Target Results</h6>
+            <div class="card bg-light">
+                <div class="card-body p-3">
+                    ${Object.keys(targetStats).length > 0 ? Object.entries(targetStats).map(([target_var, stats]) => `
+                        <div class="mb-2">
+                            <strong>${target_var}:</strong>
+                            <div class="d-flex justify-content-between">
+                                <span>Significant: ${stats.significant_count}</span>
+                                <span class="text-muted">(${(stats.significant_ratio * 100).toFixed(1)}%)</span>
+                            </div>
+                        </div>
+                    `).join('') : '<p class="text-muted mb-0">No target-specific results</p>'}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // 添加具体的特征结果表格
+    const featureTable = generateCorrelationFeatureTable(featureResults);
+    if (featureTable && !featureTable.includes('No detailed feature results available')) {
+        html += `
+            <div class="col-12 mt-3">
+                <h6><i class="bi bi-table"></i> Top Feature Results</h6>
+                ${featureTable}
+            </div>
+        `;
+    }
+    
+    return html;
+}
+
+// 生成相关性分析的具体特征结果表格
+function generateCorrelationFeatureTable(featureResults) {
+    // 查找包含具体特征数据的记录
+    const csvDataRecords = featureResults.filter(r => r.feature_name.startsWith('csv_data_'));
+    
+    if (csvDataRecords.length === 0) {
+        return '<p class="text-muted">No detailed feature results available</p>';
+    }
+    
+    let tableHtml = '<div class="table-responsive"><table class="table table-sm table-striped">';
+    tableHtml += '<thead><tr><th>Rank</th><th>Feature</th><th>Correlation</th><th>P-value</th><th>Q-value</th><th>Significance</th></tr></thead><tbody>';
+    
+    csvDataRecords.forEach(record => {
+        try {
+            const additionalData = record.additional_data ? 
+                (typeof record.additional_data === 'string' ? JSON.parse(record.additional_data) : record.additional_data) : {};
+            
+            if (additionalData.csv_content) {
+                // 解析CSV内容
+                const lines = additionalData.csv_content.split('\n');
+                const headers = lines[0].split(',');
+                const dataLines = lines.slice(1).filter(line => line.trim());
+                
+                // 找到相关列的位置
+                const featureIndex = headers.findIndex(h => h.includes('feature'));
+                const corrIndex = headers.findIndex(h => h.includes('correlation'));
+                const pIndex = headers.findIndex(h => h.includes('p_value'));
+                const qIndex = headers.findIndex(h => h.includes('q_value'));
+                
+                // 显示前20个特征
+                dataLines.slice(0, 20).forEach((line, index) => {
+                    const values = line.split(',');
+                    const feature = values[featureIndex] || 'N/A';
+                    const correlation = parseFloat(values[corrIndex]) || 0;
+                    const pValue = parseFloat(values[pIndex]) || 1;
+                    const qValue = parseFloat(values[qIndex]) || 1;
+                    
+                    // 确定显著性
+                    let significance = 'ns';
+                    if (qValue < 0.001) significance = '***';
+                    else if (qValue < 0.01) significance = '**';
+                    else if (qValue < 0.05) significance = '*';
+                    
+                    tableHtml += `<tr>
+                        <td>${index + 1}</td>
+                        <td>${feature}</td>
+                        <td>${correlation.toFixed(3)}</td>
+                        <td>${pValue.toFixed(6)}</td>
+                        <td>${qValue.toFixed(6)}</td>
+                        <td><span class="badge bg-${significance === 'ns' ? 'secondary' : 'success'}">${significance}</span></td>
+                    </tr>`;
+                });
+            }
+        } catch (e) {
+            console.error('Error parsing CSV data:', e);
+        }
+    });
+    
+    tableHtml += '</tbody></table></div>';
+    return tableHtml;
+}
+
+// 生成特征选择摘要
+
+// 生成分类分析摘要
+function generateClassificationSummary(featureResults) {
+    const overallPerformance = featureResults.find(r => r.feature_name === 'overall_classification_performance');
+    const targetPerformance = featureResults.filter(r => r.feature_name.startsWith('classification_'));
+    
+    let html = `
+        <div class="col-md-6">
+            <h6><i class="bi bi-robot"></i> Overall Performance</h6>
+            <div class="card bg-light">
+                <div class="card-body p-3">
+                    ${overallPerformance ? `
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span><strong>Average F1 Score:</strong></span>
+                            <span class="badge bg-${getPerformanceColor(overallPerformance.metric_value)} fs-6">
+                                ${(overallPerformance.metric_value * 100).toFixed(1)}%
+                            </span>
+                        </div>
+                    ` : ''}
+                    <div class="text-muted small">
+                        Cross-validation performance across targets
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <h6><i class="bi bi-target"></i> Per-Target Performance</h6>
+            <div class="card bg-light">
+                <div class="card-body p-3">
+                    ${targetPerformance.length > 0 ? targetPerformance.map(target => {
+                        const targetVar = target.feature_name.replace('classification_', '');
+                        const additionalData = target.additional_data ? 
+                            (typeof target.additional_data === 'string' ? JSON.parse(target.additional_data) : target.additional_data) : {};
+                        return `
+                            <div class="mb-2">
+                                <strong>${targetVar}:</strong>
+                                <div class="d-flex justify-content-between">
+                                    <span>F1: ${(target.metric_value * 100).toFixed(1)}%</span>
+                                    ${additionalData.roc_auc ? `
+                                        <span class="text-muted">AUC: ${(additionalData.roc_auc * 100).toFixed(1)}%</span>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `;
+                    }).join('') : '<p class="text-muted mb-0">No target-specific results</p>'}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    return html;
+}
+
+// 生成通用摘要
+function generateGenericSummary(featureResults) {
+    const resultTypes = [...new Set(featureResults.map(r => r.result_type))];
+    const totalFeatures = featureResults.length;
+    
+    let html = `
+        <div class="col-md-6">
+            <h6><i class="bi bi-info-circle"></i> Results Overview</h6>
+            <div class="card bg-light">
+                <div class="card-body p-3">
+                    <div class="mb-2">
+                        <strong>Total Results:</strong> ${totalFeatures}
+                    </div>
+                    <div class="mb-2">
+                        <strong>Result Types:</strong>
+                        <div class="mt-1">
+                            ${resultTypes.map(type => `
+                                <span class="badge bg-secondary me-1">${type}</span>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <h6><i class="bi bi-bar-chart"></i> Top Results</h6>
+            <div class="card bg-light">
+                <div class="card-body p-3">
+                    ${featureResults.slice(0, 5).map(result => `
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-truncate" style="max-width: 150px;" title="${result.feature_name}">
+                                ${result.feature_name}
+                            </span>
+                            <span class="badge bg-info">${result.metric_value ? result.metric_value.toFixed(3) : 'N/A'}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    return html;
+}
+
+// 从任务结果生成摘要
+function generateSummaryFromTaskResult(experimentType, frontendSummary) {
+    let summaryHtml = '<div class="row">';
+    
+    switch (experimentType) {
+        case 'feature_statistics':
+            summaryHtml += generateStatisticsSummaryFromTask(frontendSummary);
+            break;
+        case 'correlation':
+            summaryHtml += generateCorrelationSummaryFromTask(frontendSummary);
+            break;
+        case 'classification':
+            summaryHtml += generateClassificationSummaryFromTask(frontendSummary);
+            break;
+        default:
+            summaryHtml += generateGenericSummaryFromTask(frontendSummary);
+    }
+    
+    summaryHtml += '</div>';
+    return summaryHtml;
+}
+
+// 从任务结果生成特征统计摘要
+function generateStatisticsSummaryFromTask(frontendSummary) {
+    const { overall_health_score, overall_health_grade, quality_distribution, quality_issues, total_features, total_samples, top_worst_features } = frontendSummary;
+    
+    let html = `
+        <div class="col-md-6">
+            <h6><i class="bi bi-clipboard-data"></i> Data Health Summary</h6>
+            <div class="card bg-light">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span><strong>Overall Health Score:</strong></span>
+                        <span class="badge bg-${getHealthScoreColor(overall_health_score / 100)} fs-6">
+                            ${overall_health_score.toFixed(1)}%
+                        </span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Health Grade:</strong> <span class="badge bg-success">${overall_health_grade}</span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Total Features:</strong> ${total_features}
+                    </div>
+                    <div class="mb-2">
+                        <strong>Total Samples:</strong> ${total_samples}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <h6><i class="bi bi-exclamation-triangle"></i> Quality Issues</h6>
+            <div class="card bg-light">
+                <div class="card-body p-3">
+                    ${quality_issues.high_missing_features > 0 ? `
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span>High Missing Features:</span>
+                            <span class="badge bg-warning">${quality_issues.high_missing_features}</span>
+                        </div>
+                    ` : ''}
+                    ${quality_issues.zero_variance_features > 0 ? `
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span>Zero Variance Features:</span>
+                            <span class="badge bg-warning">${quality_issues.zero_variance_features}</span>
+                        </div>
+                    ` : ''}
+                    ${quality_issues.high_extreme_features > 0 ? `
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span>High Extreme Features:</span>
+                            <span class="badge bg-warning">${quality_issues.high_extreme_features}</span>
+                        </div>
+                    ` : ''}
+                    ${quality_issues.high_missing_features === 0 && quality_issues.zero_variance_features === 0 && quality_issues.high_extreme_features === 0 ? 
+                        '<p class="text-muted mb-0">No major issues detected</p>' : ''}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // 添加最差特征卡片
+    if (top_worst_features && top_worst_features.length > 0) {
+        html += `
+        <div class="col-12 mt-3">
+            <h6><i class="bi bi-exclamation-triangle-fill text-warning"></i> Top-5 Worst Quality Features</h6>
+            <div class="card bg-light">
+                <div class="card-body p-3">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Feature</th>
+                                    <th>Quality Score</th>
+                                    <th>Grade</th>
+                                    <th>Missing Rate</th>
+                                    <th>Zero Variance</th>
+                                    <th>Extreme Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${top_worst_features.map(feature => `
+                                    <tr>
+                                        <td><code class="small">${feature.feature}</code></td>
+                                        <td>
+                                            <span class="badge bg-${getHealthScoreColor(feature.quality_score / 100)}">
+                                                ${feature.quality_score.toFixed(1)}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-${getQualityGradeColor(feature.quality_grade)}">
+                                                ${feature.quality_grade}
+                                            </span>
+                                        </td>
+                                        <td>${(feature.missing_rate * 100).toFixed(1)}%</td>
+                                        <td>${feature.zero_variance ? '<i class="bi bi-check-circle-fill text-danger"></i>' : '<i class="bi bi-x-circle text-success"></i>'}</td>
+                                        <td>${(feature.extreme_rate * 100).toFixed(1)}%</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        `;
+    }
+    
+    return html;
+}
+
+// 从任务结果生成关联性分析摘要
+function generateCorrelationSummaryFromTask(frontendSummary) {
+    const { overall_significant_features, target_variables, total_features, total_samples, correlation_method, fdr_alpha } = frontendSummary;
+    
+    let html = `
+        <div class="col-md-4">
+            <h6><i class="bi bi-graph-up"></i> Overall Summary</h6>
+            <div class="card bg-light">
+                <div class="card-body p-3">
+                    <div class="mb-2">
+                        <small class="text-muted">Total Features:</small>
+                        <div class="fw-bold">${total_features || 0}</div>
+                    </div>
+                    <div class="mb-2">
+                        <small class="text-muted">Total Samples:</small>
+                        <div class="fw-bold">${total_samples || 0}</div>
+                    </div>
+                    <div class="mb-2">
+                        <small class="text-muted">Significant Features:</small>
+                        <div class="fw-bold text-success">${overall_significant_features || 0}</div>
+                    </div>
+                    <div class="text-muted small">
+                        Method: ${correlation_method || 'pearson'}, FDR α = ${fdr_alpha || 0.05}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <h6><i class="bi bi-target"></i> Target Variable Analysis</h6>
+            <div class="card bg-light">
+                <div class="card-body p-3">
+                    ${target_variables && Object.keys(target_variables).length > 0 ? Object.entries(target_variables).map(([target_var, target_data]) => `
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <strong>${target_var} (${target_data.type})</strong>
+                                <div>
+                                    <span class="badge bg-success me-1">${target_data.significant_count || 0} significant</span>
+                                    <span class="text-muted small">(${(target_data.significant_ratio * 100).toFixed(1)}%)</span>
+                                </div>
+                            </div>
+                            ${target_data.top_associations && target_data.top_associations.length > 0 ? `
+                                <div class="small">
+                                    <div class="text-muted mb-1">Top 5 Associations:</div>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Feature</th>
+                                                    <th>Correlation</th>
+                                                    <th>Q-value</th>
+                                                    <th>Significance</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                ${target_data.top_associations.map(assoc => `
+                                                    <tr>
+                                                        <td><code class="small">${assoc.feature}</code></td>
+                                                        <td>
+                                                            <span class="badge bg-${assoc.correlation > 0 ? 'primary' : 'info'}">
+                                                                ${assoc.correlation}
+                                                            </span>
+                                                        </td>
+                                                        <td>${assoc.q_value}</td>
+                                                        <td>
+                                                            <span class="badge bg-${assoc.significance === '***' ? 'danger' : assoc.significance === '**' ? 'warning' : assoc.significance === '*' ? 'info' : 'secondary'}">
+                                                                ${assoc.significance}
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                `).join('')}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            ` : '<p class="text-muted small mb-0">No significant associations found</p>'}
+                        </div>
+                    `).join('') : '<p class="text-muted mb-0">No target-specific results</p>'}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    return html;
+}
+
+
+// 从任务结果生成分类分析摘要
+function generateClassificationSummaryFromTask(frontendSummary) {
+    const { overall_performance, target_performance, total_targets, total_features_used } = frontendSummary;
+    
+    let html = `
+        <div class="col-md-4">
+            <h6><i class="bi bi-robot"></i> Overall Summary</h6>
+            <div class="card bg-light">
+                <div class="card-body p-3">
+                    <div class="mb-2">
+                        <small class="text-muted">Total Targets:</small>
+                        <div class="fw-bold">${total_targets || 0}</div>
+                    </div>
+                    <div class="mb-2">
+                        <small class="text-muted">Features Used:</small>
+                        <div class="fw-bold">${total_features_used || 0}</div>
+                    </div>
+                    ${overall_performance ? `
+                        <div class="mb-2">
+                            <small class="text-muted">Average F1 Score:</small>
+                            <div class="fw-bold text-success">${(overall_performance.average_f1 * 100).toFixed(1)}%</div>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted">Average Accuracy:</small>
+                            <div class="fw-bold text-info">${(overall_performance.average_accuracy * 100).toFixed(1)}%</div>
+                        </div>
+                        ${overall_performance.average_roc_auc ? `
+                            <div class="mb-2">
+                                <small class="text-muted">Average ROC AUC:</small>
+                                <div class="fw-bold text-warning">${(overall_performance.average_roc_auc * 100).toFixed(1)}%</div>
+                            </div>
+                        ` : ''}
+                    ` : ''}
+                    <div class="text-muted small">
+                        Baseline predictive check results
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <h6><i class="bi bi-target"></i> Target Performance Details</h6>
+            <div class="card bg-light">
+                <div class="card-body p-3">
+                    ${target_performance ? Object.entries(target_performance).map(([target_var, target_data]) => `
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <strong>${target_var}</strong>
+                                <span class="badge bg-primary">${target_data.model || 'Unknown Model'}</span>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="small">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span>F1 Score:</span>
+                                            <span class="badge bg-${getPerformanceColor(target_data.f1_score)}">
+                                                ${(target_data.f1_score * 100).toFixed(1)}%
+                                            </span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span>Accuracy:</span>
+                                            <span class="badge bg-${getPerformanceColor(target_data.accuracy)}">
+                                                ${(target_data.accuracy * 100).toFixed(1)}%
+                                            </span>
+                                        </div>
+                                        ${target_data.roc_auc ? `
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span>ROC AUC:</span>
+                                                <span class="badge bg-${getPerformanceColor(target_data.roc_auc)}">
+                                                    ${(target_data.roc_auc * 100).toFixed(1)}%
+                                                </span>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="small">
+                                        <div class="text-muted mb-1">Cross-Validation:</div>
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span>CV Mean:</span>
+                                            <span class="text-muted">${(target_data.cv_mean * 100).toFixed(1)}%</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span>CV Std:</span>
+                                            <span class="text-muted">±${(target_data.cv_std * 100).toFixed(1)}%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('') : '<p class="text-muted mb-0">No target-specific results</p>'}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    return html;
+}
+
+// 从任务结果生成通用摘要
+function generateGenericSummaryFromTask(frontendSummary) {
+    const keys = Object.keys(frontendSummary);
+    
+    let html = '<div class="row">';
+    html += '<div class="col-md-6"><h6>Results Overview</h6>';
+    html += '<div class="card bg-light"><div class="card-body p-3">';
+    
+    for (const key of keys.slice(0, 3)) {
+        const value = frontendSummary[key];
+        if (typeof value === 'number') {
+            html += `<p><strong>${formatKeyName(key)}:</strong> ${value}</p>`;
+        } else if (typeof value === 'string') {
+            html += `<p><strong>${formatKeyName(key)}:</strong> ${value}</p>`;
+        }
+    }
+    
+    html += '</div></div></div>';
+    html += '<div class="col-md-6"><h6>Additional Data</h6>';
+    html += '<div class="card bg-light"><div class="card-body p-3">';
+    
+    for (const key of keys.slice(3, 6)) {
+        const value = frontendSummary[key];
+        if (typeof value === 'number') {
+            html += `<p><strong>${formatKeyName(key)}:</strong> ${value}</p>`;
+        } else if (typeof value === 'string') {
+            html += `<p><strong>${formatKeyName(key)}:</strong> ${value}</p>`;
+        }
+    }
+    
+    html += '</div></div></div></div>';
+    
+    return html;
+}
+
+// 生成旧格式摘要
+function generateLegacySummary(experimentType, summaryText) {
+    return `
+        <div class="row">
+            <div class="col-12">
+                <h6><i class="bi bi-file-text"></i> Text Summary</h6>
+                <div class="card bg-light">
+                    <div class="card-body p-3">
+                        <pre class="mb-0" style="white-space: pre-wrap; font-size: 0.875rem;">${summaryText}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// 生成对象摘要
+function generateObjectSummary(experimentType, summaryObj) {
+    let html = '<div class="row">';
+    
+    // 尝试提取有用的信息
+    if (summaryObj.status) {
+        html += `
+            <div class="col-md-6">
+                <h6><i class="bi bi-info-circle"></i> Experiment Status</h6>
+                <div class="card bg-light">
+                    <div class="card-body p-3">
+                        <p><strong>Status:</strong> <span class="badge bg-success">${summaryObj.status}</span></p>
+                        ${summaryObj.output_dir ? `<p><strong>Output Directory:</strong> ${summaryObj.output_dir}</p>` : ''}
+                        ${summaryObj.duration ? `<p><strong>Duration:</strong> ${summaryObj.duration.toFixed(2)}s</p>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // 如果有其他有用的字段
+    const usefulFields = ['total_features', 'total_samples', 'significant_features', 'selected_features'];
+    const availableFields = usefulFields.filter(field => summaryObj[field] !== undefined);
+    
+    if (availableFields.length > 0) {
+        html += `
+            <div class="col-md-6">
+                <h6><i class="bi bi-bar-chart"></i> Key Metrics</h6>
+                <div class="card bg-light">
+                    <div class="card-body p-3">
+                        ${availableFields.map(field => {
+                            const value = summaryObj[field];
+                            if (typeof value === 'number') {
+                                return `<p><strong>${formatKeyName(field)}:</strong> ${value}</p>`;
+                            } else if (typeof value === 'string') {
+                                return `<p><strong>${formatKeyName(field)}:</strong> ${value}</p>`;
+                            }
+                            return '';
+                        }).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // 如果没有有用的字段，显示原始对象
+    if (!summaryObj.status && availableFields.length === 0) {
+        html += `
+            <div class="col-12">
+                <h6><i class="bi bi-code"></i> Raw Summary Data</h6>
+                <div class="card bg-light">
+                    <div class="card-body p-3">
+                        <pre class="mb-0" style="white-space: pre-wrap; font-size: 0.875rem;">${JSON.stringify(summaryObj, null, 2)}</pre>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    html += '</div>';
+    return html;
+}
+
+// 辅助函数
+function getHealthScoreColor(score) {
+    if (score >= 0.8) return 'success';
+    if (score >= 0.6) return 'warning';
+    return 'danger';
+}
+
+function getQualityGradeColor(grade) {
+    switch (grade) {
+        case 'A': return 'success';
+        case 'B': return 'info';
+        case 'C': return 'warning';
+        case 'D': return 'warning';
+        case 'F': return 'danger';
+        default: return 'secondary';
+    }
+}
+
+function getPerformanceColor(score) {
+    if (score >= 0.8) return 'success';
+    if (score >= 0.6) return 'warning';
+    return 'danger';
+}
+
+function formatIssueName(issueName) {
+    return issueName
+        .replace('_', ' ')
+        .replace(/\b\w/g, l => l.toUpperCase());
 }
 
 function displayExperimentFiles(outputFiles, resultsIndex, experimentId) {
@@ -256,10 +1104,6 @@ function displayExperimentFiles(outputFiles, resultsIndex, experimentId) {
         'correlation': {
             title: 'Correlation Analysis',
             description: 'Analysis of correlations between EEG features and target variables'
-        },
-        'feature_selection': {
-            title: 'Feature Selection',
-            description: 'Selection of most important features using multiple methods'
         },
         'classification': {
             title: 'Classification Analysis',

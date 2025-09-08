@@ -1,0 +1,27 @@
+{
+  "experiment_type": "classification",
+  "dataset_id": 7,
+  "feature_set_id": 2,
+  "output_dir": "experiments/classification_90_20250908_143759",
+  "extra_args": {
+    "parameters": {
+      "generate_plots": true,
+      "n_splits": "5",
+      "target_var": "age_group",
+      "test_size": "0.2"
+    }
+  },
+  "min_coverage": 0.95,
+  "run_time": "2025-09-08T14:38:09.370493",
+  "feature_matrix_shape": [
+    879,
+    145
+  ],
+  "metadata_shape": [
+    1000,
+    5
+  ],
+  "target_variables": [
+    "age_group"
+  ]
+}

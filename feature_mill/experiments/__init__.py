@@ -8,7 +8,6 @@ Each experiment module should implement a `run()` function with the signature:
 
 from . import correlation
 from . import feature_statistics
-from . import feature_selection
 from . import classification
 
 # Available experiments with parameter definitions
@@ -107,59 +106,6 @@ AVAILABLE_EXPERIMENTS = {
             }
         }
     },
-    'feature_selection': {
-        'name': 'Feature Selection',
-        'description': 'Select most important features using multiple methods (variance, correlation, mutual info, Lasso, etc.)',
-        'module': 'feature_mill.experiments.feature_selection',
-        'function': 'run',
-        'parameters': {
-            'target_var': {
-                'type': 'select',
-                'label': 'Target Variable',
-                'description': 'Target variable for feature selection',
-                'options': ['age', 'sex', 'age_group', 'age_days', 'race', 'ethnicity'],
-                'default': 'age',
-                'required': True
-            },
-            'n_features': {
-                'type': 'number',
-                'label': 'Number of Features',
-                'description': 'Number of features to select',
-                'min': 1,
-                'max': 100,
-                'step': 1,
-                'default': 20,
-                'required': False
-            },
-            'variance_threshold': {
-                'type': 'number',
-                'label': 'Variance Threshold',
-                'description': 'Minimum variance threshold for feature selection',
-                'min': 0.0,
-                'max': 1.0,
-                'step': 0.01,
-                'default': 0.01,
-                'required': False
-            },
-            'correlation_threshold': {
-                'type': 'number',
-                'label': 'Correlation Threshold',
-                'description': 'Maximum correlation threshold between features',
-                'min': 0.0,
-                'max': 1.0,
-                'step': 0.05,
-                'default': 0.95,
-                'required': False
-            },
-            'generate_plots': {
-                'type': 'checkbox',
-                'label': 'Generate Plots',
-                'description': 'Generate selection results and feature importance plots',
-                'default': True,
-                'required': False
-            }
-        }
-    },
     'classification': {
         'name': 'Classification Analysis',
         'description': 'Perform classification tasks using EEG features (age groups, sex, etc.)',
@@ -173,16 +119,6 @@ AVAILABLE_EXPERIMENTS = {
                 'options': ['age_group', 'sex', 'age_class'],
                 'default': 'age_group',
                 'required': True
-            },
-            'age_threshold': {
-                'type': 'number',
-                'label': 'Age Threshold',
-                'description': 'Age threshold for binary classification (young vs old). Only applicable when target variable is age_group or age_class.',
-                'min': 18,
-                'max': 100,
-                'step': 1,
-                'default': 65,
-                'required': False
             },
             'test_size': {
                 'type': 'number',

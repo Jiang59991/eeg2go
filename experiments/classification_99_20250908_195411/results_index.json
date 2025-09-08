@@ -1,0 +1,19 @@
+{
+  "experiment_type": "baseline_predictive_check",
+  "files": {
+    "model_comparison_age_class": "data/model_comparison_age_class.csv",
+    "importance_age_class": "data/importance_age_class.csv"
+  },
+  "plots": {
+    "model_comparison": "plots/model_comparison.png",
+    "feature_importance": "plots/feature_importance_comparison.png",
+    "confusion_matrices": "plots/confusion_matrices.png"
+  },
+  "summary": {
+    "target_variables": [
+      "age_class"
+    ],
+    "total_target_vars": 1,
+    "generated_at": "2025-09-08T19:55:16.128338"
+  }
+}

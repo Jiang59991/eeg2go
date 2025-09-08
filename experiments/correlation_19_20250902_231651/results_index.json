@@ -1,0 +1,23 @@
+{
+  "experiment_type": "correlation",
+  "experiment_purpose": "Associations Analysis (Correlation + Regression Effect Sizes)",
+  "files": {
+    "summary": "data/associations_summary.csv",
+    "associations_age": "data/associations_age.csv",
+    "associations_sex": "data/associations_sex.csv"
+  },
+  "plots": {
+    "associations_matrix_age": "plots/associations_matrix_age.png",
+    "scatter_plots_age": "plots/scatter_plots_age.png",
+    "associations_matrix_sex": "plots/associations_matrix_sex.png",
+    "scatter_plots_sex": "plots/scatter_plots_sex.png"
+  },
+  "summary": {
+    "target_variables": [
+      "age",
+      "sex"
+    ],
+    "total_targets": 2,
+    "generated_at": "2025-09-02T23:17:18.507149"
+  }
+}

@@ -449,6 +449,235 @@ class Experiment1Analyzer:
         
         return results_df
 
+    def print_dataset_info(self, recordings: List[Dict], y: pd.Series, all_features: Dict[str, pd.DataFrame]):
+        """
+        打印数据集信息统计
+        """
+        output_lines = []
+        
+        # 基本统计信息
+        total_recordings = len(recordings)
+        total_subjects = len(set(r['subject_id'] for r in recordings))
+        
+        # 标签分布
+        normal_count = (y == 0).sum()
+        abnormal_count = (y == 1).sum()
+        normal_ratio = normal_count / total_recordings * 100
+        abnormal_ratio = abnormal_count / total_recordings * 100
+        
+        # 计算类别比例
+        if normal_count > 0:
+            ratio_abnormal_to_normal = abnormal_count / normal_count
+            ratio_str = f"{abnormal_count}:{normal_count}"
+            percentage_str = f"{abnormal_ratio:.1f}% abnormal"
+        else:
+            ratio_str = "N/A"
+            percentage_str = "N/A"
+        
+        # 通道覆盖率统计（以P0基线管线为准）
+        channel_coverage = self.calculate_channel_coverage(all_features)
+        
+        # 构建输出内容
+        output_lines.extend([
+            "="*60,
+            "DATASET INFORMATION",
+            "="*60,
+            f"Total Recordings: {total_recordings}",
+            f"Total Subjects: {total_subjects}",
+            f"Recordings per Subject: {total_recordings / total_subjects:.2f}",
+            "",
+            "Label Distribution:",
+            f"  Normal (0): {normal_count} ({normal_ratio:.1f}%)",
+            f"  Abnormal (1): {abnormal_count} ({abnormal_ratio:.1f}%)",
+            f"  Class Ratio: {ratio_str} ({percentage_str})",
+            "",
+            "Feature Information:"
+        ])
+        
+        for pipeline_name, features in all_features.items():
+            short_name = pipeline_name.split('__')[-1]
+            feature_count = features.shape[1]
+            sample_count = features.shape[0]
+            output_lines.append(f"  {short_name}: {feature_count} features, {sample_count} samples")
+        
+        output_lines.extend([
+            "",
+            "Data Completeness:"
+        ])
+        
+        for pipeline_name, features in all_features.items():
+            short_name = pipeline_name.split('__')[-1]
+            missing_ratio = features.isnull().sum().sum() / (features.shape[0] * features.shape[1]) * 100
+            output_lines.append(f"  {short_name}: {missing_ratio:.2f}% missing values")
+        
+        output_lines.extend([
+            "",
+            "Data Quality Statistics:"
+        ])
+        
+        for pipeline_name, features in all_features.items():
+            short_name = pipeline_name.split('__')[-1]
+            if not features.empty:
+                # 计算特征的标准差，检查是否有常数特征
+                feature_stds = features.std()
+                constant_features = (feature_stds == 0).sum()
+                output_lines.append(f"  {short_name}: {constant_features} constant features out of {features.shape[1]}")
+        
+        output_lines.extend([
+            "",
+            "Channel Coverage (P0 baseline pipeline):"
+        ])
+        
+        for channel in self.channels:
+            if channel in channel_coverage:
+                coverage_info = channel_coverage[channel]
+                output_lines.append(f"  {channel}: {coverage_info['median']:.1f}% [{coverage_info['iqr']:.1f}]")
+        
+        output_lines.extend([
+            "="*60,
+            ""
+        ])
+        
+        # 打印到控制台
+        for line in output_lines:
+            print(line)
+        
+        # 保存到文件
+        output_file = os.path.join(self.output_dir, "data_summary.txt")
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write('\n'.join(output_lines))
+        
+        logger.info(f"Dataset summary saved to {output_file}")
+        
+        return output_lines
+
+    def calculate_channel_coverage(self, all_features: Dict[str, pd.DataFrame]) -> Dict[str, Dict]:
+        """
+        计算通道覆盖率（以P0基线管线为准）
+        对每个通道c，在四个频段分别计算该通道聚合特征列的非缺失占比，再取中位数[IQR]
+        """
+        # 找到P0基线管线
+        p0_pipeline = None
+        for pipeline_name in all_features.keys():
+            if 'P0_minimal_hp' in pipeline_name:
+                p0_pipeline = all_features[pipeline_name]
+                break
+        
+        if p0_pipeline is None or p0_pipeline.empty:
+            logger.warning("P0 baseline pipeline not found for channel coverage calculation")
+            return {}
+        
+        channel_coverage = {}
+        
+        for channel in self.channels:
+            # 存储四个频段的覆盖率
+            band_coverages = []
+            
+            for band in self.bands:
+                # 查找该频段和通道的特征列（修复模式匹配）
+                # 特征名称格式应该是：bp_rel_{band}_{channel}_median
+                pattern = f"bp_rel_{band}_{channel}_median"
+                matching_cols = [col for col in p0_pipeline.columns if pattern in col]
+                
+                if matching_cols:
+                    # 计算该频段该通道的非缺失占比
+                    non_missing_count = p0_pipeline[matching_cols].notna().sum().sum()
+                    total_count = len(matching_cols) * len(p0_pipeline)
+                    coverage = (non_missing_count / total_count) * 100
+                    band_coverages.append(coverage)
+                    logger.info(f"Channel {channel}, Band {band}: {coverage:.1f}% coverage")
+                else:
+                    # 如果没有找到匹配的特征，覆盖率为0
+                    band_coverages.append(0.0)
+                    logger.warning(f"No features found for channel {channel}, band {band}")
+            
+            if band_coverages:
+                # 计算中位数和IQR
+                median_coverage = np.median(band_coverages)
+                q1 = np.percentile(band_coverages, 25)
+                q3 = np.percentile(band_coverages, 75)
+                iqr = q3 - q1
+                
+                channel_coverage[channel] = {
+                    'median': median_coverage,
+                    'iqr': iqr,
+                    'band_coverages': band_coverages
+                }
+        
+        return channel_coverage
+
+    def calculate_fold_statistics(self, y: pd.Series, groups: pd.Series, n_splits: int = 5) -> Dict:
+        """
+        计算折间统计信息
+        """
+        from sklearn.model_selection import GroupKFold
+        
+        cv = GroupKFold(n_splits=n_splits)
+        fold_stats = []
+        
+        for fold, (train_idx, test_idx) in enumerate(cv.split(y, y, groups)):
+            y_test = y.iloc[test_idx]
+            groups_test = groups.iloc[test_idx]
+            
+            # 计算该折的统计信息
+            total_subjects = len(set(groups_test))
+            abnormal_count = (y_test == 1).sum()
+            normal_count = (y_test == 0).sum()
+            
+            fold_stats.append({
+                'fold': fold + 1,
+                'total_subjects': total_subjects,
+                'abnormal_count': abnormal_count,
+                'normal_count': normal_count
+            })
+        
+        # 计算统计量
+        total_subjects_list = [f['total_subjects'] for f in fold_stats]
+        abnormal_counts_list = [f['abnormal_count'] for f in fold_stats]
+        normal_counts_list = [f['normal_count'] for f in fold_stats]
+        
+        stats = {
+            'FoldTotMed': np.median(total_subjects_list),
+            'FoldTotMin': np.min(total_subjects_list),
+            'FoldTotMax': np.max(total_subjects_list),
+            'FoldAbnMed': np.median(abnormal_counts_list),
+            'FoldAbnMin': np.min(abnormal_counts_list),
+            'FoldAbnMax': np.max(abnormal_counts_list),
+            'FoldNorMed': np.median(normal_counts_list),
+            'FoldNorMin': np.min(normal_counts_list),
+            'FoldNorMax': np.max(normal_counts_list)
+        }
+        
+        return stats
+
+    def print_fold_statistics(self, y: pd.Series, groups: pd.Series) -> List[str]:
+        """
+        打印折间统计信息
+        """
+        fold_stats = self.calculate_fold_statistics(y, groups)
+        
+        output_lines = [
+            "",
+            "="*60,
+            "FOLD STATISTICS",
+            "="*60,
+            "Cross-validation fold statistics:",
+            f"\\FoldTotMed{{}}: {fold_stats['FoldTotMed']:.0f}",
+            f"\\FoldTotMin{{}} / \\FoldTotMax{{}}: {fold_stats['FoldTotMin']:.0f} / {fold_stats['FoldTotMax']:.0f}",
+            f"\\FoldAbnMed{{}}: {fold_stats['FoldAbnMed']:.0f}",
+            f"\\FoldAbnMin{{}} / \\FoldAbnMax{{}}: {fold_stats['FoldAbnMin']:.0f} / {fold_stats['FoldAbnMax']:.0f}",
+            f"\\FoldNorMed{{}}: {fold_stats['FoldNorMed']:.0f}",
+            f"\\FoldNorMin{{}} / \\FoldNorMax{{}}: {fold_stats['FoldNorMin']:.0f} / {fold_stats['FoldNorMax']:.0f}",
+            "="*60,
+            ""
+        ]
+        
+        # 打印到控制台
+        for line in output_lines:
+            print(line)
+        
+        return output_lines
+
 def main():
     """
     主函数：执行实验1的完整分析
@@ -484,13 +713,19 @@ def main():
     recording_to_subject = {r['recording_id']: r['subject_id'] for r in recordings}
     groups = pd.Series([recording_to_subject.get(rid, rid) for rid in y.index], index=y.index)
     
-    # 5. 比较所有pipeline
+    # 5. 打印数据集信息
+    analyzer.print_dataset_info(recordings, y, all_features)
+    
+    # 6. 打印折间统计信息
+    fold_stats_lines = analyzer.print_fold_statistics(y, groups)
+    
+    # 7. 比较所有pipeline
     results = analyzer.compare_pipelines(all_features, y, groups)
     
-    # 6. 创建可视化
+    # 8. 创建可视化
     results_df = analyzer.create_visualizations(results)
     
-    # 7. 保存完整结果
+    # 9. 保存完整结果和更新data_summary.txt
     output_file = os.path.join(OUTPUT_DIR, "experiment1_complete_results.pkl")
     with open(output_file, 'wb') as f:
         pickle.dump({
@@ -502,7 +737,13 @@ def main():
             'results_summary': results_df
         }, f)
     
+    # 更新data_summary.txt文件，添加折间统计信息
+    summary_file = os.path.join(OUTPUT_DIR, "data_summary.txt")
+    with open(summary_file, 'a', encoding='utf-8') as f:
+        f.write('\n'.join(fold_stats_lines))
+    
     logger.info(f"Complete results saved to {output_file}")
+    logger.info(f"Updated data summary with fold statistics to {summary_file}")
     
     return results
 

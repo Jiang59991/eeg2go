@@ -13,3 +13,4 @@ tmp/database/*.db-*
 *.db-wal
 *.db-shm
 dump.rdb
+tmp/

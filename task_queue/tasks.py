@@ -136,7 +136,8 @@ def experiment_task(self, task_id: int, parameters: Dict[str, Any],
         os.makedirs(output_dir, exist_ok=True)
         logger.info(f"Created output directory: {output_dir}")
         
-        extra_args = parameters.copy()
+        # 获取实验参数（嵌套在parameters字段中）
+        extra_args = parameters.get('parameters', {}).copy()
         
         # 移除已明确传递的参数
         for key in ['dataset_id', 'feature_set_id', 'experiment_type', 'output_dir']:

@@ -218,7 +218,7 @@ def get_system_mode():
         
         mode_info = {
             'mode': 'local' if use_local_mode else 'celery',
-            'description': '本地执行器模式 (不使用Redis)' if use_local_mode else 'Celery分布式模式 (使用Redis)',
+            'description': 'Local Executor Mode (No Redis)' if use_local_mode else 'Celery Distributed Mode (Using Redis)',
             'workers': int(os.getenv('LOCAL_EXECUTOR_WORKERS', '4')) if use_local_mode else 'N/A'
         }
         

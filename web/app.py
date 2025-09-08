@@ -3,6 +3,7 @@ import sqlite3
 import os
 import json
 import pandas as pd
+import numpy as np
 from datetime import datetime
 import tempfile
 import zipfile
@@ -21,6 +22,33 @@ from web.api.task_api import task_api
 from logging_config import logger
 
 app = Flask(__name__)
+
+# 自定义 JSON 编码器，处理 NaN 值
+class SafeJSONEncoder(json.JSONEncoder):
+    def encode(self, obj):
+        # 递归清理 NaN 值
+        cleaned_obj = self._clean_nan(obj)
+        return super().encode(cleaned_obj)
+    
+    def _clean_nan(self, obj):
+        """递归清理对象中的 NaN 值"""
+        if isinstance(obj, dict):
+            return {key: self._clean_nan(value) for key, value in obj.items()}
+        elif isinstance(obj, list):
+            return [self._clean_nan(item) for item in obj]
+        elif isinstance(obj, np.ndarray):
+            return [self._clean_nan(item) for item in obj.tolist()]
+        elif isinstance(obj, (np.integer, np.floating)):
+            if np.isnan(obj):
+                return None
+            return obj.item() if hasattr(obj, 'item') else float(obj)
+        elif isinstance(obj, float) and np.isnan(obj):
+            return None
+        else:
+            return obj
+
+# 设置自定义 JSON 编码器
+app.json_encoder = SafeJSONEncoder
 
 # 注册任务API蓝图
 app.register_blueprint(task_api)
@@ -850,8 +878,10 @@ def get_experiment_details(experiment_id):
         if task_dict['parameters']:
             params = json.loads(task_dict['parameters'])
             task_dict['experiment_name'] = params.get('experiment_type', 'N/A')
+            task_dict['experiment_type'] = params.get('experiment_type', 'N/A')
     except:
         task_dict['experiment_name'] = 'N/A'
+        task_dict['experiment_type'] = 'N/A'
     
     # 计算持续时间
     if task_dict['created_at']:
@@ -866,18 +896,577 @@ def get_experiment_details(experiment_id):
         task_dict['duration_seconds'] = duration
         task_dict['run_time'] = task_dict['created_at']
     
-    # 处理result字段
+    # 从数据库调取特征结果数据
     feature_results = []
+    if task_dict['status'] == 'completed':
+        try:
+            # 从experiment_feature_results表获取特征级别的结果
+            feature_results_query = '''
+                SELECT 
+                    efr.fxdef_id,
+                    efr.feature_name,
+                    efr.target_variable,
+                    efr.result_type,
+                    efr.metric_name,
+                    efr.metric_value,
+                    efr.metric_unit,
+                    efr.significance_level,
+                    efr.rank_position,
+                    efr.confidence_interval_lower,
+                    efr.confidence_interval_upper,
+                    efr.additional_data,
+                    fd.shortname as feature_shortname,
+                    fd.chans as feature_channels
+                FROM experiment_feature_results efr
+                LEFT JOIN fxdef fd ON efr.fxdef_id = fd.id
+                WHERE efr.experiment_result_id = ?
+                ORDER BY efr.rank_position ASC, efr.metric_value DESC
+            '''
+            
+            # 首先尝试从experiment_results表获取experiment_result_id
+            experiment_result = conn.execute('''
+                SELECT id FROM experiment_results 
+                WHERE experiment_type = ? AND dataset_id = ? AND feature_set_id = ?
+                ORDER BY run_time DESC LIMIT 1
+            ''', (task_dict['experiment_type'], task_dict['dataset_id'], task_dict['feature_set_id'])).fetchall()
+            
+            if experiment_result:
+                experiment_result_id = experiment_result[0]
+                feature_results = conn.execute(feature_results_query, (experiment_result_id,)).fetchall()
+                
+                # 转换为字典格式
+                feature_results = [dict(row) for row in feature_results]
+                
+                # 处理additional_data字段
+                for result in feature_results:
+                    if result['additional_data']:
+                        try:
+                            result['additional_data'] = json.loads(result['additional_data'])
+                        except:
+                            result['additional_data'] = {}
+                    
+                    # 确保数值字段的类型正确
+                    if result['metric_value'] is not None:
+                        try:
+                            result['metric_value'] = float(result['metric_value'])
+                        except:
+                            result['metric_value'] = None
+                    
+                    if result['rank_position'] is not None:
+                        try:
+                            result['rank_position'] = int(result['rank_position'])
+                        except:
+                            result['rank_position'] = None
+                
+                print(f"Found {len(feature_results)} feature results from database")
+            else:
+                print(f"No experiment_results found for {task_dict['experiment_type']}")
+                
+        except Exception as e:
+            print(f"Error fetching feature results from database: {e}")
+            feature_results = []
+    
+    # 如果数据库中没有具体特征结果，且是correlation实验，尝试从CSV文件读取
+    if (len(feature_results) == 0 or 
+        all(result['metric_name'] in ['significant_features_count', 'significant_associations'] for result in feature_results)) and \
+       task_dict['experiment_type'] == 'correlation' and \
+       task_dict['output_dir'] and os.path.exists(task_dict['output_dir']):
+        
+        print(f"Attempting to read correlation results from CSV files for experiment {experiment_id}")
+        try:
+            # 查找associations CSV文件
+            data_dir = os.path.join(task_dict['output_dir'], 'data')
+            if os.path.exists(data_dir):
+                csv_files = [f for f in os.listdir(data_dir) if f.startswith('associations_') and f.endswith('.csv') and 'summary' not in f]
+                
+                for csv_file in csv_files:
+                    target_var = csv_file.replace('associations_', '').replace('.csv', '')
+                    csv_path = os.path.join(data_dir, csv_file)
+                    
+                    print(f"Reading CSV file: {csv_path}")
+                    
+                    # 读取CSV文件
+                    import pandas as pd
+                    df = pd.read_csv(csv_path)
+                    
+                    # 按相关性绝对值排序
+                    if 'correlation' in df.columns:
+                        df['abs_correlation'] = df['correlation'].abs()
+                        df = df.sort_values('abs_correlation', ascending=False)
+                    
+                    # 转换为feature_results格式
+                    for rank, (_, row) in enumerate(df.head(50).iterrows(), 1):  # 只取前50个
+                        try:
+                            feature_name = str(row['feature']) if pd.notna(row['feature']) else ''
+                            correlation = float(row['correlation']) if pd.notna(row['correlation']) else 0.0
+                            p_value = float(row['p_value']) if pd.notna(row['p_value']) else 1.0
+                            q_value = float(row['q_value']) if pd.notna(row['q_value']) else 1.0
+                            
+                            # 跳过无效的特征名称
+                            if not feature_name or feature_name == '' or feature_name == 'nan':
+                                continue
+                            
+                            # 确定显著性水平
+                            if q_value < 0.001:
+                                significance = '***'
+                            elif q_value < 0.01:
+                                significance = '**'
+                            elif q_value < 0.05:
+                                significance = '*'
+                            else:
+                                significance = 'ns'
+                            
+                            # 提取fxdef_id（从特征名称中解析）
+                            fxdef_id = None
+                            if feature_name.startswith('fx'):
+                                parts = feature_name.split('_')
+                                if len(parts) >= 2:
+                                    try:
+                                        fxdef_id = int(parts[0][2:])  # 去掉'fx'前缀
+                                    except ValueError:
+                                        pass
+                            
+                            feature_results.append({
+                                'fxdef_id': fxdef_id,
+                                'feature_name': feature_name,
+                                'target_variable': target_var,
+                                'result_type': 'correlation',
+                                'metric_name': 'correlation_coefficient',
+                                'metric_value': correlation,
+                                'metric_unit': 'correlation',
+                                'significance_level': significance,
+                                'rank_position': rank,
+                                'confidence_interval_lower': None,
+                                'confidence_interval_upper': None,
+                                'additional_data': json.dumps({
+                                    'p_value': p_value,
+                                    'q_value': q_value,
+                                    'abs_correlation': abs(correlation)
+                                }),
+                                'feature_shortname': feature_name,
+                                'feature_channels': 'N/A'
+                            })
+                            
+                        except Exception as e:
+                            print(f"Error processing row {rank} in {csv_file}: {e}")
+                            continue
+                    
+                    print(f"Successfully read {len(feature_results)} feature results from CSV file {csv_file}")
+                    break  # 只处理第一个CSV文件
+                    
+        except Exception as e:
+            print(f"Error reading CSV files: {e}")
+            import traceback
+            traceback.print_exc()
+     
+    # 如果数据库中没有具体特征结果，且是feature_statistics实验，尝试从CSV文件读取
+    if (len(feature_results) == 0 or 
+        all(result['metric_name'] in ['health_score', 'feature_count', 'issue_count'] for result in feature_results)) and \
+       task_dict['experiment_type'] == 'feature_statistics' and \
+       task_dict['output_dir'] and os.path.exists(task_dict['output_dir']):
+         
+         print(f"Attempting to read feature_statistics results from CSV files for experiment {experiment_id}")
+         try:
+             # 查找statistics CSV文件
+             data_dir = os.path.join(task_dict['output_dir'], 'data')
+             if os.path.exists(data_dir):
+                 csv_files = [f for f in os.listdir(data_dir) if f.endswith('.csv') and 'summary' not in f]
+                 
+                 for csv_file in csv_files:
+                     csv_path = os.path.join(data_dir, csv_file)
+                     
+                     print(f"Reading CSV file: {csv_path}")
+                     
+                     # 读取CSV文件
+                     import pandas as pd
+                     df = pd.read_csv(csv_path)
+                     
+                     # 转换为feature_results格式
+                     for rank, (_, row) in enumerate(df.head(100).iterrows(), 1):  # 取前100个
+                         try:
+                             # 根据CSV文件内容确定数据类型
+                             if 'feature' in df.columns and 'missing_ratio' in df.columns:
+                                 # 缺失值统计
+                                 feature_name = str(row['feature']) if pd.notna(row['feature']) else ''
+                                 missing_ratio = float(row['missing_ratio']) if pd.notna(row['missing_ratio']) else 0.0
+                                 
+                                 if not feature_name or feature_name == '' or feature_name == 'nan':
+                                     continue
+                                 
+                                 # 提取fxdef_id
+                                 fxdef_id = None
+                                 if feature_name.startswith('fx'):
+                                     parts = feature_name.split('_')
+                                     if len(parts) >= 2:
+                                         try:
+                                             fxdef_id = int(parts[0][2:])
+                                         except ValueError:
+                                             pass
+                                 
+                                 feature_results.append({
+                                     'fxdef_id': fxdef_id,
+                                     'feature_name': feature_name,
+                                     'target_variable': 'missing_analysis',
+                                     'result_type': 'statistics',
+                                     'metric_name': 'missing_ratio',
+                                     'metric_value': missing_ratio,
+                                     'metric_unit': 'ratio',
+                                     'significance_level': '***' if missing_ratio > 0.9 else '**' if missing_ratio > 0.5 else '*',
+                                     'rank_position': rank,
+                                     'confidence_interval_lower': None,
+                                     'confidence_interval_upper': None,
+                                     'additional_data': json.dumps({
+                                         'feature_type': 'missing_analysis',
+                                         'missing_ratio': missing_ratio
+                                     }),
+                                     'feature_shortname': feature_name,
+                                     'feature_channels': 'N/A'
+                                 })
+                                 
+                             elif 'feature' in df.columns and 'variance' in df.columns:
+                                 # 方差统计
+                                 feature_name = str(row['feature']) if pd.notna(row['feature']) else ''
+                                 variance = float(row['variance']) if pd.notna(row['variance']) else 0.0
+                                 
+                                 if not feature_name or feature_name == '' or feature_name == 'nan':
+                                     continue
+                                 
+                                 # 提取fxdef_id
+                                 fxdef_id = None
+                                 if feature_name.startswith('fx'):
+                                     parts = feature_name.split('_')
+                                     if len(parts) >= 2:
+                                         try:
+                                             fxdef_id = int(parts[0][2:])
+                                         except ValueError:
+                                             pass
+                                 
+                                 feature_results.append({
+                                     'fxdef_id': fxdef_id,
+                                     'feature_name': feature_name,
+                                     'target_variable': 'variance_analysis',
+                                     'result_type': 'statistics',
+                                     'metric_name': 'variance',
+                                     'metric_value': variance,
+                                     'metric_unit': 'variance',
+                                     'significance_level': '***' if variance == 0 else '**' if variance < 0.001 else '*',
+                                     'rank_position': rank,
+                                     'confidence_interval_lower': None,
+                                     'confidence_interval_upper': None,
+                                     'additional_data': json.dumps({
+                                         'feature_type': 'variance_analysis',
+                                         'variance': variance
+                                     }),
+                                     'feature_shortname': feature_name,
+                                     'feature_channels': 'N/A'
+                                 })
+                                 
+                             elif 'feature' in df.columns and 'outlier_ratio' in df.columns:
+                                 # 异常值统计
+                                 feature_name = str(row['feature']) if pd.notna(row['feature']) else ''
+                                 outlier_ratio = float(row['outlier_ratio']) if pd.notna(row['outlier_ratio']) else 0.0
+                                 
+                                 if not feature_name or feature_name == '' or feature_name == 'nan':
+                                     continue
+                                 
+                                 # 提取fxdef_id
+                                 fxdef_id = None
+                                 if feature_name.startswith('fx'):
+                                     parts = feature_name.split('_')
+                                     if len(parts) >= 2:
+                                         try:
+                                             fxdef_id = int(parts[0][2:])
+                                         except ValueError:
+                                             pass
+                                 
+                                 feature_results.append({
+                                     'fxdef_id': fxdef_id,
+                                     'feature_name': feature_name,
+                                     'target_variable': 'outlier_analysis',
+                                     'result_type': 'statistics',
+                                     'metric_name': 'outlier_ratio',
+                                     'metric_value': outlier_ratio,
+                                     'metric_unit': 'ratio',
+                                     'significance_level': '***' if outlier_ratio > 0.1 else '**' if outlier_ratio > 0.05 else '*',
+                                     'rank_position': rank,
+                                     'confidence_interval_lower': None,
+                                     'confidence_interval_upper': None,
+                                     'additional_data': json.dumps({
+                                         'feature_type': 'outlier_analysis',
+                                         'outlier_ratio': outlier_ratio
+                                     }),
+                                     'feature_shortname': feature_name,
+                                     'feature_channels': 'N/A'
+                                 })
+                                 
+                         except Exception as e:
+                             print(f"Error processing row {rank} in {csv_file}: {e}")
+                             continue
+                     
+                     print(f"Successfully read {len(feature_results)} feature results from CSV file {csv_file}")
+                     break  # 只处理第一个CSV文件
+                     
+         except Exception as e:
+             print(f"Error reading CSV files: {e}")
+             import traceback
+             traceback.print_exc()
+     
+    # 如果数据库中没有具体特征结果，且是feature_selection实验，尝试从CSV文件读取
+    if (len(feature_results) == 0 or 
+        all(result['metric_name'] in ['total_selected_features', 'selected_features_count'] for result in feature_results)) and \
+       task_dict['experiment_type'] == 'feature_selection' and \
+       task_dict['output_dir'] and os.path.exists(task_dict['output_dir']):
+         
+         print(f"Attempting to read feature_selection results from CSV files for experiment {experiment_id}")
+         try:
+             # 查找selection CSV文件
+             data_dir = os.path.join(task_dict['output_dir'], 'data')
+             if os.path.exists(data_dir):
+                 csv_files = [f for f in os.listdir(data_dir) if f.endswith('.csv') and 'summary' not in f]
+                 
+                 for csv_file in csv_files:
+                     csv_path = os.path.join(data_dir, csv_file)
+                     
+                     print(f"Reading CSV file: {csv_path}")
+                     
+                     # 读取CSV文件
+                     import pandas as pd
+                     df = pd.read_csv(csv_path)
+                     
+                     # 转换为feature_results格式
+                     for rank, (_, row) in enumerate(df.head(100).iterrows(), 1):  # 取前100个
+                         try:
+                             # 根据CSV文件内容确定数据类型
+                             if 'feature' in df.columns and 'selection_score' in df.columns:
+                                 feature_name = str(row['feature']) if pd.notna(row['feature']) else ''
+                                 selection_score = float(row['selection_score']) if pd.notna(row['selection_score']) else 0.0
+                                 
+                                 if not feature_name or feature_name == '' or feature_name == 'nan':
+                                     continue
+                                 
+                                 # 提取fxdef_id
+                                 fxdef_id = None
+                                 if feature_name.startswith('fx'):
+                                     parts = feature_name.split('_')
+                                     if len(parts) >= 2:
+                                         try:
+                                             fxdef_id = int(parts[0][2:])
+                                         except ValueError:
+                                             pass
+                                 
+                                 feature_results.append({
+                                     'fxdef_id': fxdef_id,
+                                     'feature_name': feature_name,
+                                     'target_variable': 'feature_selection',
+                                     'result_type': 'selection',
+                                     'metric_name': 'selection_score',
+                                     'metric_value': selection_score,
+                                     'metric_unit': 'score',
+                                     'significance_level': '***' if selection_score > 0.8 else '**' if selection_score > 0.6 else '*',
+                                     'rank_position': rank,
+                                     'confidence_interval_lower': None,
+                                     'confidence_interval_upper': None,
+                                     'additional_data': json.dumps({
+                                         'selection_method': 'score_based',
+                                         'selection_score': selection_score
+                                     }),
+                                     'feature_shortname': feature_name,
+                                     'feature_channels': 'N/A'
+                                 })
+                                 
+                             elif 'feature' in df.columns and 'importance' in df.columns:
+                                 feature_name = str(row['feature']) if pd.notna(row['feature']) else ''
+                                 importance = float(row['importance']) if pd.notna(row['importance']) else 0.0
+                                 
+                                 if not feature_name or feature_name == '' or feature_name == 'nan':
+                                     continue
+                                 
+                                 # 提取fxdef_id
+                                 fxdef_id = None
+                                 if feature_name.startswith('fx'):
+                                     parts = feature_name.split('_')
+                                     if len(parts) >= 2:
+                                         try:
+                                             fxdef_id = int(parts[0][2:])
+                                         except ValueError:
+                                             pass
+                                 
+                                 feature_results.append({
+                                     'fxdef_id': fxdef_id,
+                                     'feature_name': feature_name,
+                                     'target_variable': 'feature_selection',
+                                     'result_type': 'selection',
+                                     'metric_name': 'importance_score',
+                                     'metric_value': importance,
+                                     'metric_unit': 'importance',
+                                     'significance_level': '***' if importance > 0.8 else '**' if importance > 0.6 else '*',
+                                     'rank_position': rank,
+                                     'confidence_interval_lower': None,
+                                     'confidence_interval_upper': None,
+                                     'additional_data': json.dumps({
+                                         'selection_method': 'importance_based',
+                                         'importance_score': importance
+                                     }),
+                                     'feature_shortname': feature_name,
+                                     'feature_channels': 'N/A'
+                                 })
+                                 
+                         except Exception as e:
+                             print(f"Error processing row {rank} in {csv_file}: {e}")
+                             continue
+                     
+                     print(f"Successfully read {len(feature_results)} feature results from CSV file {csv_file}")
+                     break  # 只处理第一个CSV文件
+                     
+         except Exception as e:
+             print(f"Error reading CSV files: {e}")
+             import traceback
+             traceback.print_exc()
+     
+    # 如果数据库中没有具体特征结果，且是classification实验，尝试从CSV文件读取
+    if (len(feature_results) == 0 or 
+        all(result['metric_name'] in ['average_f1_score', 'model_performance'] for result in feature_results)) and \
+       task_dict['experiment_type'] == 'classification' and \
+       task_dict['output_dir'] and os.path.exists(task_dict['output_dir']):
+         
+         print(f"Attempting to read classification results from CSV files for experiment {experiment_id}")
+         try:
+             # 查找classification CSV文件
+             data_dir = os.path.join(task_dict['output_dir'], 'data')
+             if os.path.exists(data_dir):
+                 csv_files = [f for f in os.listdir(data_dir) if f.endswith('.csv') and 'summary' not in f]
+                 
+                 for csv_file in csv_files:
+                     csv_path = os.path.join(data_dir, csv_file)
+                     
+                     print(f"Reading CSV file: {csv_path}")
+                     
+                     # 读取CSV文件
+                     import pandas as pd
+                     df = pd.read_csv(csv_path)
+                     
+                     # 转换为feature_results格式
+                     for rank, (_, row) in enumerate(df.head(100).iterrows(), 1):  # 取前100个
+                         try:
+                             # 根据CSV文件内容确定数据类型
+                             if 'feature' in df.columns and 'importance_score' in df.columns:
+                                 feature_name = str(row['feature']) if pd.notna(row['feature']) else ''
+                                 importance_score = float(row['importance_score']) if pd.notna(row['importance_score']) else 0.0
+                                 
+                                 if not feature_name or feature_name == '' or feature_name == 'nan':
+                                     continue
+                                 
+                                 # 提取fxdef_id
+                                 fxdef_id = None
+                                 if feature_name.startswith('fx'):
+                                     parts = feature_name.split('_')
+                                     if len(parts) >= 2:
+                                         try:
+                                             fxdef_id = int(parts[0][2:])
+                                         except ValueError:
+                                             pass
+                                 
+                                 feature_results.append({
+                                     'fxdef_id': fxdef_id,
+                                     'feature_name': feature_name,
+                                     'target_variable': 'classification_importance',
+                                     'result_type': 'classification',
+                                     'metric_name': 'importance_score',
+                                     'metric_value': importance_score,
+                                     'metric_unit': 'importance',
+                                     'significance_level': '***' if importance_score > 0.8 else '**' if importance_score > 0.6 else '*',
+                                     'rank_position': rank,
+                                     'confidence_interval_lower': None,
+                                     'confidence_interval_upper': None,
+                                     'additional_data': json.dumps({
+                                         'classification_method': 'importance_based',
+                                         'importance_score': importance_score
+                                     }),
+                                     'feature_shortname': feature_name,
+                                     'feature_channels': 'N/A'
+                                 })
+                                 
+                             elif 'feature' in df.columns and 'coefficient' in df.columns:
+                                 feature_name = str(row['feature']) if pd.notna(row['feature']) else ''
+                                 coefficient = float(row['coefficient']) if pd.notna(row['coefficient']) else 0.0
+                                 
+                                 if not feature_name or feature_name == '' or feature_name == 'nan':
+                                     continue
+                                 
+                                 # 提取fxdef_id
+                                 fxdef_id = None
+                                 if feature_name.startswith('fx'):
+                                     parts = feature_name.split('_')
+                                     if len(parts) >= 2:
+                                         try:
+                                             fxdef_id = int(parts[0][2:])
+                                         except ValueError:
+                                             pass
+                                 
+                                 feature_results.append({
+                                     'fxdef_id': fxdef_id,
+                                     'feature_name': feature_name,
+                                     'target_variable': 'classification_coefficient',
+                                     'result_type': 'classification',
+                                     'metric_name': 'coefficient',
+                                     'metric_value': coefficient,
+                                     'metric_unit': 'coefficient',
+                                     'significance_level': '***' if abs(coefficient) > 2.0 else '**' if abs(coefficient) > 1.0 else '*',
+                                     'rank_position': rank,
+                                     'confidence_interval_lower': None,
+                                     'confidence_interval_upper': None,
+                                     'additional_data': json.dumps({
+                                         'classification_method': 'coefficient_based',
+                                         'coefficient': coefficient
+                                     }),
+                                     'feature_shortname': feature_name,
+                                     'feature_channels': 'N/A'
+                                 })
+                                 
+                         except Exception as e:
+                             print(f"Error processing row {rank} in {csv_file}: {e}")
+                             continue
+                     
+                     print(f"Successfully read {len(feature_results)} feature results from CSV file {csv_file}")
+                     break  # 只处理第一个CSV文件
+                     
+         except Exception as e:
+             print(f"Error reading CSV files: {e}")
+             import traceback
+             traceback.print_exc()
+    
+    # 处理result字段（兼容旧格式）
     metadata = []
     output_files = []
     results_index = {}
     
+    # 尝试从文件系统读取frontend_summary（如果数据库中没有）
+    frontend_summary = None
+    if task_dict['output_dir'] and os.path.exists(task_dict['output_dir']):
+        summary_file = os.path.join(task_dict['output_dir'], 'summary.txt')
+        if os.path.exists(summary_file):
+            try:
+                with open(summary_file, 'r', encoding='utf-8') as f:
+                    summary_content = f.read()
+                import ast
+                summary_data = ast.literal_eval(summary_content)
+                frontend_summary = summary_data.get('frontend_summary')
+                if frontend_summary:
+                    print(f"Loaded frontend_summary from file: {summary_file}")
+            except Exception as e:
+                print(f"Error reading frontend_summary from file: {e}")
+    
     if task_dict['result']:
         try:
             result_data = json.loads(task_dict['result'])
-            # 从result中提取feature_results和metadata
-            feature_results = result_data.get('feature_results', [])
+            # 从result中提取metadata
             metadata = result_data.get('metadata', [])
+            
+            # 如果数据库中没有frontend_summary，但文件系统中有，则添加到result_data中
+            if frontend_summary and 'frontend_summary' not in result_data:
+                result_data['frontend_summary'] = frontend_summary
+                # 更新task_dict中的result字段
+                task_dict['result'] = json.dumps(result_data)
             
             # 检查输出目录
             if task_dict['output_dir'] and os.path.exists(task_dict['output_dir']):
@@ -919,7 +1508,7 @@ def get_experiment_details(experiment_id):
         'metadata': metadata,
         'output_files': output_files,
         'results_index': results_index,
-        'source': 'task'
+        'source': 'database' if feature_results else 'task'
     })
 
 
@@ -982,6 +1571,12 @@ def get_experiment_files(experiment_id):
     
     output_dir = task['output_dir']
     
+    # 如果output_dir是相对路径，则基于项目根目录解析
+    if not os.path.isabs(output_dir):
+        # 获取项目根目录（web目录的父目录）
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        output_dir = os.path.join(project_root, output_dir)
+    
     if not os.path.exists(output_dir):
         return jsonify({'error': 'Output directory does not exist'}), 404
     
@@ -1028,6 +1623,13 @@ def get_experiment_file(experiment_id, filename):
         return jsonify({'error': 'Experiment output directory not found'}), 404
     
     output_dir = task['output_dir']
+    
+    # 如果output_dir是相对路径，则基于项目根目录解析
+    if not os.path.isabs(output_dir):
+        # 获取项目根目录（web目录的父目录）
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        output_dir = os.path.join(project_root, output_dir)
+    
     file_path = os.path.join(output_dir, filename)
     
     if not os.path.exists(file_path):
@@ -1081,6 +1683,13 @@ def get_experiment_image(experiment_id, image_path):
         return jsonify({'error': 'Experiment output directory not found'}), 404
     
     output_dir = task['output_dir']
+    
+    # 如果output_dir是相对路径，则基于项目根目录解析
+    if not os.path.isabs(output_dir):
+        # 获取项目根目录（web目录的父目录）
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        output_dir = os.path.join(project_root, output_dir)
+    
     file_path = os.path.join(output_dir, image_path)
     
     if not os.path.exists(file_path):
@@ -1113,6 +1722,13 @@ def get_experiment_data(experiment_id, data_path):
         return jsonify({'error': 'Experiment output directory not found'}), 404
     
     output_dir = task['output_dir']
+    
+    # 如果output_dir是相对路径，则基于项目根目录解析
+    if not os.path.isabs(output_dir):
+        # 获取项目根目录（web目录的父目录）
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        output_dir = os.path.join(project_root, output_dir)
+    
     file_path = os.path.join(output_dir, data_path)
     
     if not os.path.exists(file_path):

@@ -18,6 +18,46 @@ DEFAULT_DB_PATH = "database/eeg2go.db"
 result_manager = ExperimentResultManager(DEFAULT_DB_PATH)
 
 
+def normalize_experiment_parameters(parameters: dict) -> dict:
+    """
+    标准化实验参数，确保数值类型正确
+    """
+    normalized = parameters.copy()
+    
+    # 数值参数的类型转换
+    numeric_params = {
+        'n_features': int,
+        'n_splits': int,
+        'top_n': int,
+        'top_n_features': int,
+        'min_corr': float,
+        'fdr_alpha': float,
+        'outlier_threshold': float,
+        'test_size': float,
+    }
+    
+    for param_name, param_type in numeric_params.items():
+        if param_name in normalized:
+            try:
+                normalized[param_name] = param_type(normalized[param_name])
+            except (ValueError, TypeError) as e:
+                logger.warning(f"Failed to convert parameter {param_name} to {param_type.__name__}: {e}")
+                # 使用默认值
+                default_values = {
+                    'n_features': 20,
+                    'n_splits': 5,
+                    'top_n': 20,
+                    'top_n_features': 20,
+                    'min_corr': 0.3,
+                    'fdr_alpha': 0.05,
+                    'outlier_threshold': 1.5,
+                    'test_size': 0.2,
+                }
+                normalized[param_name] = default_values.get(param_name, normalized[param_name])
+    
+    return normalized
+
+
 def get_recording_ids_for_dataset(dataset_id: int, db_path: str) -> list[int]:
     """Get all recording IDs for a specified dataset"""
     conn = sqlite3.connect(db_path)
@@ -231,11 +271,11 @@ def check_features_exist_in_db(dataset_id: int, feature_set_id: int, db_path: st
         exists = actual_count == expected_count  # 100% coverage
         
         if exists:
-            logger.info(f"✅ All features exist in database (coverage: {coverage_ratio:.2%})")
+            logger.info(f"All features exist in database (coverage: {coverage_ratio:.1%})")
         elif can_use_existing:
-            logger.info(f"✅ High coverage features available (coverage: {coverage_ratio:.2%}, missing: {missing_count}) - can use existing data")
+            logger.info(f"High coverage available (coverage: {coverage_ratio:.1%}, missing: {missing_count}) - using existing data")
         else:
-            logger.info(f"❌ Insufficient coverage in database (coverage: {coverage_ratio:.2%}, missing: {missing_count}) - need to compute features")
+            logger.info(f"Insufficient coverage (coverage: {coverage_ratio:.1%}, missing: {missing_count}) - need to compute features")
         
         return {
             'exists': exists,
@@ -286,7 +326,7 @@ def extract_features_with_coverage(dataset_id: int, feature_set_id: int, db_path
         return extract_features_from_db(dataset_id, feature_set_id, db_path)
     else:
         # High coverage but some missing - extract what we have and handle missing values
-        logger.info(f"High coverage ({coverage_info['coverage_ratio']:.2%}) - extracting available features and handling missing values")
+        logger.info(f"High coverage ({coverage_info['coverage_ratio']:.1%}) - extracting available features and handling missing values")
         return extract_features_from_db_partial(dataset_id, feature_set_id, db_path, coverage_info)
 
 
@@ -304,7 +344,7 @@ def extract_features_from_db_partial(dataset_id: int, feature_set_id: int, db_pa
     Returns:
         pd.DataFrame: Feature matrix with recording-level statistics, missing values handled
     """
-    logger.info(f"Extracting features with partial coverage: {coverage_info['coverage_ratio']:.2%}")
+    logger.info(f"Extracting features with partial coverage: {coverage_info['coverage_ratio']:.1%}")
     
     conn = sqlite3.connect(db_path)
     
@@ -440,7 +480,7 @@ def extract_features_from_db_partial(dataset_id: int, feature_set_id: int, db_pa
         # Log coverage information
         total_possible_features = len(recording_ids) * len(fxdefs)
         actual_features = df.shape[1] - 1  # Subtract recording_id column
-        logger.info(f"Coverage achieved: {actual_features}/{total_possible_features} ({actual_features/total_possible_features:.2%})")
+        logger.info(f"Coverage achieved: {actual_features}/{total_possible_features} ({actual_features/total_possible_features:.1%})")
         
         return df
         
@@ -471,10 +511,10 @@ def extract_feature_matrix_direct(dataset_id: int, feature_set_id: int, db_path:
     coverage_info = check_features_exist_in_db(dataset_id, feature_set_id, db_path, min_coverage)
     
     if coverage_info['can_use_existing']:
-        logger.info(f"Using existing data with {coverage_info['coverage_ratio']:.2%} coverage")
+        logger.info(f"Using existing data with {coverage_info['coverage_ratio']:.1%} coverage")
         return extract_features_with_coverage(dataset_id, feature_set_id, db_path, min_coverage)
     
-    logger.info(f"Insufficient coverage ({coverage_info['coverage_ratio']:.2%}), computing missing features...")
+    logger.info(f"Insufficient coverage ({coverage_info['coverage_ratio']:.1%}), computing missing features...")
     
     # Get recording IDs
     recording_ids = get_recording_ids_for_dataset(dataset_id, db_path)
@@ -661,7 +701,7 @@ def get_relevant_metadata(dataset_id: int, db_path: str, target_vars: list = Non
     dynamic_fields = []
     if target_vars:
         for var in target_vars:
-            if var in ['age', 'age_days']:
+            if var in ['age', 'age_days', 'age_group', 'age_class']:
                 dynamic_fields.extend([
                     "s.age",
                     "rm.age_days"
@@ -706,6 +746,44 @@ def get_relevant_metadata(dataset_id: int, db_path: str, target_vars: list = Non
     
     df_meta = pd.read_sql_query(query, conn, params=(dataset_id,))
     conn.close()
+    
+    # 如果需要age_group或age_class，根据age和age_days创建
+    age_target_vars = [var for var in target_vars if var in ['age_group', 'age_class']] if target_vars else []
+    
+    if age_target_vars:
+        if 'age' in df_meta.columns and 'age_days' in df_meta.columns:
+            # 使用age_days创建年龄分组，如果没有age_days则使用age
+            age_data = df_meta['age_days'].fillna(df_meta['age'] * 365.25)
+            
+            for age_var in age_target_vars:
+                if age_var == 'age_group':
+                    df_meta['age_group'] = pd.cut(age_data, 
+                                                bins=[0, 2*365.25, 12*365.25, 18*365.25, 65*365.25, float('inf')],
+                                                labels=['infant', 'child', 'adolescent', 'adult', 'elderly'],
+                                                include_lowest=True)
+                elif age_var == 'age_class':
+                    df_meta['age_class'] = pd.cut(age_data, 
+                                                bins=[0, 2*365.25, 12*365.25, 18*365.25, 65*365.25, float('inf')],
+                                                labels=['infant', 'child', 'adolescent', 'adult', 'elderly'],
+                                                include_lowest=True)
+            
+            logger.info(f"Created age columns from age/age_days data: {age_target_vars}")
+            
+        elif 'age' in df_meta.columns:
+            # 只有age数据，按年分组
+            for age_var in age_target_vars:
+                if age_var == 'age_group':
+                    df_meta['age_group'] = pd.cut(df_meta['age'], 
+                                                bins=[0, 2, 12, 18, 65, float('inf')],
+                                                labels=['infant', 'child', 'adolescent', 'adult', 'elderly'],
+                                                include_lowest=True)
+                elif age_var == 'age_class':
+                    df_meta['age_class'] = pd.cut(df_meta['age'], 
+                                                bins=[0, 2, 12, 18, 65, float('inf')],
+                                                labels=['infant', 'child', 'adolescent', 'adult', 'elderly'],
+                                                include_lowest=True)
+            
+            logger.info(f"Created age columns from age data: {age_target_vars}")
     
     logger.info(f"Loaded {len(df_meta)} metadata records, fields: {list(df_meta.columns)}")
     return df_meta
@@ -757,7 +835,28 @@ def run_experiment(
     logger.info(f"Loading metadata...")
     try:
         # Get target variables from extra arguments
-        target_vars = extra_args.get('target_vars', ['age', 'sex']) if extra_args else ['age', 'sex']
+        # Handle both target_var (single) and target_vars (list) from frontend
+        logger.info(f"extra_args received: {extra_args}")
+        
+        # Check if extra_args has nested parameters (from experiment_task)
+        actual_params = extra_args
+        if extra_args and 'parameters' in extra_args:
+            actual_params = extra_args['parameters']
+            logger.info(f"Found nested parameters, using: {actual_params}")
+        
+        if actual_params and 'target_var' in actual_params:
+            # Frontend sends target_var as single value, convert to list
+            target_vars = [actual_params['target_var']]
+            logger.info(f"Frontend sent target_var: {actual_params['target_var']}, converted to target_vars: {target_vars}")
+        elif actual_params and 'target_vars' in actual_params:
+            # Frontend sends target_vars as list
+            target_vars = actual_params['target_vars']
+            logger.info(f"Frontend sent target_vars: {target_vars}")
+        else:
+            # Fallback to default
+            target_vars = ['age', 'sex']
+            logger.info(f"No target variables specified, using defaults: {target_vars}")
+        
         df_meta = get_relevant_metadata(dataset_id, db_path, target_vars)
         logger.info(f"Metadata loading completed: {df_meta.shape}")
     except Exception as e:
@@ -793,9 +892,12 @@ def run_experiment(
             raise AttributeError(f"Module '{experiment_type}' does not have 'run' function")
         
         # Prepare parameters for experiment function
-        experiment_kwargs = extra_args or {}
+        # Ensure target_vars is passed correctly and normalize parameter types
+        experiment_kwargs = normalize_experiment_parameters(actual_params) if actual_params else {}
+        experiment_kwargs['target_vars'] = target_vars
         
-        logger.info(f"Running experiment: {experiment_type}")
+        logger.info(f"Running experiment: {experiment_type} with target_vars: {target_vars}")
+        logger.info(f"Normalized parameters: {experiment_kwargs}")
         summary = module.run(df_feat, df_meta, output_dir, **experiment_kwargs)
         
         # Step 6: Save result summary
@@ -808,15 +910,23 @@ def run_experiment(
         duration = (end_time - start_time).total_seconds()
         
         # 保存实验运行记录
+        experiment_result_id = None
         try:
             logger.info(f"Saving experiment result to database...")
+            # 确保summary是字符串类型
+            summary_str = summary
+            if isinstance(summary, dict):
+                summary_str = json.dumps(summary, ensure_ascii=False, default=str)
+            elif summary is None:
+                summary_str = "{}"
+            
             experiment_result_id = result_manager.save_experiment_result(
                 experiment_type=experiment_type,
                 dataset_id=dataset_id,
                 feature_set_id=feature_set_id,
                 parameters=extra_args or {},
                 output_dir=output_dir,
-                summary=summary,
+                summary=summary_str,
                 duration=duration
             )
             logger.info(f"Experiment result saved with ID: {experiment_result_id}")
@@ -824,34 +934,297 @@ def run_experiment(
             logger.error(f"Failed to save experiment result to database: {e}")
             logger.error(f"Exception traceback: {traceback.format_exc()}")
             # 不抛出异常，继续执行，因为实验本身已经成功完成
+            experiment_result_id = None
         
         # 根据实验类型保存特征级别的详细结果
+        # 尝试保存特征结果，即使 experiment_result_id 为 None
+        logger.info(f"准备保存特征级别结果，experiment_result_id: {experiment_result_id}")
+        
         try:
             if experiment_type == 'correlation':
-                # 读取相关性分析结果文件
-                correlation_files = [f for f in os.listdir(output_dir) if f.startswith('correlation_') and f.endswith('.csv')]
-                for file in correlation_files:
-                    if 'summary' not in file:  # 跳过汇总文件
-                        target_var = file.replace('correlation_', '').replace('.csv', '')
-                        result_file = os.path.join(output_dir, file)
-                        if os.path.exists(result_file):
-                            try:
-                                correlation_df = pd.read_csv(result_file)
-                                correlation_results = {
-                                    target_var: {
-                                        'top_results': correlation_df,
-                                        'total_features': len(correlation_df),
-                                        'significant_count': len(correlation_df[correlation_df['significant'] == True])
-                                    }
-                                }
-                                result_manager.save_correlation_results(
-                                    experiment_result_id, correlation_results, [target_var]
-                                )
-                            except Exception as e:
-                                logger.warning(f"保存相关性结果失败 {file}: {e}")
-
+                # 优先保存具体特征结果，而不是汇总统计
+                logger.info("开始保存correlation实验的特征级别结果...")
+                
+                # 读取关联性分析结果文件
+                associations_files = [f for f in os.listdir(output_dir) if f.startswith('associations_') and f.endswith('.csv')]
+                if not associations_files:
+                    # 如果没有associations文件，尝试读取旧的correlation文件
+                    associations_files = [f for f in os.listdir(output_dir) if f.startswith('correlation_') and f.endswith('.csv')]
+                
+                logger.info(f"找到结果文件: {associations_files}")
+                
+                for file in associations_files:
+                    if 'summary' in file:  # 跳过汇总文件
+                        logger.info(f"跳过汇总文件: {file}")
+                        continue
+                        
+                    target_var = file.replace('associations_', '').replace('correlation_', '').replace('.csv', '')
+                    result_file = os.path.join(output_dir, file)
+                    
+                    logger.info(f"处理文件: {file}, 目标变量: {target_var}, 文件路径: {result_file}")
+                    
+                    if os.path.exists(result_file):
+                        try:
+                            logger.info(f"读取 CSV 文件: {file}")
+                            associations_df = pd.read_csv(result_file)
+                            logger.info(f"文件包含 {len(associations_df)} 行数据")
+                            logger.info(f"列名: {list(associations_df.columns)}")
+                            
+                            # 按相关性绝对值排序，获取Top特征
+                            if 'correlation' in associations_df.columns:
+                                associations_df['abs_correlation'] = associations_df['correlation'].abs()
+                                associations_df = associations_df.sort_values('abs_correlation', ascending=False)
+                            
+                            # 保存到数据库
+                            logger.info(f"开始保存 {len(associations_df)} 个特征结果到数据库...")
+                            saved_count = 0
+                            
+                            # 检查必要的列是否存在
+                            required_columns = ['feature', 'correlation', 'p_value', 'q_value']
+                            missing_columns = [col for col in required_columns if col not in associations_df.columns]
+                            if missing_columns:
+                                logger.error(f"CSV 文件缺少必要的列: {missing_columns}")
+                                logger.error(f"可用的列: {list(associations_df.columns)}")
+                                continue
+                            
+                            # 如果 experiment_result_id 为 None，尝试从数据库中找到对应的记录
+                            current_experiment_result_id = experiment_result_id
+                            if current_experiment_result_id is None:
+                                logger.warning("experiment_result_id 为 None，尝试从数据库中找到对应的记录")
+                                try:
+                                    conn = sqlite3.connect(db_path)
+                                    c = conn.cursor()
+                                    c.execute("""
+                                        SELECT id FROM experiment_results 
+                                        WHERE experiment_type = ? AND dataset_id = ? AND feature_set_id = ?
+                                        ORDER BY run_time DESC LIMIT 1
+                                    """, (experiment_type, dataset_id, feature_set_id))
+                                    result = c.fetchone()
+                                    if result:
+                                        current_experiment_result_id = result[0]
+                                        logger.info(f"找到对应的 experiment_result_id: {current_experiment_result_id}")
+                                    else:
+                                        logger.error("在数据库中没有找到对应的实验记录")
+                                        continue
+                                    conn.close()
+                                except Exception as e:
+                                    logger.error(f"查找 experiment_result_id 失败: {e}")
+                                    continue
+                            
+                            if current_experiment_result_id is None:
+                                logger.error("无法获取有效的 experiment_result_id，跳过特征结果保存")
+                                continue
+                            
+                            for rank, (_, row) in enumerate(associations_df.iterrows(), 1):
+                                # 使用正确的列名访问数据
+                                feature_name = str(row['feature']) if pd.notna(row['feature']) else ''
+                                correlation = float(row['correlation']) if pd.notna(row['correlation']) else 0.0
+                                p_value = float(row['p_value']) if pd.notna(row['p_value']) else 1.0
+                                q_value = float(row['q_value']) if pd.notna(row['q_value']) else 1.0
+                                significant = bool(row['significant']) if pd.notna(row['significant']) else False
+                                
+                                logger.debug(f"处理特征 {rank}: {feature_name}, r={correlation:.3f}, p={p_value:.6f}, q={q_value:.6f}")
+                                
+                                # 跳过无效的特征名称
+                                if not feature_name or feature_name == '' or feature_name == 'nan':
+                                    logger.debug(f"跳过无效特征名称: {feature_name}")
+                                    continue
+                                
+                                # 提取fxdef_id（从特征名称中解析）
+                                fxdef_id = result_manager._extract_fxdef_id(feature_name)
+                                logger.debug(f"提取的fxdef_id: {fxdef_id}")
+                                
+                                # 确定显著性水平
+                                if q_value < 0.001:
+                                    significance = '***'
+                                elif q_value < 0.01:
+                                    significance = '**'
+                                elif q_value < 0.05:
+                                    significance = '*'
+                                else:
+                                    significance = 'ns'
+                                
+                                try:
+                                    # 保存相关系数
+                                    conn = sqlite3.connect(db_path)
+                                    c = conn.cursor()
+                                    c.execute("""
+                                        INSERT INTO experiment_feature_results (
+                                            experiment_result_id, fxdef_id, feature_name, target_variable,
+                                            result_type, metric_name, metric_value, metric_unit,
+                                            significance_level, rank_position, additional_data
+                                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                    """, (
+                                        current_experiment_result_id, fxdef_id, feature_name, target_var,
+                                        'correlation', 'correlation_coefficient', correlation, 'correlation',
+                                        significance, rank, json.dumps({
+                                            'p_value': p_value,
+                                            'q_value': q_value,
+                                            'significant': significant,
+                                            'abs_correlation': abs(correlation)
+                                        })
+                                    ))
+                                    conn.commit()
+                                    conn.close()
+                                    
+                                    saved_count += 1
+                                    logger.debug(f"成功保存特征结果: {feature_name}, r={correlation:.3f}, q={q_value:.3f}, rank={rank}")
+                                    
+                                except Exception as e:
+                                    logger.error(f"保存特征结果失败: {feature_name}, 错误: {e}")
+                                    continue
+                            
+                            logger.info(f"成功保存 {saved_count}/{len(associations_df)} 个特征结果到数据库")
+                            
+                            # 同时保存完整的CSV内容到数据库（用于前端显示）
+                            csv_content = associations_df.to_csv(index=False)
+                            conn = sqlite3.connect(db_path)
+                            c = conn.cursor()
+                            c.execute("""
+                                INSERT INTO experiment_feature_results (
+                                    experiment_result_id, fxdef_id, feature_name, target_variable,
+                                    result_type, metric_name, metric_value, metric_unit,
+                                    significance_level, rank_position, additional_data
+                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            """, (
+                                current_experiment_result_id, None, f'csv_data_{target_var}', target_var,
+                                'correlation', 'csv_content', len(associations_df), 'rows',
+                                'data', 0, json.dumps({
+                                    'csv_content': csv_content,
+                                    'file_path': result_file,
+                                    'total_rows': len(associations_df),
+                                    'columns': list(associations_df.columns)
+                                })
+                            ))
+                            conn.commit()
+                            conn.close()
+                            
+                            logger.info(f"成功保存 CSV 内容到数据库")
+                            
+                        except Exception as e:
+                            logger.error(f"处理文件 {file} 时出错: {e}")
+                            import traceback
+                            logger.error(f"异常详情: {traceback.format_exc()}")
+                            continue
+                    else:
+                        logger.warning(f"结果文件不存在: {result_file}")
+                
+                # 可选：保存汇总统计（如果需要的话）
+                if isinstance(summary, dict) and 'frontend_summary' in summary:
+                    frontend_data = summary['frontend_summary']
+                    logger.info("保存前端摘要数据...")
+                    
+                    # 获取有效的 experiment_result_id
+                    current_experiment_result_id = experiment_result_id
+                    if current_experiment_result_id is None:
+                        try:
+                            conn = sqlite3.connect(db_path)
+                            c = conn.cursor()
+                            c.execute("""
+                                SELECT id FROM experiment_results 
+                                WHERE experiment_type = ? AND dataset_id = ? AND feature_set_id = ?
+                                ORDER BY run_time DESC LIMIT 1
+                            """, (experiment_type, dataset_id, feature_set_id))
+                            result = c.fetchone()
+                            if result:
+                                current_experiment_result_id = result[0]
+                                logger.info(f"找到对应的 experiment_result_id: {current_experiment_result_id}")
+                            conn.close()
+                        except Exception as e:
+                            logger.error(f"查找 experiment_result_id 失败: {e}")
+                    
+                    if current_experiment_result_id is not None:
+                        # 保存总体关联性统计
+                        if 'overall_significant_features' in frontend_data:
+                            conn = sqlite3.connect(db_path)
+                            c = conn.cursor()
+                            c.execute("""
+                                INSERT INTO experiment_feature_results (
+                                    experiment_result_id, fxdef_id, feature_name, target_variable,
+                                    result_type, metric_name, metric_value, metric_unit
+                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                            """, (
+                                current_experiment_result_id, None, 'overall_significant_associations', 'associations_summary',
+                                'correlation', 'significant_features_count', frontend_data['overall_significant_features'], 'count'
+                            ))
+                            conn.commit()
+                            conn.close()
+                        
+                        # 保存每个目标变量的关联性统计
+                        if 'target_variables' in frontend_data:
+                            for target_var, target_data in frontend_data['target_variables'].items():
+                                conn = sqlite3.connect(db_path)
+                                c = conn.cursor()
+                                c.execute("""
+                                    INSERT INTO experiment_feature_results (
+                                        experiment_result_id, fxdef_id, feature_name, target_variable,
+                                        result_type, metric_name, metric_value, metric_unit, additional_data
+                                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                """, (
+                                    current_experiment_result_id, None, f'associations_{target_var}', target_var,
+                                    'correlation', 'significant_associations', target_data['significant_count'], 'count',
+                                    json.dumps({
+                                        'target_type': target_data['type'],
+                                        'total_features': target_data['total_features'],
+                                        'significant_ratio': target_data['significant_ratio']
+                                    })
+                                ))
+                                conn.commit()
+                                conn.close()
+                        
+                        logger.info("关联性分析前端摘要数据已保存到数据库")
+                    else:
+                        logger.error("无法获取有效的 experiment_result_id，跳过前端摘要数据保存")
+                
             elif experiment_type == 'classification':
-                # 读取分类分析结果文件
+                # 处理新的结构化返回结果
+                if isinstance(summary, dict) and 'frontend_summary' in summary:
+                    frontend_data = summary['frontend_summary']
+                    
+                    # 保存总体性能统计
+                    if 'overall_performance' in frontend_data:
+                        overall_perf = frontend_data['overall_performance']
+                        conn = sqlite3.connect(db_path)
+                        c = conn.cursor()
+                        c.execute("""
+                            INSERT INTO experiment_feature_results (
+                                experiment_result_id, fxdef_id, feature_name, target_variable,
+                                result_type, metric_name, metric_value, metric_unit
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                        """, (
+                            experiment_result_id, None, 'overall_classification_performance', 'classification_summary',
+                            'classification', 'average_f1_score', overall_perf.get('average_f1', 0), 'score'
+                        ))
+                        conn.commit()
+                        conn.close()
+                    
+                    # 保存每个目标变量的性能统计
+                    if 'target_performance' in frontend_data:
+                        for target_var, target_data in frontend_data['target_performance'].items():
+                            conn = sqlite3.connect(db_path)
+                            c = conn.cursor()
+                            c.execute("""
+                                INSERT INTO experiment_feature_results (
+                                    experiment_result_id, fxdef_id, feature_name, target_variable,
+                                    result_type, metric_name, metric_value, metric_unit, additional_data
+                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            """, (
+                                experiment_result_id, None, f'classification_{target_var}', target_var,
+                                'classification', 'model_performance', target_data.get('f1_score', 0), 'score',
+                                json.dumps({
+                                    'model': target_data.get('model', 'Unknown'),
+                                    'accuracy': target_data.get('accuracy', 0),
+                                    'roc_auc': target_data.get('roc_auc', 0),
+                                    'cv_mean': target_data.get('cv_mean', 0),
+                                    'cv_std': target_data.get('cv_std', 0)
+                                })
+                            ))
+                            conn.commit()
+                            conn.close()
+                    
+                    logger.info("分类分析前端摘要数据已保存到数据库")
+                
+                # 读取分类分析结果文件（兼容旧格式）
                 classification_file = os.path.join(output_dir, 'classification_results.csv')
                 if os.path.exists(classification_file):
                     try:
@@ -880,74 +1253,80 @@ def run_experiment(
                         logger.info("分类特征重要性结果已保存到数据库")
                     except Exception as e:
                         logger.warning(f"保存分类结果失败: {e}")
-
-            elif experiment_type == 'feature_selection':
-                # 读取特征选择结果文件
-                selection_file = os.path.join(output_dir, 'feature_selection_results.csv')
-                if os.path.exists(selection_file):
-                    try:
-                        selection_df = pd.read_csv(selection_file)
-                        # 假设有列: feature, selection_score, method, target_variable
-                        for _, row in selection_df.iterrows():
-                            feature_name = row.get('feature')
-                            selection_score = row.get('selection_score')
-                            method = row.get('method', 'N/A')
-                            target_var = row.get('target_variable', 'N/A')
-                            rank_position = row.get('rank_position', None)
-                            fxdef_id = result_manager._extract_fxdef_id(feature_name)
-                            if fxdef_id is not None:  # 只处理有效的fxdef_id
-                                conn = sqlite3.connect(db_path)
-                                c = conn.cursor()
-                                c.execute("""
-                                    INSERT INTO experiment_feature_results (
-                                        experiment_result_id, fxdef_id, feature_name, target_variable,
-                                        result_type, metric_name, metric_value, metric_unit, rank_position, additional_data
-                                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                                """, (
-                                    experiment_result_id, fxdef_id, feature_name, target_var,
-                                    'selection_score', 'selection_score', selection_score, 'score', rank_position,
-                                    json.dumps({'method': method})
-                                ))
-                                conn.commit()
-                                conn.close()
-                        logger.info("特征选择结果已保存到数据库")
-                    except Exception as e:
-                        logger.warning(f"保存特征选择结果失败: {e}")
-
+                
+                
             elif experiment_type == 'feature_statistics':
-                # 读取特征统计结果文件
-                try:
-                    # 读取特征重要性排名
-                    importance_file = os.path.join(output_dir, 'feature_importance_ranking.csv')
-                    if os.path.exists(importance_file):
-                        importance_df = pd.read_csv(importance_file)
-                        for _, row in importance_df.iterrows():
-                            feature_name = row['feature']
-                            importance_score = row['importance_score']
-                            rank_position = row.name + 1
+                # 处理新的结构化返回结果
+                if isinstance(summary, dict) and 'frontend_summary' in summary:
+                    frontend_data = summary['frontend_summary']
+                    
+                    # 保存总体统计
+                    if 'overall_health' in frontend_data:
+                        overall_health = frontend_data['overall_health']
+                        conn = sqlite3.connect(db_path)
+                        c = conn.cursor()
+                        c.execute("""
+                            INSERT INTO experiment_feature_results (
+                                experiment_result_id, fxdef_id, feature_name, target_variable,
+                                result_type, metric_name, metric_value, metric_unit
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                        """, (
+                            experiment_result_id, None, 'overall_dataset_health', 'statistics_summary',
+                            'statistics', 'health_score', overall_health.get('health_score', 0), 'score'
+                        ))
+                        conn.commit()
+                        conn.close()
+                    
+                    # 保存质量分布统计
+                    if 'quality_distribution' in frontend_data:
+                        quality_dist = frontend_data['quality_distribution']
+                        for grade, count in quality_dist.items():
+                            conn = sqlite3.connect(db_path)
+                            c = conn.cursor()
+                            c.execute("""
+                                INSERT INTO experiment_feature_results (
+                                    experiment_result_id, fxdef_id, feature_name, target_variable,
+                                    result_type, metric_name, metric_value, metric_unit
+                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                            """, (
+                                experiment_result_id, None, f'quality_grade_{grade}', 'quality_distribution',
+                                'statistics', 'feature_count', count, 'count'
+                            ))
+                            conn.commit()
+                            conn.close()
+                    
+                    # 保存质量问题统计
+                    if 'quality_issues' in frontend_data:
+                        quality_issues = frontend_data['quality_issues']
+                        for issue_type, count in quality_issues.items():
+                            conn = sqlite3.connect(db_path)
+                            c = conn.cursor()
+                            c.execute("""
+                                INSERT INTO experiment_feature_results (
+                                    experiment_result_id, fxdef_id, feature_name, target_variable,
+                                    result_type, metric_name, metric_value, metric_unit
+                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                            """, (
+                                experiment_result_id, None, f'quality_issue_{issue_type}', 'quality_issues',
+                                'statistics', 'issue_count', count, 'count'
+                            ))
+                            conn.commit()
+                            conn.close()
+                    
+                    logger.info("特征统计前端摘要数据已保存到数据库")
+                
+                # 读取特征统计结果文件（兼容旧格式）
+                stats_file = os.path.join(output_dir, 'feature_statistics.csv')
+                if os.path.exists(stats_file):
+                    try:
+                        stats_df = pd.read_csv(stats_file)
+                        # 假设有列: feature, statistic_type, value
+                        for _, row in stats_df.iterrows():
+                            feature_name = row.get('feature')
+                            stat_type = row.get('statistic_type', 'unknown')
+                            stat_value = row.get('value', 0)
                             fxdef_id = result_manager._extract_fxdef_id(feature_name)
                             if fxdef_id is not None:  # 只处理有效的fxdef_id
-                                conn = sqlite3.connect(db_path)
-                                c = conn.cursor()
-                                c.execute("""
-                                    INSERT INTO experiment_feature_results (
-                                        experiment_result_id, fxdef_id, feature_name, target_variable,
-                                        result_type, metric_name, metric_value, metric_unit, rank_position
-                                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                                """, (
-                                    experiment_result_id, fxdef_id, feature_name, 'feature_importance',
-                                    'statistics', 'importance_score', importance_score, 'score', rank_position
-                                ))
-                                conn.commit()
-                                conn.close()
-                        logger.info(f"特征统计结果已保存到数据库，共{len(importance_df)}个特征")
-                    # 读取基本统计信息
-                    basic_stats_file = os.path.join(output_dir, 'feature_basic_statistics.csv')
-                    if os.path.exists(basic_stats_file):
-                        basic_stats_df = pd.read_csv(basic_stats_file, index_col=0)
-                        for feature_name, stats in basic_stats_df.iterrows():
-                            fxdef_id = result_manager._extract_fxdef_id(feature_name)
-                            if fxdef_id is not None and 'std' in stats:  # 只处理有效的fxdef_id
                                 conn = sqlite3.connect(db_path)
                                 c = conn.cursor()
                                 c.execute("""
@@ -956,28 +1335,26 @@ def run_experiment(
                                         result_type, metric_name, metric_value, metric_unit
                                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                                 """, (
-                                    experiment_result_id, fxdef_id, feature_name, 'feature_variability',
-                                    'statistics', 'standard_deviation', stats['std'], 'value'
+                                    experiment_result_id, fxdef_id, feature_name, 'statistics',
+                                    'feature_statistic', stat_type, stat_value, 'value'
                                 ))
                                 conn.commit()
                                 conn.close()
-                        logger.info("特征基本统计信息已保存到数据库")
-                except Exception as e:
-                    logger.warning(f"保存特征统计结果失败: {e}")
+                        logger.info("特征统计结果已保存到数据库")
+                    except Exception as e:
+                        logger.warning(f"保存特征统计结果失败: {e}")
+            
         except Exception as e:
-            logger.error(f"Failed to save feature-level results: {e}")
-            logger.error(f"Exception traceback: {traceback.format_exc()}")
-            # 不抛出异常，继续执行，因为实验本身已经成功完成
+            logger.error(f"保存特征级别结果时出错: {e}")
+            import traceback
+            logger.error(f"异常详情: {traceback.format_exc()}")
         
-        logger.info(f"Experiment completed! Results saved to: {output_dir}")
-        logger.info(f"Total duration: {duration:.2f} seconds")
-        
+        # 返回实验结果
         return {
-            "status": "success",
-            "summary": summary,
-            "output_dir": output_dir,
-            "duration": duration,
-            "experiment_result_id": experiment_result_id if 'experiment_result_id' in locals() else None
+            'status': 'success',
+            'output_dir': output_dir,
+            'summary': summary,
+            'duration': duration
         }
         
     except ModuleNotFoundError:
