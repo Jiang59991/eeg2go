@@ -4,13 +4,28 @@ from scipy.signal import stft
 from eeg2fx.feature.common import wrap_structured_result, auto_gc
 from logging_config import logger
 import mne
+from typing import Any, Dict, List, Optional, Tuple
 mne.set_log_level('WARNING')
 
 
 @auto_gc
-def wavelet_entropy(epochs, chans=None, wavelet="db4", level=4):
+def wavelet_entropy(
+    epochs, 
+    chans: Optional[List[str]] = None, 
+    wavelet: str = "db4", 
+    level: int = 4
+) -> Dict[str, List[Dict[str, Any]]]:
     """
     Compute wavelet entropy for each epoch and channel.
+
+    Args:
+        epochs: MNE Epochs object.
+        chans: List of channel names or None for all channels.
+        wavelet: Wavelet type to use for decomposition.
+        level: Decomposition level.
+
+    Returns:
+        Dictionary mapping channel names to a list of wavelet entropy values per epoch.
     """
     data = epochs.get_data()
     n_epochs = data.shape[0]
@@ -29,6 +44,7 @@ def wavelet_entropy(epochs, chans=None, wavelet="db4", level=4):
             idx = ch_names.index(ch)
             we_vals = []
             for epoch in data[:, idx, :]:
+                # Wavelet decomposition and entropy calculation
                 coeffs = pywt.wavedec(epoch, wavelet=wavelet, level=level)
                 energies = np.array([np.sum(c ** 2) for c in coeffs])
                 probs = energies / np.sum(energies)
@@ -45,9 +61,21 @@ def wavelet_entropy(epochs, chans=None, wavelet="db4", level=4):
 
 
 @auto_gc
-def stft_power(epochs, chans=None, band=(8, 13)):
+def stft_power(
+    epochs, 
+    chans: Optional[List[str]] = None, 
+    band: Tuple[float, float] = (8, 13)
+) -> Dict[str, List[Dict[str, Any]]]:
     """
     Compute average STFT power in a given frequency band per epoch and channel.
+
+    Args:
+        epochs: MNE Epochs object.
+        chans: List of channel names or None for all channels.
+        band: Tuple specifying the frequency band (fmin, fmax).
+
+    Returns:
+        Dictionary mapping channel names to a list of average STFT power values per epoch.
     """
     data = epochs.get_data()
     n_epochs = data.shape[0]
@@ -67,6 +95,7 @@ def stft_power(epochs, chans=None, band=(8, 13)):
             idx = ch_names.index(ch)
             power_vals = []
             for epoch in data[:, idx, :]:
+                # STFT and band power calculation
                 f, t, Zxx = stft(epoch, fs=sfreq, nperseg=128)
                 band_mask = (f >= band[0]) & (f <= band[1])
                 power = np.abs(Zxx) ** 2

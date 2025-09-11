@@ -5,11 +5,20 @@ from eeg2fx.function_registry import FEATURE_FUNCS, FEATURE_METADATA
 import sqlite3
 import os
 from logging_config import logger
+from typing import List, Optional
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "eeg2go.db")
 
-def get_latest_fxdef_ids(n):
-    """Return last n fxdef IDs in ascending order (used immediately after batch insert)."""
+def get_latest_fxdef_ids(n: int) -> List[int]:
+    """
+    Get the last n fxdef IDs in ascending order.
+
+    Args:
+        n (int): Number of fxdef IDs to retrieve.
+
+    Returns:
+        List[int]: List of fxdef IDs in ascending order.
+    """
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT id FROM fxdef ORDER BY id DESC LIMIT ?", (n,))
@@ -17,10 +26,13 @@ def get_latest_fxdef_ids(n):
     conn.close()
     return [row[0] for row in reversed(rows)]
 
-def create_all_features_featureset():
+def create_all_features_featureset() -> Optional[int]:
     """
-    Creates a feature set containing all available features from the eeg2fx/feature directory.
-    Handles channel configurations intelligently based on feature type.
+    Create a feature set containing all available features from the eeg2fx/feature directory.
+    Channel configuration is determined by feature type.
+
+    Returns:
+        Optional[int]: The ID of the created feature set, or None if creation failed.
     """
     logger.info("Creating a feature set containing all available features...")
     available_features = list(FEATURE_FUNCS.keys())
@@ -31,7 +43,7 @@ def create_all_features_featureset():
     pipeline_id = c.fetchone()[0]
     conn.close()
     logger.info(f"Using pipeline ID: {pipeline_id}")
-    all_fxdef_ids = []
+    all_fxdef_ids: List[int] = []
     for feature_func in available_features:
         logger.info(f"Processing feature: {feature_func}")
         metadata = FEATURE_METADATA.get(feature_func, {})
@@ -99,15 +111,20 @@ def create_all_features_featureset():
         logger.error(f"✗ Creating feature set failed: {e}")
         return None
 
-def register_comparison_feature_sets():
-    all_fxids = []
+def register_comparison_feature_sets() -> None:
+    """
+    Register several comparison feature sets for testing and demonstration.
 
-    # 1. Same pipeline, multiple channels
+    Returns:
+        None
+    """
+    all_fxids: List[int] = []
+
     entropy_multi_ch = []
     for ch in ["C3", "C4", "Pz"]:
         entropy_multi_ch.append({
             "func": "spectral_entropy",
-            "pipeid": 5,  # pipeline: entropy_eval_base
+            "pipeid": 5,
             "shortname": "entropy",
             "channels": [ch],
             "params": {},
@@ -126,7 +143,6 @@ def register_comparison_feature_sets():
         "fxdef_ids": all_fxids
     })
 
-    # 2. Same channel, same function, different pipelines (differs by one node)
     logger.info("Adding comparison pipelines...")
 
     base_steps = [
@@ -202,8 +218,5 @@ def register_comparison_feature_sets():
     })
 
 if __name__ == "__main__":
-    # Create a feature set containing all features
     create_all_features_featureset()
-    
-    # Create comparison feature sets (optional)
     # register_comparison_feature_sets()

@@ -8,16 +8,30 @@ import psutil
 from multiprocessing import Pool, cpu_count, TimeoutError
 from eeg2fx.featureset_fetcher import run_feature_set
 from eeg2fx.featureset_grouping import load_fxdefs_for_set
-from logging_config import logger  # 使用全局logger
+from logging_config import logger
 
 DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "database", "eeg2go.db"))
 
-def get_memory_usage():
-    """Get current memory usage in MB"""
+def get_memory_usage() -> float:
+    """
+    Get current memory usage in MB.
+
+    Returns:
+        float: Current process memory usage in MB.
+    """
     process = psutil.Process(os.getpid())
     return process.memory_info().rss / 1024 / 1024
 
 def get_recording_ids_for_dataset(dataset_id: str) -> list[int]:
+    """
+    Get all recording IDs for a given dataset.
+
+    Args:
+        dataset_id (str): Dataset ID.
+
+    Returns:
+        list[int]: List of recording IDs.
+    """
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT id FROM recordings WHERE dataset_id = ?", (dataset_id,))
@@ -26,6 +40,15 @@ def get_recording_ids_for_dataset(dataset_id: str) -> list[int]:
     return ids
 
 def get_fxdef_meta(fxid: int) -> dict:
+    """
+    Get feature definition metadata for a given feature ID.
+
+    Args:
+        fxid (int): Feature definition ID.
+
+    Returns:
+        dict: Dictionary with 'shortname' and 'chans' keys.
+    """
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT shortname, chans FROM fxdef WHERE id = ?", (fxid,))
@@ -36,7 +59,16 @@ def get_fxdef_meta(fxid: int) -> dict:
         "chans": row[1] if row else "NA"
     }
 
-def process_one_recording(args):
+def process_one_recording(args) -> tuple[dict, list]:
+    """
+    Process one recording and extract feature values.
+
+    Args:
+        args (tuple): (recording_id, feature_set_id, output_dir)
+
+    Returns:
+        tuple[dict, list]: (scalar_row, epoch_rows)
+    """
     recording_id, feature_set_id, output_dir = args
     try:
         logger.info(f"Processing recording {recording_id} with feature set {feature_set_id}")
@@ -46,13 +78,10 @@ def process_one_recording(args):
 
         for fxid, fxval in fx_values.items():
             fxmeta = get_fxdef_meta(int(fxid))
-            # 修改特征名称生成逻辑，确保连字符格式的一致性
             chans_str = fxmeta['chans']
             if chans_str and "-" in chans_str:
-                # 双通道特征：保持连字符格式
                 base = f"fx{fxid}_{fxmeta['shortname']}_{chans_str}"
             else:
-                # 单通道特征：替换逗号为下划线
                 base = f"fx{fxid}_{fxmeta['shortname']}_{chans_str}".replace(",", "_")
             dim = fxval.get("dim")
             value = fxval.get("value")
@@ -82,7 +111,24 @@ def process_one_recording(args):
         # Force garbage collection after each recording
         gc.collect()
 
-def extract_feature_matrix(dataset_id: str, feature_set_id: str, output_dir: str = None, num_workers: int = None):
+def extract_feature_matrix(
+    dataset_id: str,
+    feature_set_id: str,
+    output_dir: str = None,
+    num_workers: int = None
+) -> None:
+    """
+    Extract feature matrix for all recordings in a dataset.
+
+    Args:
+        dataset_id (str): Dataset ID.
+        feature_set_id (str): Feature set ID.
+        output_dir (str, optional): Output directory. Defaults to None.
+        num_workers (int, optional): Number of workers. Defaults to None.
+
+    Returns:
+        None
+    """
     if output_dir is None:
         ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
         output_dir = os.path.join(ROOT_DIR, "data", "processed")
@@ -90,7 +136,6 @@ def extract_feature_matrix(dataset_id: str, feature_set_id: str, output_dir: str
     os.makedirs(output_dir, exist_ok=True)
     recording_ids = get_recording_ids_for_dataset(dataset_id)
 
-    # For now, use single process to avoid multiprocessing issues
     logger.info(f"Using single process mode to avoid multiprocessing issues")
     logger.info(f"Processing {len(recording_ids)} recordings...")
     logger.info(f"Initial memory usage: {get_memory_usage():.1f} MB")
@@ -100,7 +145,6 @@ def extract_feature_matrix(dataset_id: str, feature_set_id: str, output_dir: str
     processed_count = 0
     start_time = time.time()
 
-    # Use single process approach to avoid multiprocessing issues
     for rid in recording_ids:
         try:
             logger.info(f"Processing recording {rid} ({processed_count + 1}/{len(recording_ids)})")
@@ -119,7 +163,6 @@ def extract_feature_matrix(dataset_id: str, feature_set_id: str, output_dir: str
                 memory_usage = get_memory_usage()
                 logger.info(f"Progress: {processed_count}/{len(recording_ids)} ({processed_count/len(recording_ids)*100:.1f}%) - {elapsed:.1f}s elapsed - {memory_usage:.1f} MB")
             
-            # Force garbage collection more frequently
             if processed_count % 10 == 0:
                 gc.collect()
                 memory_after_gc = get_memory_usage()

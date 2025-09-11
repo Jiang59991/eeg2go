@@ -1,10 +1,23 @@
 import json
+from typing import Any, Dict, List, Callable
 from .feature.common import auto_gc
 from .function_registry import PREPROCESSING_FUNCS, FEATURE_FUNCS, UTILITY_FUNCS, EPOCH_BY_EVENT_FUNCS
 from .featureset_grouping import load_pipeline_structure
 
+def resolve_function(func_name: str, context: Any = None) -> Callable:
+    """
+    Resolve a function name to its corresponding callable object from the function registry.
 
-def resolve_function(func_name, context=None):
+    Args:
+        func_name (str): The name of the function to resolve.
+        context (Any, optional): Optional context for event-based functions.
+
+    Returns:
+        Callable: The resolved function.
+
+    Raises:
+        ValueError: If the function name is not registered.
+    """
     if func_name in PREPROCESSING_FUNCS:
         return PREPROCESSING_FUNCS[func_name]
     if func_name in EPOCH_BY_EVENT_FUNCS:
@@ -15,16 +28,39 @@ def resolve_function(func_name, context=None):
         return UTILITY_FUNCS[func_name]
     raise ValueError(f"Function '{func_name}' is not registered in function_registry.")
 
-def split_channel(result_dict, chan):
+def split_channel(result_dict: dict, chan: Any) -> list:
+    """
+    Extract the data for a specific channel from a result dictionary.
+
+    Args:
+        result_dict (dict): The dictionary containing channel data.
+        chan (Any): The channel key to extract.
+
+    Returns:
+        list: The data for the specified channel, or an empty list if not found.
+    """
     if isinstance(result_dict, dict) and chan in result_dict:
         return result_dict[chan]
     return []
 
 @auto_gc
-def run_pipeline(pipeid, recording_id, value_cache, node_output):
+def run_pipeline(
+    pipeid: int,
+    recording_id: int,
+    value_cache: Dict[Any, Any],
+    node_output: Dict[Any, Any]
+) -> Dict[Any, Any]:
     """
-    Execute one pipeline, use shared value_cache to avoid redoing nodes.
-    Return all intermediate results for this pipeline.
+    Execute a pipeline and return all intermediate results.
+
+    Args:
+        pipeid (int): Pipeline definition ID.
+        recording_id (int): Recording ID.
+        value_cache (dict): Shared cache for node outputs to avoid redundant computation.
+        node_output (dict): Output dictionary for node results.
+
+    Returns:
+        Dict[Any, Any]: All node outputs for this pipeline.
     """
     dag = load_pipeline_structure(pipeid)
     execution_order = toposort(dag)
@@ -45,11 +81,8 @@ def run_pipeline(pipeid, recording_id, value_cache, node_output):
 
         if cache_key in value_cache:
             output = value_cache[cache_key]
-            # print(f"[CACHE HIT] func={func_name} | key={cache_key}")
         else:
             func = resolve_function(func_name, context=context)
-            # print(f"[EXECUTE] func={func_name} | input_nodes={input_ids} | params={params}")
-
             if func_name == "raw":
                 output = func(recording_id, **params)
             else:
@@ -58,48 +91,21 @@ def run_pipeline(pipeid, recording_id, value_cache, node_output):
                 else:
                     output = func(*inputs, **params)
             value_cache[cache_key] = output
-            # print(f"[RESULT] node={nid} → output_type={type(output)} | shape={getattr(output, 'shape', 'N/A') or getattr(output, 'get_data', lambda: 'no get_data')()}")
 
         node_output[nid] = output
 
     return node_output
 
+def toposort(graph: Dict[Any, Dict[str, Any]]) -> List[Any]:
+    """
+    Perform topological sort on a directed acyclic graph (DAG).
 
-# def run_pipeline(pipeid, recording_id, until_node=None, dag_loader=None):
-#     if dag_loader is None:
-#         raise ValueError("dag_loader function must be provided.")
+    Args:
+        graph (Dict[Any, Dict[str, Any]]): The DAG to sort.
 
-#     node_map = dag_loader(pipeid)
-#     execution_order = toposort(node_map)
-
-#     if not execution_order:
-#         raise ValueError(f"No nodes found for pipeline {pipeid}")
-#     if until_node is None:
-#         until_node = execution_order[-1]
-
-#     cache = {}
-#     for nid in execution_order:
-#         func_name = node_map[nid]["func"]
-#         input_ids = node_map[nid]["inputnodes"]
-#         params = node_map[nid]["params"]
-
-#         inputs = [cache[inid] for inid in input_ids]
-#         func = resolve_function(func_name)
-
-#         if func_name == "raw":
-#             result = func(recording_id)
-#         elif func_name == "split_channel":
-#             result = func(*inputs, **params)
-#         else:
-#             result = func(*inputs, **params)
-
-#         cache[nid] = result
-#         if nid == until_node:
-#             return result
-
-#     raise ValueError(f"Target node '{until_node}' not found.")
-
-def toposort(graph):
+    Returns:
+        List[Any]: List of node IDs in topological order.
+    """
     from collections import defaultdict, deque
     indegree = defaultdict(int)
     for node in graph:

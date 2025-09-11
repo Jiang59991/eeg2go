@@ -5,19 +5,36 @@ from graphviz import Digraph
 import sqlite3
 import os
 from logging_config import logger
+from typing import Dict, Any, List
 
 DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "database", "eeg2go.db"))
 
-def _hash_id(prefix, fields):
-    """Generate short stable hash-based node ID"""
+def _hash_id(prefix: str, fields: list) -> str:
+    """
+    Generate a short, stable hash-based node ID.
+
+    Args:
+        prefix (str): Prefix for the node ID.
+        fields (list): Fields to be hashed.
+
+    Returns:
+        str: Short hash-based node ID.
+    """
     h = hashlib.sha1(json.dumps(fields, sort_keys=True).encode()).hexdigest()
     return f"{prefix}_{h[:8]}"
 
-def load_pipeline_structure(pipeid):
-    """Load pipe_nodes + pipe_edges for one pipeline into DAG format"""
+def load_pipeline_structure(pipeid: int) -> Dict[Any, Dict[str, Any]]:
+    """
+    Load the structure of a pipeline (nodes and edges) and return as a DAG dictionary.
+
+    Args:
+        pipeid (int): Pipeline definition ID.
+
+    Returns:
+        Dict: {nodeid: {"func": ..., "params": ..., "inputnodes": [...]}}
+    """
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-
     c.execute("""
         SELECT DISTINCT nodeid, func, params
         FROM pipe_nodes
@@ -38,22 +55,26 @@ def load_pipeline_structure(pipeid):
     logger.debug(f"Loaded pipeline structure for pipeid={pipeid}: {raw_nodes}")
     return raw_nodes
 
-def build_feature_dag(fxdef_list):
+def build_feature_dag(fxdef_list: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
     """
-    Construct merged pipeline-feature DAG.
-    Output: Dict[nodeid] = {func, inputnodes, params, meta}
+    Construct a merged pipeline-feature DAG from a list of feature definitions.
+
+    Args:
+        fxdef_list (List[Dict]): List of feature definition dicts.
+
+    Returns:
+        Dict: DAG structure {nodeid: {func, inputnodes, params, meta}}
     """
     dag = {}
 
     for fx in fxdef_list:
         pipeid = fx["pipeid"]
-        inputnodeid = fx["inputnodeid"] # output_node of the pipeline (final output where feature is computed)
+        inputnodeid = fx["inputnodeid"]
         fxfunc = fx["func"]
         fxparams = fx["params"]
         chan = fx["chans"]
         fxid = fx["id"]
 
-        # Add pipeline nodes
         logger.debug(f"Building DAG for pipeid={pipeid}")
         pipeline = load_pipeline_structure(pipeid)
         for nid, node in pipeline.items():
@@ -69,7 +90,6 @@ def build_feature_dag(fxdef_list):
                     "meta": {}
                 }
 
-        # Add feature node
         feature_id = _hash_id(fxfunc, [fxfunc, fxparams])
         if feature_id not in dag:
             dag[feature_id] = {
@@ -79,7 +99,6 @@ def build_feature_dag(fxdef_list):
                 "meta": {}
             }
 
-        # Add split node
         split_id = f"{feature_id}__{chan}"
         if split_id not in dag:
             dag[split_id] = {
@@ -91,9 +110,17 @@ def build_feature_dag(fxdef_list):
 
     return dag
 
-def visualize_dag(dag, output_path="dag_view", view=False):
+def visualize_dag(dag: Dict[str, Dict[str, Any]], output_path: str = "dag_view", view: bool = False) -> None:
     """
-    Render DAG to PDF using graphviz.
+    Render a DAG to PDF using graphviz.
+
+    Args:
+        dag (Dict): The DAG to visualize.
+        output_path (str): Output file path (without extension).
+        view (bool): Whether to open the PDF after rendering.
+
+    Returns:
+        None
     """
     dot = Digraph(comment="Feature DAG", format="pdf")
 
@@ -104,7 +131,6 @@ def visualize_dag(dag, output_path="dag_view", view=False):
         dot.node(nid, label)
 
     edge_set = set()
-
     for nid, node in dag.items():
         for parent in node["inputnodes"]:
             edge_key = (parent, nid)
@@ -115,10 +141,15 @@ def visualize_dag(dag, output_path="dag_view", view=False):
     outpath = dot.render(output_path, view=False)
     logger.info(f"DAG rendered to: {outpath} (PDF)")
 
-def load_fxdefs_for_set(feature_set_id):
+def load_fxdefs_for_set(feature_set_id: int) -> List[Dict[str, Any]]:
     """
-    From feature_set_id, load full fxdef records with:
-    id, pipeid, inputnodeid, func, chans, params
+    Load all feature definitions for a given feature set ID.
+
+    Args:
+        feature_set_id (int): The feature set ID.
+
+    Returns:
+        List[Dict]: List of feature definition dicts, each with id, pipeid, func, chans, params, inputnodeid.
     """
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -140,7 +171,7 @@ def load_fxdefs_for_set(feature_set_id):
             "func": row[2],
             "chans": row[3],
             "params": json.loads(row[4] or "{}"),
-            "inputnodeid": row[5]  # = pipedef.output_node
+            "inputnodeid": row[5]
         })
     return fxdefs
 

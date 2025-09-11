@@ -9,8 +9,16 @@ from typing import List
 
 DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "database", "eeg2go.db"))
 
-
 def get_recording_ids_for_dataset(dataset_id: int) -> List[int]:
+    """
+    Get all recording IDs for a given dataset.
+
+    Args:
+        dataset_id (int): The dataset ID.
+
+    Returns:
+        List[int]: List of recording IDs.
+    """
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT id FROM recordings WHERE dataset_id = ? ORDER BY id", (dataset_id,))
@@ -18,8 +26,13 @@ def get_recording_ids_for_dataset(dataset_id: int) -> List[int]:
     conn.close()
     return ids
 
+def main() -> int:
+    """
+    Main entry point for submitting PBS jobs for feature extraction.
 
-def main():
+    Returns:
+        int: Exit code, 0 for success, 1 for failure.
+    """
     parser = argparse.ArgumentParser(
         description="Submit one PBS job per recording to run run_feature_set on HPC"
     )
@@ -54,19 +67,16 @@ def main():
 
     print(f"Submitting {len(recording_ids)} jobs for dataset {dataset_id}, feature_set {feature_set_id}")
 
-    # 固定日志目录
+    # Use a fixed log directory for all batch logs
     project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     logs_dir = os.path.join(project_root, "logs")
     os.makedirs(logs_dir, exist_ok=True)
 
-    # 准备本次批量提交的统一日志文件名（每次运行该脚本产生日志）
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     batch_log_file = os.path.join(logs_dir, f"submit_qsub_{dataset_id}_{feature_set_id}_{timestamp}.log")
     print(f"Batch log: {batch_log_file}")
 
-    # 让所有被提交的PBS作业里的 Python logger 也写入这一份批次日志
-    # 方法：把日志文件路径通过 -v 传给PBS，PBS内导出 EEG2GO_LOG_FILE，logging_config.py 会使用该文件
-
+    # Pass the log file path to PBS jobs via environment variable
     for rid in recording_ids:
         job_name = f"feat_{dataset_id}_{rid}"
         env_vars = (
@@ -81,7 +91,6 @@ def main():
         ]
         if args.queue:
             cmd.extend(["-q", args.queue])
-        # 可选：控制PBS的stdout/stderr输出目录
         if args.discard_output:
             cmd.extend(["-o", "/dev/null", "-e", "/dev/null"])
         elif args.pbs_stdout_dir:
@@ -95,10 +104,8 @@ def main():
             with open(batch_log_file, "a", encoding="utf-8") as f:
                 f.write(line + "\n")
         else:
-            # 每次提交 qsub 前，确保 HPC 环境已准备：在当前进程内 source/activate（影响当前提交端日志需求）
-            # 注意：PBS 节点内仍需在脚本中 source/activate
             env = os.environ.copy()
-            env["EEG2GO_NO_FILE_LOG"] = "1"  # 防止该提交脚本自身触发文件日志
+            env["EEG2GO_NO_FILE_LOG"] = "1"
             result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
             out_line = result.stdout.strip()
             err_line = result.stderr.strip()
@@ -115,8 +122,5 @@ def main():
 
     return 0
 
-
 if __name__ == "__main__":
     sys.exit(main())
-
-

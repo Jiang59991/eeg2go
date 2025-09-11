@@ -5,7 +5,13 @@ from logging_config import logger
 DB_PATH = os.path.join(os.path.dirname(__file__), "eeg2go.db")
 SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "schema.sql")
 
-def initialize_database():
+def initialize_database() -> None:
+    """
+    Initialize the SQLite database using the schema defined in schema.sql.
+
+    Returns:
+        None
+    """
     with open(SCHEMA_PATH, "r") as f:
         schema_sql = f.read()
 

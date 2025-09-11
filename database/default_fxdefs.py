@@ -1,10 +1,16 @@
 from database.add_fxdef import add_fxdefs
 from logging_config import logger
+from typing import List, Dict, Any
 
-def create_default_features():
-    features = []
+def create_default_features() -> None:
+    """
+    Create and add a set of default feature definitions to the database.
 
-    # 1. Entropy features from pipeline 5 (e.g. "entropy_eval_base")
+    Returns:
+        None
+    """
+    features: List[Dict[str, Any]] = []
+
     features.append({
         "func": "spectral_entropy",
         "pipeid": 5,
@@ -16,19 +22,17 @@ def create_default_features():
         "notes": "Spectral entropy for {chan}"
     })
 
-    # 2. Bandpower (alpha) features from pipeline 1 (e.g. "classic_clean_5s")
     features.append({
         "func": "bandpower",
         "pipeid": 1,
         "shortname": "bp_alpha",
         "channels": ["C3", "C4"],
-        "params": {"band": "alpha"},  # Assume bandpower supports band param
+        "params": {"band": "alpha"},
         "dim": "1d",
         "ver": "v1",
         "notes": "Alpha band power at {chan}"
     })
 
-    # 3. Z-score stddev (scalar) from pipeline 2 (e.g. "full_preprocessing_test")
     features.append({
         "func": "zscore_stddev",
         "pipeid": 2,

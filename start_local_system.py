@@ -1,18 +1,12 @@
 #!/usr/bin/env python3
-"""
-Start local mode system
-No Redis required, all tasks run locally
-"""
 import os
 import sys
 import signal
 import time
 from datetime import datetime
 
-# Set environment variables to enable local mode
 os.environ['USE_LOCAL_EXECUTOR'] = 'true'
 
-# Add project root directory to Python path
 project_root = os.path.dirname(os.path.abspath(__file__))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
@@ -20,14 +14,27 @@ if project_root not in sys.path:
 from logging_config import logger
 from task_queue.local_executor import get_local_executor, shutdown_local_executor
 
-def signal_handler(signum, frame):
-    """Signal handler for graceful shutdown"""
+def signal_handler(signum: int, frame) -> None:
+    """
+    Handle system signals for graceful shutdown.
+
+    Args:
+        signum (int): The signal number received.
+        frame: The current stack frame (unused).
+    Returns:
+        None
+    """
     logger.info(f"Received signal {signum}, shutting down...")
     shutdown_local_executor()
     sys.exit(0)
 
-def main():
-    """Main function"""
+def main() -> None:
+    """
+    Main entry point for starting the EEG2Go local system.
+
+    Returns:
+        None
+    """
     print("=" * 60)
     print("EEG2Go Local Mode System Starting")
     print("=" * 60)
@@ -35,12 +42,11 @@ def main():
     print("Mode: Local Executor (No Redis)")
     print("=" * 60)
     
-    # Set signal handlers
+    # Set signal handlers for graceful shutdown
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     
     try:
-        # Initialize local executor
         logger.info("Initializing local executor...")
         local_executor = get_local_executor()
         
@@ -49,7 +55,6 @@ def main():
         print("Press Ctrl+C to exit")
         print("-" * 60)
         
-        # Keep system running
         while True:
             time.sleep(1)
             
@@ -64,4 +69,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

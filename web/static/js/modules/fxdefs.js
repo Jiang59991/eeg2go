@@ -57,7 +57,6 @@ export function showFxdefDetails(fxdefId) {
                 return;
             }
             
-            // 填充信息
             document.getElementById('fxdefInfo').innerHTML = `
                 <div class="card mb-3">
                     <div class="card-header">Feature Definition Information</div>
@@ -77,7 +76,6 @@ export function showFxdefDetails(fxdefId) {
                 </div>
             `;
             
-            // 显示模态框
             const modal = new bootstrap.Modal(document.getElementById('fxdefModal'));
             modal.show();
         })
@@ -87,6 +85,5 @@ export function showFxdefDetails(fxdefId) {
         });
 }
 
-// 导出到全局作用域
 window.showFxdefs = showFxdefs;
 window.showFxdefDetails = showFxdefDetails;

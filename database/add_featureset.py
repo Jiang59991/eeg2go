@@ -4,16 +4,24 @@ from logging_config import logger
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "eeg2go.db")
 
-def add_featureset(featureset_spec):
+def add_featureset(featureset_spec: dict) -> int:
     """
     Register a new feature set with a list of fxdef IDs.
-    
-    Input format:
-    {
-        "name": "Human-friendly name",
-        "description": "Optional description",
-        "fxdef_ids": [1, 2, 3]
-    }
+
+    Args:
+        featureset_spec (dict): A dictionary specifying the feature set. Example format:
+            {
+                "name": "Human-friendly name",
+                "description": "Optional description",
+                "fxdef_ids": [1, 2, 3]
+            }
+
+    Returns:
+        int: The ID of the newly created feature set.
+
+    Raises:
+        ValueError: If required fields are missing or fxdef_ids are invalid.
+        TypeError: If fxdef_ids are not all integers.
     """
     # --- Check input fields ---
     required_keys = ["name", "fxdef_ids"]

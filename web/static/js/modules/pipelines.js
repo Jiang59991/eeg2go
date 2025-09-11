@@ -4,7 +4,6 @@ import { showStatus } from './ui-utils.js';
 import { apiGet } from './api-client.js';
 
 export function initializePipelines() {
-    // 管道相关初始化
 }
 
 export async function showPipelines() {
@@ -70,7 +69,6 @@ export async function showPipelineDetails(pipelineId) {
     try {
         const modal = new bootstrap.Modal(document.getElementById('pipelineModal'));
         
-        // 显示加载状态
         document.getElementById('pipelineInfoPanel').innerHTML = `
             <div class="pipeline-visualization-loading">
                 <div class="spinner-border" role="status">
@@ -82,7 +80,6 @@ export async function showPipelineDetails(pipelineId) {
         
         modal.show();
         
-        // 并行获取pipeline详情和可视化数据
         const [response, vizResponse] = await Promise.all([
             fetch(`/api/pipeline_details/${pipelineId}`),
             fetch(`/api/pipeline_visualization/${pipelineId}`)
@@ -97,7 +94,6 @@ export async function showPipelineDetails(pipelineId) {
         
         // Pipeline info
         const pipeline = data.pipeline;
-        // 渲染信息
         document.getElementById('pipelineInfoPanel').innerHTML = `
             <p><strong>Name:</strong> ${pipeline.shortname}</p>
             <p><strong>Description:</strong> ${pipeline.description || 'N/A'}</p>
@@ -107,9 +103,7 @@ export async function showPipelineDetails(pipelineId) {
             <p><strong>Low Pass:</strong> ${pipeline.lp || 'N/A'} Hz</p>
         `;
         
-        // Pipeline visualization with Cytoscape.js
         if (vizData.cytoscape_data && !vizData.error) {
-            // 渲染 Cytoscape 图（保持原有逻辑即可）
             initializeCytoscape(vizData.cytoscape_data);
         } else {
             document.getElementById('pipelineInfoPanel').innerHTML = `
@@ -121,7 +115,6 @@ export async function showPipelineDetails(pipelineId) {
             `;
         }
         
-        // Pipeline nodes
         const nodes = data.nodes;
         const fxdefs = data.fxdefs || [];
         document.getElementById('pipelineFxdefsHeader').innerHTML = 
@@ -158,13 +151,11 @@ export async function showPipelineDetails(pipelineId) {
             </div>
         ` : '<p class="text-muted">No feature definitions use this pipeline.</p>';
         
-        // 在showPipelineDetails最后，监听modal显示后再初始化Cytoscape
         const modalEl = document.getElementById('pipelineModal');
         modalEl.addEventListener('shown.bs.modal', function handler() {
             if (vizData.cytoscape_data && vizData.cytoscape_data.nodes.length > 0) {
                 initializeCytoscape(vizData.cytoscape_data);
             }
-            // 只监听一次
             modalEl.removeEventListener('shown.bs.modal', handler);
         });
         
@@ -181,15 +172,12 @@ export async function showPipelineDetails(pipelineId) {
     }
 }
 
-// 初始化Cytoscape.js可视化
 export function initializeCytoscape(cytoscapeData) {
     const container = document.getElementById('pipeline-cytoscape');
     if (!container) return;
     
-    // 清除之前的可视化
     container.innerHTML = '';
     
-    // 创建Cytoscape实例
     const cy = cytoscape({
         container: container,
         elements: {
@@ -267,7 +255,6 @@ export function initializeCytoscape(cytoscapeData) {
         autolock: false
     });
     
-    // 添加交互功能
     cy.on('mouseover', 'node', function(e) {
         const node = e.target;
         node.style('border-width', 4);
@@ -280,28 +267,24 @@ export function initializeCytoscape(cytoscapeData) {
         node.style('border-color', '#666');
     });
     
-    // 先 resize 一次
     cy.resize();
 
-    // 关键：延迟 fit/center，确保容器宽度已渲染
     setTimeout(() => {
         cy.resize();
         cy.fit();
         cy.center();
     }, 50);
 
-    // 可选：监听窗口大小变化
     window.addEventListener('resize', () => {
         cy.resize();
         cy.fit();
     });
 
-    // 放大缩小按钮事件
     document.getElementById('cy-zoom-in').onclick = () => cy.zoom({ level: cy.zoom() * 1.2, renderedPosition: { x: cy.width()/2, y: cy.height()/2 } });
     document.getElementById('cy-zoom-out').onclick = () => cy.zoom({ level: cy.zoom() / 1.2, renderedPosition: { x: cy.width()/2, y: cy.height()/2 } });
     document.getElementById('cy-zoom-fit').onclick = () => { cy.fit(); cy.center(); };
 }
 
-// 导出到全局作用域
+
 window.showPipelines = showPipelines;
 window.showPipelineDetails = showPipelineDetails;

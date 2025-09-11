@@ -171,7 +171,7 @@ CREATE TABLE experiment_definitions (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Experiment results table (只用于存储最终结果，不用于任务管理)
+-- Experiment results table
 CREATE TABLE experiment_results (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     experiment_type TEXT NOT NULL,
@@ -185,13 +185,13 @@ CREATE TABLE experiment_results (
     status TEXT DEFAULT 'completed',  -- 'completed', 'failed'
     summary TEXT,
     notes TEXT,
-    task_id INTEGER,  -- 关联到tasks表的ID
+    task_id INTEGER,  -- Associated with tasks table ID
     FOREIGN KEY (dataset_id) REFERENCES datasets(id),
     FOREIGN KEY (feature_set_id) REFERENCES feature_sets(id),
     FOREIGN KEY (task_id) REFERENCES tasks(id)
 );
 
--- Experiment metadata table (stores detailed experiment metadata)
+-- Experiment metadata table
 CREATE TABLE experiment_metadata (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     experiment_result_id INTEGER,
@@ -201,7 +201,7 @@ CREATE TABLE experiment_metadata (
     FOREIGN KEY (experiment_result_id) REFERENCES experiment_results(id)
 );
 
--- Feature-level experiment results table (core table)
+-- Feature-level experiment results table
 CREATE TABLE experiment_feature_results (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     experiment_result_id INTEGER,
@@ -222,7 +222,7 @@ CREATE TABLE experiment_feature_results (
     FOREIGN KEY (fxdef_id) REFERENCES fxdef(id)
 );
 
--- 统一的任务表 (支持所有任务类型)
+-- Unified tasks table (supports all task types)
 CREATE TABLE tasks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     task_type TEXT NOT NULL,           -- 'feature_extraction', 'experiment', 'pipeline', etc.
@@ -261,7 +261,7 @@ CREATE INDEX idx_experiment_feature_results_target ON experiment_feature_results
 CREATE INDEX idx_experiment_feature_results_type ON experiment_feature_results(result_type);
 CREATE INDEX idx_experiment_feature_results_metric ON experiment_feature_results(metric_name);
 
--- Tasks表索引
+-- Tasks table indexes
 CREATE INDEX IF NOT EXISTS idx_tasks_type ON tasks(task_type);
 CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
 CREATE INDEX IF NOT EXISTS idx_tasks_dataset ON tasks(dataset_id);

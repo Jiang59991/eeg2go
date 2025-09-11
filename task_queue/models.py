@@ -2,15 +2,31 @@ import json
 import sqlite3
 import os
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
-# Import shared enum
 from .common import TaskStatus
 
 class Task:
-    def __init__(self, task_type: str, parameters: Dict[str, Any], 
-                 dataset_id: Optional[int] = None, feature_set_id: Optional[int] = None,
-                 experiment_type: Optional[str] = None, priority: int = 0):
+    def __init__(
+        self, 
+        task_type: str, 
+        parameters: Dict[str, Any], 
+        dataset_id: Optional[int] = None, 
+        feature_set_id: Optional[int] = None,
+        experiment_type: Optional[str] = None, 
+        priority: int = 0
+    ):
+        """
+        Initialize a Task object.
+
+        Args:
+            task_type (str): The type of the task.
+            parameters (Dict[str, Any]): Task parameters.
+            dataset_id (Optional[int]): Dataset ID.
+            feature_set_id (Optional[int]): Feature set ID.
+            experiment_type (Optional[str]): Experiment type.
+            priority (int): Task priority.
+        """
         self.task_type = task_type
         self.parameters = parameters
         self.dataset_id = dataset_id
@@ -29,23 +45,32 @@ class Task:
 
 class TaskManager:
     def __init__(self, db_path: str = "database/eeg2go.db"):
+        """
+        Initialize TaskManager with the path to the database.
+
+        Args:
+            db_path (str): Path to the SQLite database file.
+        """
         self.db_path = db_path
     
     def create_task(self, task: Task) -> int:
-        """Create a new task and return the task ID"""
+        """
+        Create a new task in the database and schedule it.
+
+        Args:
+            task (Task): The Task object to be created.
+
+        Returns:
+            int: The ID of the created task.
+        """
         try:
             from logging_config import logger
             logger.info(f"TaskManager.create_task called, task_type={task.task_type}")
-            
             conn = sqlite3.connect(self.db_path)
             c = conn.cursor()
-            
-            # Ensure correct data types
             dataset_id = int(task.dataset_id) if task.dataset_id is not None else None
             feature_set_id = int(task.feature_set_id) if task.feature_set_id is not None else None
-            
             logger.info(f"Creating task: dataset_id={dataset_id}, feature_set_id={feature_set_id}")
-            
             c.execute("""
                 INSERT INTO tasks (task_type, status, parameters, dataset_id, feature_set_id, 
                                   experiment_type, priority, created_at, progress, processed_count, total_count)
@@ -63,19 +88,13 @@ class TaskManager:
                 task.processed_count,
                 task.total_count
             ))
-            
             task_id = c.lastrowid
             conn.commit()
             conn.close()
-            
             logger.info(f"Task created successfully, ID: {task_id}")
-            
-            # Schedule Celery task
             logger.info(f"Start scheduling Celery task, task_id={task_id}")
             self._schedule_celery_task(task_id, task)
-            
             return task_id
-            
         except Exception as e:
             logger.error(f"Failed to create task: {e}")
             import traceback
@@ -84,42 +103,47 @@ class TaskManager:
                 conn.close()
             raise e
     
-    def _schedule_celery_task(self, task_id: int, task: Task):
-        """Schedule a task (Celery or Local)"""
+    def _schedule_celery_task(self, task_id: int, task: Task) -> None:
+        """
+        Schedule a task using Celery or local executor.
+
+        Args:
+            task_id (int): The ID of the task.
+            task (Task): The Task object.
+        """
         try:
             from logging_config import logger
             logger.info(f"_schedule_celery_task called, task_id={task_id}, task_type={task.task_type}")
-            
-            # 检查是否使用本地模式
             use_local_mode = os.getenv('USE_LOCAL_EXECUTOR', 'false').lower() == 'true'
-            
             if use_local_mode:
                 logger.info(f"Using local executor mode for task {task_id}")
                 self._schedule_local_task(task_id, task)
             else:
                 logger.info(f"Using Celery mode for task {task_id}")
                 self._schedule_celery_task_internal(task_id, task)
-                
         except Exception as e:
             logger.error(f"Failed to schedule task: {e}")
             import traceback
             logger.error(f"Exception details: {traceback.format_exc()}")
-            # If scheduling fails, update task status to FAILED
             self.update_task_status(task_id, TaskStatus.FAILED, error_message=str(e))
             raise
     
-    def _schedule_local_task(self, task_id: int, task: Task):
-        """Schedule a task using simple local executor"""
+    def _schedule_local_task(self, task_id: int, task: Task) -> Any:
+        """
+        Schedule a task using the simple local executor.
+
+        Args:
+            task_id (int): The ID of the task.
+            task (Task): The Task object.
+
+        Returns:
+            Any: The result of the local executor's submit_task.
+        """
         try:
             from logging_config import logger
             from .simple_local_executor import get_simple_local_executor
-            
             logger.info(f"Scheduling simple local task, task_id={task_id}, task_type={task.task_type}")
-            
-            # 获取简单本地执行器
             simple_local_executor = get_simple_local_executor()
-            
-            # 直接执行任务（同步执行）
             result = simple_local_executor.submit_task(
                 task_id=task_id,
                 task_type=task.task_type,
@@ -128,49 +152,40 @@ class TaskManager:
                 feature_set_id=task.feature_set_id,
                 experiment_type=task.experiment_type
             )
-            
             logger.info(f"Simple local task completed: {task_id}")
             return result
-            
         except Exception as e:
             logger.error(f"Failed to execute simple local task: {e}")
             raise
     
-    def _schedule_celery_task_internal(self, task_id: int, task: Task):
-        """Schedule a Celery task (internal method)"""
+    def _schedule_celery_task_internal(self, task_id: int, task: Task) -> None:
+        """
+        Schedule a Celery task (internal method).
+
+        Args:
+            task_id (int): The ID of the task.
+            task (Task): The Task object.
+        """
         try:
             from logging_config import logger
             logger.info(f"_schedule_celery_task_internal called, task_id={task_id}, task_type={task.task_type}")
-            
-            # Delayed import to avoid circular import
             from .tasks import feature_extraction_task, experiment_task
-            
             if task.task_type == 'feature_extraction':
                 if not task.dataset_id or not task.feature_set_id:
                     raise ValueError("Missing required parameters: dataset_id and feature_set_id")
-                
                 logger.info(f"Scheduling feature extraction task, task_id={task_id}")
-                
-                # Asynchronously execute feature extraction task
                 celery_task = feature_extraction_task.delay(
                     task_id=task_id,
                     parameters=task.parameters,
                     dataset_id=task.dataset_id,
                     feature_set_id=task.feature_set_id
                 )
-                
                 logger.info(f"Celery task scheduled successfully: {celery_task.id}")
-                
-                # Save Celery task ID to database (optional)
                 self._save_celery_task_id(task_id, celery_task.id)
-                
             elif task.task_type == 'experiment':
                 if not task.dataset_id or not task.feature_set_id or not task.experiment_type:
                     raise ValueError("Missing required parameters: dataset_id, feature_set_id, and experiment_type")
-                
                 logger.info(f"Scheduling experiment task, task_id={task_id}")
-                
-                # Asynchronously execute experiment task
                 celery_task = experiment_task.delay(
                     task_id=task_id,
                     parameters=task.parameters,
@@ -178,53 +193,54 @@ class TaskManager:
                     feature_set_id=task.feature_set_id,
                     experiment_type=task.experiment_type
                 )
-                
                 logger.info(f"Celery task scheduled successfully: {celery_task.id}")
-                
-                # Save Celery task ID to database (optional)
                 self._save_celery_task_id(task_id, celery_task.id)
-                
             else:
                 raise ValueError(f"Unknown task type: {task.task_type}")
-                
         except Exception as e:
             logger.error(f"Failed to schedule Celery task: {e}")
             import traceback
             logger.error(f"Exception details: {traceback.format_exc()}")
-            # If scheduling fails, update task status to FAILED
             self.update_task_status(task_id, TaskStatus.FAILED, error_message=str(e))
             raise
     
-    def _save_celery_task_id(self, task_id: int, celery_task_id: str):
-        """Save Celery task ID to database (optional feature)"""
+    def _save_celery_task_id(self, task_id: int, celery_task_id: str) -> None:
+        """
+        Save the Celery task ID to the database.
+
+        Args:
+            task_id (int): The ID of the task.
+            celery_task_id (str): The Celery task ID.
+        """
         try:
             conn = sqlite3.connect(self.db_path)
             c = conn.cursor()
-            
-            # Check if celery_task_id column exists, add if not
             c.execute("PRAGMA table_info(tasks)")
             columns = [column[1] for column in c.fetchall()]
-            
             if 'celery_task_id' not in columns:
                 c.execute("ALTER TABLE tasks ADD COLUMN celery_task_id TEXT")
-            
             c.execute("UPDATE tasks SET celery_task_id = ? WHERE id = ?", (celery_task_id, task_id))
             conn.commit()
             conn.close()
-            
         except Exception as e:
             print(f"Error saving Celery task ID: {e}")
             # This error should not affect main functionality, so just log and do not raise
 
     def get_task(self, task_id: int) -> Optional[Dict[str, Any]]:
-        """Get task information"""
+        """
+        Get task information by task ID.
+
+        Args:
+            task_id (int): The ID of the task.
+
+        Returns:
+            Optional[Dict[str, Any]]: The task information as a dictionary, or None if not found.
+        """
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
-        
         c.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
         row = c.fetchone()
         conn.close()
-        
         if row:
             return {
                 'id': row[0],
@@ -247,12 +263,24 @@ class TaskManager:
             }
         return None
     
-    def update_task_status(self, task_id: int, status: TaskStatus, 
-                          result: Optional[Dict] = None, error_message: Optional[str] = None):
-        """Update task status"""
+    def update_task_status(
+        self, 
+        task_id: int, 
+        status: TaskStatus, 
+        result: Optional[Dict] = None, 
+        error_message: Optional[str] = None
+    ) -> None:
+        """
+        Update the status of a task.
+
+        Args:
+            task_id (int): The ID of the task.
+            status (TaskStatus): The new status.
+            result (Optional[Dict]): The result of the task.
+            error_message (Optional[str]): Error message if any.
+        """
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
-        
         if status == TaskStatus.RUNNING:
             c.execute("""
                 UPDATE tasks SET status = ?, started_at = ? WHERE id = ?
@@ -264,37 +292,53 @@ class TaskManager:
             """, (status.value, datetime.now(), 
                   json.dumps(result) if result else None,
                   error_message, task_id))
-        
         conn.commit()
         conn.close()
     
-    def update_task_progress(self, task_id: int, progress: float, processed_count: int, total_count: int):
-        """Update task progress"""
+    def update_task_progress(
+        self, 
+        task_id: int, 
+        progress: float, 
+        processed_count: int, 
+        total_count: int
+    ) -> None:
+        """
+        Update the progress of a task.
+
+        Args:
+            task_id (int): The ID of the task.
+            progress (float): Progress value.
+            processed_count (int): Number of processed items.
+            total_count (int): Total number of items.
+        """
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
-        
         c.execute("""
             UPDATE tasks SET progress = ?, processed_count = ?, total_count = ? WHERE id = ?
         """, (progress, processed_count, total_count, task_id))
-        
         conn.commit()
         conn.close()
     
-    def get_pending_tasks(self, limit: int = 10) -> list:
-        """Get pending tasks"""
+    def get_pending_tasks(self, limit: int = 10) -> List[Dict[str, Any]]:
+        """
+        Get a list of pending tasks.
+
+        Args:
+            limit (int): The maximum number of tasks to return.
+
+        Returns:
+            List[Dict[str, Any]]: List of pending task dictionaries.
+        """
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
-        
         c.execute("""
             SELECT * FROM tasks 
             WHERE status = 'pending' 
             ORDER BY priority DESC, created_at ASC 
             LIMIT ?
         """, (limit,))
-        
         rows = c.fetchall()
         conn.close()
-        
         return [{
             'id': row[0],
             'task_type': row[1],
@@ -305,29 +349,28 @@ class TaskManager:
             'priority': row[9]
         } for row in rows]
     
-    def get_all_tasks(self) -> list:
-        """Get all tasks"""
+    def get_all_tasks(self) -> List[Dict[str, Any]]:
+        """
+        Get all tasks from the database.
+
+        Returns:
+            List[Dict[str, Any]]: List of all task dictionaries.
+        """
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
-        
         try:
             # Check if table exists
             c.execute("""
                 SELECT name FROM sqlite_master 
                 WHERE type='table' AND name='tasks'
             """)
-            
             if not c.fetchone():
-                # If table does not exist, return empty list
                 return []
-            
             c.execute("""
                 SELECT * FROM tasks 
                 ORDER BY created_at DESC
             """)
-            
             rows = c.fetchall()
-            
             tasks = []
             for row in rows:
                 task = {
@@ -350,9 +393,7 @@ class TaskManager:
                     'notes': row[16]
                 }
                 tasks.append(task)
-            
             return tasks
-            
         except Exception as e:
             print(f"Error getting all tasks: {e}")
             return []

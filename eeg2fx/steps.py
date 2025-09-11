@@ -7,19 +7,29 @@ import gc
 from .feature.common import auto_gc
 from logging_config import logger
 import csv
+from typing import Optional, List, Dict, Any
 
 DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "database", "eeg2go.db"))
-MAX_MEMORY_GB = 1  # 统一内存限制常量 (1GB)
+MAX_MEMORY_GB = 1  # Memory limit in GB
 
 class RecordingTooLargeError(Exception):
-    """当录音文件过大时抛出的异常"""
+    """Exception raised when a recording file is too large to process."""
     pass
 
-def build_channel_rename_dict(lookup_csv_path):
+def build_channel_rename_dict(lookup_csv_path: str) -> Dict[str, str]:
+    """
+    Build a dictionary for channel renaming from a CSV lookup table.
+
+    Args:
+        lookup_csv_path (str): Path to the channel lookup CSV.
+
+    Returns:
+        Dict[str, str]: Mapping from source channel names to destination names.
+    """
     rename_dict = {}
     with open(lookup_csv_path, newline='', encoding='utf-8') as csvfile:
         reader = csv.reader(csvfile)
-        next(reader)  # 跳过表头
+        next(reader)  # Skip header
         for row in reader:
             dest = row[0].strip()
             for src in row[1:]:
@@ -28,12 +38,19 @@ def build_channel_rename_dict(lookup_csv_path):
                     rename_dict[src] = dest
     return rename_dict
 
-# ====== 只在模块加载时读取一次csv，生成全局变量 ======
 LOOKUP_CSV_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "chanlookup.csv"))
 RENAME_DICT = build_channel_rename_dict(LOOKUP_CSV_PATH)
-# =====================================================
 
-def load_recording(recording_id):
+def load_recording(recording_id: int) -> mne.io.Raw:
+    """
+    Load an EEG recording from the database by its ID.
+
+    Args:
+        recording_id (int): The ID of the recording.
+
+    Returns:
+        mne.io.Raw: The loaded EEG recording.
+    """
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT path, duration, channels, sampling_rate FROM recordings WHERE id = ?", (recording_id,))
@@ -47,22 +64,13 @@ def load_recording(recording_id):
     if not os.path.exists(filepath):
         raise FileNotFoundError(f"EEG file not found at path: {filepath}")
 
-    # 计算预估内存使用量
     if duration and channels and sampling_rate:
         estimated_memory_mb = (duration * sampling_rate * channels * 4) / (1024 * 1024)  # 4 bytes per float32
         logger.info(f"[load_recording] Recording {recording_id}: {duration:.1f}s, {channels} channels, {sampling_rate} Hz")
         logger.info(f"[load_recording] Estimated memory usage: {estimated_memory_mb:.1f} MB")
-        
-        # 检查是否超过内存限制
         if estimated_memory_mb > MAX_MEMORY_GB * 1024:
             logger.warning(f"[load_recording] Recording {recording_id} is too large ({estimated_memory_mb:.2f} MB), exceeding limit of {MAX_MEMORY_GB*1024:.2f} MB. Skipping.")
             raise RecordingTooLargeError(f"Recording too large to process ({estimated_memory_mb:.2f} MB)")
-        
-
-        # raw = mne.io.read_raw_edf(filepath, preload=True, verbose='ERROR')
-
-
-        # 根据文件大小决定是否使用内存映射
         if estimated_memory_mb > 900:
             logger.info(f"[load_recording] Large file detected, using memory mapping")
             raw = mne.io.read_raw_edf(filepath, preload='auto', verbose='ERROR')
@@ -72,7 +80,6 @@ def load_recording(recording_id):
         logger.info(f"[load_recording] Missing metadata, using memory mapping")
         raw = mne.io.read_raw_edf(filepath, preload='auto', verbose='ERROR')
 
-    # 1. 只重命名raw中存在的通道
     channel_rename_map = {}
     for ch in raw.ch_names:
         if ch in RENAME_DICT:
@@ -86,9 +93,19 @@ def load_recording(recording_id):
     return raw
 
 @auto_gc
-def filter(raw, hp=None, lp=None):
-    out = raw.copy()
+def filter(raw: mne.io.Raw, hp: Optional[float] = None, lp: Optional[float] = None) -> mne.io.Raw:
+    """
+    Apply bandpass filtering to the raw EEG data.
 
+    Args:
+        raw (mne.io.Raw): The raw EEG data.
+        hp (Optional[float]): High-pass frequency in Hz.
+        lp (Optional[float]): Low-pass frequency in Hz.
+
+    Returns:
+        mne.io.Raw: Filtered EEG data.
+    """
+    out = raw.copy()
     hp = None if (hp is None or hp <= 0) else float(hp)
     lp = None if (lp is None or lp <= 0) else float(lp)
 
@@ -106,11 +123,20 @@ def filter(raw, hp=None, lp=None):
         raise ValueError(f"Low-pass ({lp}) must be greater than high-pass ({hp}).")
 
     out.filter(l_freq=hp, h_freq=lp, fir_design='firwin', verbose='ERROR')
-
     return out
 
 @auto_gc
-def notch_filter(raw, freq):
+def notch_filter(raw: mne.io.Raw, freq: float) -> mne.io.Raw:
+    """
+    Apply a notch filter to the raw EEG data.
+
+    Args:
+        raw (mne.io.Raw): The raw EEG data.
+        freq (float): Frequency to notch filter (Hz).
+
+    Returns:
+        mne.io.Raw: Notch-filtered EEG data.
+    """
     if freq is None:
         raise ValueError("Notch filter frequency must be specified.")
     sfreq = raw.info.get('sfreq')
@@ -119,27 +145,21 @@ def notch_filter(raw, freq):
     return raw.copy().notch_filter(freqs=[freq])
 
 @auto_gc
-def reref(raw, method, original_reference=None):
+def reref(raw: mne.io.Raw, method: str, original_reference: Optional[str] = None) -> mne.io.Raw:
     """
     Apply EEG re-referencing strategy.
 
-    Parameters:
-        raw: mne.io.Raw
-            The raw EEG recording.
-        method: str
-            The re-reference strategy. Options: 'average', 'linked_mastoid', 'none'.
-        original_reference: str or None
-            The original reference used at recording time. Can be 'Cz', 'average', 'CMS/DRL', etc.
+    Args:
+        raw (mne.io.Raw): The raw EEG recording.
+        method (str): The re-reference strategy. Options: 'average', 'linked_mastoid'.
+        original_reference (Optional[str]): The original reference used at recording time.
 
     Returns:
-        raw_ref: mne.io.Raw
-            The re-referenced raw object.
+        mne.io.Raw: The re-referenced raw object.
     """
-
     original_reference = (original_reference or "").lower()
     method = method.lower()
 
-    # Catch dangerous or nonsensical combinations
     if method == "average" and original_reference == "average":
         raise ValueError("Recording is already average referenced; do not apply average again.")
 
@@ -157,36 +177,38 @@ def reref(raw, method, original_reference=None):
 
     return raw_copy
 
-
 @auto_gc
-def resample(raw, sfreq):
+def resample(raw: mne.io.Raw, sfreq: float) -> mne.io.Raw:
+    """
+    Resample the raw EEG data to a new sampling frequency.
+
+    Args:
+        raw (mne.io.Raw): The raw EEG data.
+        sfreq (float): Target sampling frequency in Hz.
+
+    Returns:
+        mne.io.Raw: Resampled EEG data.
+    """
     if sfreq is None:
         raise ValueError("Target sampling rate must be explicitly specified.")
     original_sfreq = raw.info.get('sfreq')
     if np.isclose(sfreq, original_sfreq):
-        return raw.copy()  # Skip if already at target sfreq
+        return raw.copy()
     return raw.copy().resample(sfreq=sfreq)
 
 @auto_gc
-def ica(raw, n_components, detect_artifacts):
+def ica(raw: mne.io.Raw, n_components: Any, detect_artifacts: str) -> mne.io.Raw:
     """
-    Fully automated ICA step for EEG pipelines. No manual interaction allowed.
+    Perform fully automated ICA for artifact removal.
 
-    Parameters:
-        raw : mne.io.Raw
-            Continuous EEG recording.
-        n_components : int or float
-            Number of components to retain (int or PCA variance ratio).
-        detect_artifacts : str
-            Artifact detection strategy: 'eog', 'ecg', or 'none'.
-        random_state : int
-            For reproducibility of ICA.
+    Args:
+        raw (mne.io.Raw): Continuous EEG recording.
+        n_components (int or float): Number of components to retain.
+        detect_artifacts (str): Artifact detection strategy: 'eog', 'ecg', 'auto', or 'none'.
 
     Returns:
-        raw_clean : mne.io.Raw
-            EEG data after ICA cleaning (if any components excluded).
+        mne.io.Raw: EEG data after ICA cleaning.
     """
-
     if isinstance(n_components, int):
         if n_components <= 0:
             raise ValueError("n_components must be positive.")
@@ -197,8 +219,7 @@ def ica(raw, n_components, detect_artifacts):
             raise ValueError("When float, n_components must be in (0, 1].")
     else:
         raise TypeError("n_components must be int or float.")
-    
-    # Fit ICA
+
     ica_inst = mne.preprocessing.ICA(
         n_components=n_components,
         random_state=97,
@@ -206,25 +227,19 @@ def ica(raw, n_components, detect_artifacts):
     )
     ica_inst.fit(raw)
 
-    # Helper: try EOG with fallback proxies if no EOG channel exists
     def _find_bads_eog_with_fallback(ica_obj, raw_obj):
         eog_picks = mne.pick_types(raw_obj.info, eeg=False, eog=True)
         if len(eog_picks) > 0:
             eog_inds, eog_scores = ica_obj.find_bads_eog(raw_obj)
             return eog_inds, eog_scores
-
-        # Fallback: use frontal proxies if available
         proxies = {'fp1', 'fp2', 'fpz'}
         ch_lower = {ch.lower(): ch for ch in raw_obj.ch_names}
         proxy_name = next((ch_lower[k] for k in proxies if k in ch_lower), None)
         if proxy_name is not None:
             eog_inds, eog_scores = ica_obj.find_bads_eog(raw_obj, ch_name=proxy_name)
             return eog_inds, eog_scores
-
-        # Nothing found / no proxies
         return [], None
 
-    # Helper: ECG only if ECG channel exists (safer in EEG-only recordings)
     def _find_bads_ecg_safe(ica_obj, raw_obj):
         ecg_picks = mne.pick_types(raw_obj.info, eeg=False, ecg=True)
         if len(ecg_picks) == 0:
@@ -251,7 +266,6 @@ def ica(raw, n_components, detect_artifacts):
     else:
         raise ValueError("detect_artifacts must be one of {'auto','eog','ecg','none'}.")
 
-    # Apply ICA (on a copy)
     raw_clean = raw.copy()
     if len(exclude) > 0:
         ica_inst.apply(raw_clean, exclude=list(exclude))
@@ -259,9 +273,16 @@ def ica(raw, n_components, detect_artifacts):
     return raw_clean
 
 @auto_gc
-def epoch(raw, duration=5.0):
+def epoch(raw: mne.io.Raw, duration: float = 5.0) -> mne.Epochs:
     """
     Segment raw data into fixed-length epochs.
+
+    Args:
+        raw (mne.io.Raw): The raw EEG data.
+        duration (float): Length of each epoch in seconds.
+
+    Returns:
+        mne.Epochs: Epoched EEG data.
     """
     events = mne.make_fixed_length_events(raw, duration=duration)
     epochs = mne.Epochs(raw, events, tmin=0, tmax=duration, baseline=None, preload=True, verbose='ERROR')
@@ -269,46 +290,32 @@ def epoch(raw, duration=5.0):
 
 @auto_gc
 def epoch_by_event(
-    raw,
-    event_type,
-    recording_id,
-    subepoch_len=10.0,
-    drop_partial=True,
-    min_overlap=0.8,
-    include_values=None,
-):
+    raw: mne.io.Raw,
+    event_type: str,
+    recording_id: int,
+    subepoch_len: float = 10.0,
+    drop_partial: bool = True,
+    min_overlap: float = 0.8,
+    include_values: Optional[List[str]] = None,
+) -> mne.Epochs:
     """
-    根据数据库 `recording_events` 中的事件区间，切分为定长子窗并返回 mne.Epochs。
+    Segment raw data into fixed-length sub-epochs based on event intervals from the database.
 
-    典型用法：基于睡眠阶段（30s hypnogram），将每段阶段切成 10s 无重叠子窗。
+    Args:
+        raw (mne.io.Raw): Continuous EEG.
+        event_type (str): Event type (e.g., 'sleep_stage').
+        recording_id (int): Recording ID.
+        subepoch_len (float): Sub-epoch length in seconds.
+        drop_partial (bool): If True, only keep sub-epochs fully within event intervals.
+        min_overlap (float): Minimum overlap ratio for partial sub-epochs.
+        include_values (Optional[List[str]]): Only keep these event values.
 
-    Parameters
-    ----------
-    raw : mne.io.Raw
-        连续 EEG。
-    event_type : str
-        事件类型（如 'sleep_stage'）。
-    recording_id : int
-        对应 `recordings.id`。
-    subepoch_len : float
-        子窗长度（秒）。默认 10.0。
-    drop_partial : bool
-        True 时仅保留完全落入事件区间的子窗；False 时允许部分重叠，配合 `min_overlap` 使用。
-    min_overlap : float
-        当 `drop_partial=False` 时，子窗与事件区间的最小重叠比例阈值（0-1）。
-    include_values : list[str] or None
-        仅保留这些取值（例如 ['W','N1','N2','N3','REM']）。None 表示不过滤。
-
-    Returns
-    -------
-    mne.Epochs
-        每个子窗一个 epoch，`event_id` 对应事件 value 的枚举映射。
+    Returns:
+        mne.Epochs: Epoched EEG data, one epoch per sub-epoch.
     """
-
     if recording_id is None:
         raise ValueError("recording_id must be provided")
 
-    # 读取该 recording 的事件（包含 onset / duration / value）
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute(
@@ -323,7 +330,6 @@ def epoch_by_event(
 
     sfreq = float(raw.info["sfreq"])
 
-    # 可选按取值过滤（例如仅保留 AASM 五阶段）
     if include_values is not None:
         include_values_set = set([str(v) for v in include_values])
         rows = [r for r in rows if str(r[2]) in include_values_set]
@@ -332,8 +338,6 @@ def epoch_by_event(
                 f"No events left after filtering include_values={include_values} for recording {recording_id}"
             )
 
-    # 生成子窗事件（样本点）
-    # events: (n_events, 3) 数组，第三列为整数标签；event_id 为 {label: code}
     value_to_code = {}
     events_list = []
 
@@ -345,19 +349,16 @@ def epoch_by_event(
             continue
 
         if duration <= 0:
-            # 无持续时长就跳过（睡眠阶段通常有 duration=30s）
             continue
 
         window_start = onset
         window_end = onset + duration
 
-        # 按 subepoch_len 滚动切分
         t = window_start
-        while t + 1e-9 < window_end:  # 容忍浮点边界
+        while t + 1e-9 < window_end:
             candidate_start = t
             candidate_end = t + subepoch_len
 
-            # 计算与事件区间的重叠
             inter_start = max(candidate_start, window_start)
             inter_end = min(candidate_end, window_end)
             overlap = max(0.0, inter_end - inter_start)
@@ -370,13 +371,10 @@ def epoch_by_event(
 
             if keep:
                 if value not in value_to_code:
-                    value_to_code[value] = len(value_to_code) + 1  # 从1开始编码
+                    value_to_code[value] = len(value_to_code) + 1
                 code = value_to_code[value]
-
                 sample = int(round(candidate_start * sfreq))
                 events_list.append([sample, 0, code])
-
-            # 子窗无重叠滚动
             t += subepoch_len
 
     if len(events_list) == 0:
@@ -385,7 +383,6 @@ def epoch_by_event(
     events = np.array(events_list, dtype=int)
     event_id = {str(k): v for k, v in value_to_code.items()}
 
-    # 用 mne.Epochs 切分，tmin=0, tmax=subepoch_len
     epochs = mne.Epochs(
         raw,
         events,
@@ -406,39 +403,34 @@ def epoch_by_event(
     return epochs
 
 @auto_gc
-def reject_high_amplitude(epochs, threshold_uv):
+def reject_high_amplitude(epochs: mne.Epochs, threshold_uv: float) -> mne.Epochs:
     """
     Reject epochs with any EEG channel exceeding the given amplitude.
 
-    Parameters:
-        epochs : mne.Epochs
-            Input EEG epochs.
-        threshold_uv : float
-            Absolute amplitude threshold (in microvolts). Default is 150 µV.
+    Args:
+        epochs (mne.Epochs): Input EEG epochs.
+        threshold_uv (float): Absolute amplitude threshold (in microvolts).
 
     Returns:
-        clean_epochs : mne.Epochs
-            Epochs after rejecting high-amplitude artifacts.
+        mne.Epochs: Cleaned epochs after rejecting high-amplitude artifacts.
     """
     threshold_v = threshold_uv * 1e-6  # convert µV to V
     clean_epochs = epochs.copy().drop_bad(reject={"eeg": threshold_v})
     return clean_epochs
 
 @auto_gc
-def zscore(epochs, mode):
+def zscore(epochs: mne.Epochs, mode: str) -> mne.Epochs:
     """
     Standardize epochs across time for each channel.
 
-    Parameters:
-        epochs : mne.Epochs
-            Input EEG epochs.
-        mode : str
-            Normalization strategy. 
-            'per_epoch': normalize each epoch × channel individually (default).
-            'global': normalize across all epochs per channel.
+    Args:
+        epochs (mne.Epochs): Input EEG epochs.
+        mode (str): Normalization strategy. 'per_epoch' or 'global'.
+
+    Returns:
+        mne.Epochs: Z-scored epochs.
     """
-    data = epochs.get_data()  # shape: (n_epochs, n_channels, n_times)
-    
+    data = epochs.get_data()
     if mode == "per_epoch":
         mean = np.mean(data, axis=2, keepdims=True)
         std = np.std(data, axis=2, keepdims=True)
@@ -448,7 +440,7 @@ def zscore(epochs, mode):
     else:
         raise ValueError(f"Unsupported mode '{mode}'. Choose from 'per_epoch' or 'global'.")
 
-    std[std == 0] = 1e-6  # floor to prevent divide-by-zero
+    std[std == 0] = 1e-6
     data_z = (data - mean) / std
 
     zscored = epochs.copy()
@@ -456,7 +448,24 @@ def zscore(epochs, mode):
     return zscored
 
 @auto_gc
-def detect_bad_channels(raw, flat_thresh=1e-7, noisy_thresh=1e-4, correlation_thresh=0.4):
+def detect_bad_channels(
+    raw: mne.io.Raw,
+    flat_thresh: float = 1e-7,
+    noisy_thresh: float = 1e-4,
+    correlation_thresh: float = 0.4
+) -> List[str]:
+    """
+    Detect bad EEG channels based on flatness, noise, and correlation.
+
+    Args:
+        raw (mne.io.Raw): The raw EEG data.
+        flat_thresh (float): Threshold for flat channels (std below this).
+        noisy_thresh (float): Threshold for noisy channels (std above this).
+        correlation_thresh (float): Minimum mean absolute correlation with other channels.
+
+    Returns:
+        List[str]: List of detected bad channel names.
+    """
     data, _ = raw.get_data(picks="eeg", return_times=False)
     ch_names = raw.ch_names
     n_channels = data.shape[0]

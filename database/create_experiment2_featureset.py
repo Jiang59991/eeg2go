@@ -8,18 +8,12 @@ from database.add_fxdef import add_fxdefs
 from database.add_featureset import add_featureset
 from database.add_pipeline import add_pipeline
 
+DB_PATH: str = os.path.join(os.path.dirname(__file__), "eeg2go.db")
+PIPE_SHORTNAME: str = "P0_sleep10s_hp"
+CHANS: List[str] = ["Fpz-Cz", "Pz-Oz"]
+BANDS: List[str] = ["delta", "theta", "alpha", "beta"]
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "eeg2go.db")
-
-# Baseline pipeline for Experiment 2 (sleep-stage-aware 10s subepochs)
-PIPE_SHORTNAME = "P0_sleep10s_hp"
-
-# Channels and bands (Sleep-EDFx uses Fpz-Cz and Pz-Oz)
-CHANS = ["Fpz-Cz", "Pz-Oz"]
-BANDS = ["delta", "theta", "alpha", "beta"]
-
-# Wide feature list (22 total: 11 time + 11 freq)
-TIME_FEATURES = [
+TIME_FEATURES: List[str] = [
     "peak_to_peak_amplitude",
     "crest_factor",
     "shape_factor",
@@ -33,7 +27,7 @@ TIME_FEATURES = [
     "signal_stability",
 ]
 
-FREQ_FEATURES = [
+FREQ_FEATURES: List[str] = [
     "spectral_entropy",
     "alpha_peak_frequency",
     "theta_alpha_ratio",
@@ -47,18 +41,23 @@ FREQ_FEATURES = [
     "spectral_complexity",
 ]
 
-
 def ensure_experiment2_pipeline() -> int:
-    """Create the baseline pipeline for Experiment 2 if it doesn't exist, return its id."""
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
+    """
+    Ensure the baseline pipeline for Experiment 2 exists in the database.
+    If it does not exist, create it. Return the pipeline id.
+
+    Returns:
+        int: The id of the pipeline.
+    """
+    conn: sqlite3.Connection = sqlite3.connect(DB_PATH)
+    c: sqlite3.Cursor = conn.cursor()
     c.execute("SELECT id FROM pipedef WHERE shortname = ?", (PIPE_SHORTNAME,))
     row = c.fetchone()
     conn.close()
     if row:
         return int(row[0])
 
-    pipe = {
+    pipe: Dict = {
         "shortname": PIPE_SHORTNAME,
         "description": "Exp2 baseline: resample(250) → HP 0.5 Hz → epoch_by_event(sleep_stage, 10s)",
         "source": "experiment2",
@@ -85,22 +84,23 @@ def ensure_experiment2_pipeline() -> int:
         ],
     }
     logger.info(f"Creating pipeline '{PIPE_SHORTNAME}' for Experiment 2 …")
-    pipe_id = add_pipeline(pipe)
+    pipe_id: int = add_pipeline(pipe)
     return int(pipe_id)
-
 
 def build_fxdefs_for_pipeline(pipe_id: int) -> List[int]:
     """
-    Build fxdefs for Experiment 2 feature set on a given pipeline.
-    Includes:
-      - relative_power for 4 bands × 6 chans
-      - 22 wide features (time+freq) × 6 chans
+    Build all feature definitions (fxdefs) for Experiment 2 for a given pipeline.
+
+    Args:
+        pipe_id (int): The id of the pipeline.
+
+    Returns:
+        List[int]: List of fxdef ids created.
     """
     all_fxids: List[int] = []
 
-    # 1) Relative power (per-channel)
     for band in BANDS:
-        fxdef_spec = {
+        fxdef_spec: Dict = {
             "func": "relative_power",
             "pipeid": pipe_id,
             "shortname": f"bp_rel_{band}",
@@ -110,13 +110,12 @@ def build_fxdefs_for_pipeline(pipe_id: int) -> List[int]:
             "ver": "v1",
             "notes": f"Relative bandpower for {{chan}} in {band}",
         }
-        fxids = add_fxdefs(fxdef_spec)
+        fxids: List[int] = add_fxdefs(fxdef_spec)
         all_fxids.extend(fxids)
         logger.info(f"Added relative_power({band}) with {len(fxids)} fxdefs for pipe {pipe_id}")
 
-    # 2) Wide time-domain features
     for fname in TIME_FEATURES:
-        fxdef_spec = {
+        fxdef_spec: Dict = {
             "func": fname,
             "pipeid": pipe_id,
             "shortname": fname,
@@ -126,13 +125,12 @@ def build_fxdefs_for_pipeline(pipe_id: int) -> List[int]:
             "ver": "v1",
             "notes": f"{fname} for {{chan}} (10s subepochs)",
         }
-        fxids = add_fxdefs(fxdef_spec)
+        fxids: List[int] = add_fxdefs(fxdef_spec)
         all_fxids.extend(fxids)
         logger.info(f"Added {fname} with {len(fxids)} fxdefs for pipe {pipe_id}")
 
-    # 3) Wide frequency-domain features
     for fname in FREQ_FEATURES:
-        fxdef_spec = {
+        fxdef_spec: Dict = {
             "func": fname,
             "pipeid": pipe_id,
             "shortname": fname,
@@ -142,28 +140,28 @@ def build_fxdefs_for_pipeline(pipe_id: int) -> List[int]:
             "ver": "v1",
             "notes": f"{fname} for {{chan}} (10s subepochs)",
         }
-        fxids = add_fxdefs(fxdef_spec)
+        fxids: List[int] = add_fxdefs(fxdef_spec)
         all_fxids.extend(fxids)
         logger.info(f"Added {fname} with {len(fxids)} fxdefs for pipe {pipe_id}")
 
     return all_fxids
 
-
 def create_experiment2_featureset() -> Dict[str, int]:
     """
-    Create the Experiment 2 featureset:
-      - featureset name: exp2_wide_sleep_featureset__P0_sleep10s
-      - bound to pipeline: P0_sleep10s_hp
+    Create the Experiment 2 featureset and add it to the database.
+
+    Returns:
+        Dict[str, int]: Mapping from featureset name to featureset id.
     """
     results: Dict[str, int] = {}
 
-    pipe_id = ensure_experiment2_pipeline()
+    pipe_id: int = ensure_experiment2_pipeline()
     logger.info(f"Building fxdefs for pipeline {PIPE_SHORTNAME} (id={pipe_id})")
 
-    fxids = build_fxdefs_for_pipeline(pipe_id)
+    fxids: List[int] = build_fxdefs_for_pipeline(pipe_id)
 
-    fs_name = f"exp2_wide_sleep_featureset__{PIPE_SHORTNAME}"
-    fs_id = add_featureset({
+    fs_name: str = f"exp2_wide_sleep_featureset__{PIPE_SHORTNAME}"
+    fs_id: int = add_featureset({
         "name": fs_name,
         "description": (
             "Experiment 2: Sleep-EDFx two-channel (Fpz-Cz, Pz-Oz); 10s subepochs aligned to sleep stages; "
@@ -176,9 +174,6 @@ def create_experiment2_featureset() -> Dict[str, int]:
 
     return results
 
-
 if __name__ == "__main__":
-    results = create_experiment2_featureset()
+    results: Dict[str, int] = create_experiment2_featureset()
     print("Created featuresets:", results)
-
-

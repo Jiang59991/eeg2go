@@ -3,37 +3,35 @@ import os
 import sqlite3
 import mne
 import re
+from typing import Optional, Dict, Any, List
 from logging_config import logger
 
 DATA_DIR = "/rds/general/user/zj724/ephemeral/TUAB_v3_0_1_edf"
 DB_PATH = os.path.join(os.path.dirname(__file__), "eeg2go.db")
 mne.set_log_level('WARNING')
 
-def extract_subject_info_from_path(file_path):
+def extract_subject_info_from_path(file_path: str) -> Optional[Dict[str, Any]]:
     """
-    从TUAB v3.0.1文件路径中提取subject信息
-    文件路径格式: eval/abnormal/01_tcp_ar/aaaaabdo_s003_t000.edf
+    Extract subject information from TUAB v3.0.1 file path.
+
+    Args:
+        file_path (str): Relative path of the .edf file, e.g. eval/abnormal/01_tcp_ar/aaaaabdo_s003_t000.edf
+
+    Returns:
+        Optional[Dict[str, Any]]: Dictionary with subject/session/token/recording_id/split_type/label/config/filename, or None if parsing fails.
     """
     path_parts = file_path.split('/')
     if len(path_parts) >= 4:
-        split_type = path_parts[0]  # eval 或 train
-        label = path_parts[1]       # normal 或 abnormal
-        config = path_parts[2]      # 01_tcp_ar
-        filename = path_parts[3]    # aaaaabdo_s003_t000.edf
-        
-        # 解析文件名: aaaaabdo_s003_t000.edf
-        # subject_id: aaaaabdo
-        # session: s003
-        # token: t000
+        split_type = path_parts[0]
+        label = path_parts[1]
+        config = path_parts[2]
+        filename = path_parts[3]
         filename_parts = filename.replace('.edf', '').split('_')
         if len(filename_parts) >= 3:
             subject_id = filename_parts[0]
             session = filename_parts[1]
             token = filename_parts[2]
-            
-            # 创建唯一的recording_id: subject_id_session_token
             recording_id = f"{subject_id}_{session}_{token}"
-            
             return {
                 'subject_id': subject_id,
                 'session': session,
@@ -46,15 +44,21 @@ def extract_subject_info_from_path(file_path):
             }
     return None
 
-def import_tuab_data(data_dir):
+def import_tuab_data(data_dir: str) -> Optional[int]:
     """
-    导入TUAB v3.0.1数据到数据库
+    Import TUAB v3.0.1 data into the database.
+
+    Args:
+        data_dir (str): Directory containing TUAB EDF files.
+
+    Returns:
+        Optional[int]: Dataset ID of the imported TUAB dataset.
     """
     logger.info(f"Importing TUAB v3.0.1 data from {data_dir}")
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
-    # 1. 确保 TUAB 数据集存在
+    # Ensure TUAB dataset exists
     c.execute("SELECT id FROM datasets WHERE name = ?", ("TUAB_v3.0.1",))
     row = c.fetchone()
     if row is None:
@@ -66,58 +70,47 @@ def import_tuab_data(data_dir):
         dataset_id = row[0]
         logger.info(f"Using existing TUAB v3.0.1 dataset with ID: {dataset_id}")
 
-    # 2. 遍历所有 .edf 文件
     edf_files = []
     for root, dirs, files in os.walk(data_dir):
         for fname in files:
             if fname.endswith(".edf"):
                 fpath = os.path.join(root, fname)
-                # 获取相对于data_dir的路径
                 rel_path = os.path.relpath(fpath, data_dir)
                 edf_files.append((fpath, rel_path))
     
     logger.info(f"Found {len(edf_files)} EDF files")
-    
     imported_count = 0
     skipped_count = 0
     
     for fpath, rel_path in edf_files:
         info = extract_subject_info_from_path(rel_path)
-        
         if not info:
             logger.warning(f"Could not extract subject info from path: {rel_path}")
             skipped_count += 1
             continue
 
-        # 检查是否已经导入
         c.execute("SELECT id FROM recordings WHERE filename = ? AND path = ?", (info['filename'], fpath))
         if c.fetchone():
             logger.debug(f"Already imported: {info['filename']}")
             skipped_count += 1
             continue
 
-        # 插入或查询 subject
         c.execute("SELECT subject_id FROM subjects WHERE subject_id = ? AND dataset_id = ?", (info['subject_id'], dataset_id))
         if not c.fetchone():
             c.execute("INSERT INTO subjects (subject_id, dataset_id) VALUES (?, ?)", (info['subject_id'], dataset_id))
             logger.debug(f"Created new subject: {info['subject_id']}")
 
         try:
-            # 读取EDF文件获取基本信息
             raw = mne.io.read_raw_edf(fpath, preload=False, verbose='ERROR')
             sfreq = raw.info['sfreq']
             channels = len(raw.info['ch_names'])
             duration = raw.n_times / sfreq
-            
-            # 获取通道名称
             ch_names = raw.info['ch_names']
-            
         except Exception as e:
             logger.error(f"Failed to read {fpath}: {e}")
             sfreq = channels = duration = None
             ch_names = []
 
-        # 插入recording记录
         c.execute("""
             INSERT INTO recordings (
                 dataset_id, subject_id, filename, path, duration, 
@@ -127,7 +120,7 @@ def import_tuab_data(data_dir):
         """, (dataset_id, info['subject_id'], info['filename'], fpath, duration, 
               channels, sfreq, "continuous", "10-20"))
 
-        # 插入recording_metadata记录，包含normal/abnormal标签
+        # Insert recording_metadata with normal/abnormal label
         recording_id = c.lastrowid
         c.execute("""
             INSERT INTO recording_metadata (
@@ -148,43 +141,36 @@ def import_tuab_data(data_dir):
 
     conn.commit()
     conn.close()
-    
     logger.info(f"Import completed. Imported: {imported_count}, Skipped: {skipped_count}")
     return dataset_id
 
-def create_tuab_subset_for_experiment1():
+def create_tuab_subset_for_experiment1() -> Optional[List[Dict[str, Any]]]:
     """
-    为实验1创建TUAB子集：每个subject选择1条recording
-    优先选择abnormal标签的recording
+    Create TUAB subset for Experiment 1: select one recording per subject,
+    preferring abnormal label, otherwise the longest recording.
+
+    Returns:
+        Optional[List[Dict[str, Any]]]: List of selected recordings with keys: recording_id, subject_id, filename, path, duration, is_abnormal.
     """
     logger.info("Creating TUAB subset for Experiment 1...")
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    
-    # 获取TUAB数据集ID
     c.execute("SELECT id FROM datasets WHERE name = ?", ("TUAB_v3.0.1",))
     row = c.fetchone()
     if not row:
         logger.error("TUAB v3.0.1 dataset not found. Please import TUAB data first.")
         return None
-    
     dataset_id = row[0]
-    
-    # 为每个subject选择一条recording（优先选择abnormal，然后选择最长的）
     c.execute("""
         SELECT DISTINCT r.subject_id 
         FROM recordings r
         WHERE r.dataset_id = ? 
         ORDER BY r.subject_id
     """, (dataset_id,))
-    
     subjects = [row[0] for row in c.fetchall()]
     logger.info(f"Found {len(subjects)} subjects in TUAB v3.0.1 dataset")
-    
-    # 为每个subject选择recording
     selected_recordings = []
     for subject_id in subjects:
-        # 优先选择abnormal标签的recording，然后按duration排序
         c.execute("""
             SELECT r.id, r.filename, r.path, r.duration, rm.abnormal
             FROM recordings r
@@ -193,7 +179,6 @@ def create_tuab_subset_for_experiment1():
             ORDER BY rm.abnormal DESC, r.duration DESC
             LIMIT 1
         """, (dataset_id, subject_id))
-        
         row = c.fetchone()
         if row:
             selected_recordings.append({
@@ -204,35 +189,28 @@ def create_tuab_subset_for_experiment1():
                 'duration': row[3],
                 'is_abnormal': row[4] == '1' if isinstance(row[4], str) else bool(row[4])
             })
-    
     conn.close()
-    
     logger.info(f"Selected {len(selected_recordings)} recordings for Experiment 1")
-    
-    # 统计标签分布
     abnormal_count = sum(1 for r in selected_recordings if r['is_abnormal'])
     normal_count = len(selected_recordings) - abnormal_count
     logger.info(f"Label distribution: Normal={normal_count}, Abnormal={abnormal_count}")
-    
     return selected_recordings
 
-def get_label_statistics():
+def get_label_statistics() -> Optional[Dict[str, Any]]:
     """
-    获取数据集标签统计信息
+    Get label statistics for the TUAB dataset.
+
+    Returns:
+        Optional[Dict[str, Any]]: Dictionary with overall and by_split label statistics.
     """
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    
-    # 获取TUAB数据集ID
     c.execute("SELECT id FROM datasets WHERE name = ?", ("TUAB_v3.0.1",))
     row = c.fetchone()
     if not row:
         logger.error("TUAB v3.0.1 dataset not found.")
         return None
-    
     dataset_id = row[0]
-    
-    # 统计标签分布
     c.execute("""
         SELECT rm.abnormal, COUNT(*) as count
         FROM recordings r
@@ -240,14 +218,11 @@ def get_label_statistics():
         WHERE r.dataset_id = ?
         GROUP BY rm.abnormal
     """, (dataset_id,))
-    
     stats = {}
     for row in c.fetchall():
         is_abnormal = bool(row[0])
         count = row[1]
         stats['abnormal' if is_abnormal else 'normal'] = count
-    
-    # 统计split分布
     c.execute("""
         SELECT 
             CASE 
@@ -262,30 +237,22 @@ def get_label_statistics():
         WHERE r.dataset_id = ?
         GROUP BY split_type, rm.abnormal
     """, (dataset_id,))
-    
     split_stats = {}
     for row in c.fetchall():
         split_type = row[0]
         is_abnormal = bool(row[1])
         count = row[2]
-        
         if split_type not in split_stats:
             split_stats[split_type] = {'normal': 0, 'abnormal': 0}
-        
         split_stats[split_type]['abnormal' if is_abnormal else 'normal'] = count
-    
     conn.close()
-    
     return {
         'overall': stats,
         'by_split': split_stats
     }
 
 if __name__ == "__main__":
-    # 导入TUAB数据
     dataset_id = import_tuab_data(DATA_DIR)
-    
-    # 获取统计信息
     stats = get_label_statistics()
     if stats:
         print("\n=== TUAB v3.0.1 Dataset Statistics ===")
@@ -293,10 +260,7 @@ if __name__ == "__main__":
         print("By split:")
         for split_type, counts in stats['by_split'].items():
             print(f"  {split_type}: {counts}")
-    
-    # 创建实验1子集
     subset = create_tuab_subset_for_experiment1()
-    
     if subset:
         print(f"\nExperiment 1 subset created with {len(subset)} recordings")
         print("Sample recordings:")
@@ -305,8 +269,6 @@ if __name__ == "__main__":
             print(f"  {i+1}. {rec['subject_id']}: {rec['filename']} ({rec['duration']:.1f}s, {label})")
         if len(subset) > 5:
             print(f"  ... and {len(subset)-5} more")
-        
-        # 统计子集标签分布
         abnormal_count = sum(1 for r in subset if r['is_abnormal'])
         normal_count = len(subset) - abnormal_count
         print(f"\nExperiment 1 subset label distribution:")

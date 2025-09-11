@@ -3,7 +3,7 @@ import os
 import time
 import json
 import sqlite3
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Any
 
 import numpy as np
 import pandas as pd
@@ -11,7 +11,6 @@ import pandas as pd
 from logging_config import logger
 from eeg2fx.featureset_fetcher import run_feature_set, load_cached_feature_value
 from eeg2fx.steps import load_recording, epoch_by_event
-
 
 DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "database", "eeg2go.db"))
 
@@ -45,8 +44,15 @@ WIDE_FREQ_FEATURES = [
 ]
 WIDE_FEATURES = WIDE_TIME_FEATURES + WIDE_FREQ_FEATURES
 
-
 def _get_recording_ids(dataset_id: int, limit: int | None = None) -> List[int]:
+    """
+    Get a list of recording IDs for a given dataset.
+    Args:
+        dataset_id (int): Dataset ID.
+        limit (int | None): Optional limit on number of IDs.
+    Returns:
+        List[int]: List of recording IDs.
+    """
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT id FROM recordings WHERE dataset_id=? ORDER BY id", (dataset_id,))
@@ -56,8 +62,14 @@ def _get_recording_ids(dataset_id: int, limit: int | None = None) -> List[int]:
         ids = ids[: int(limit)]
     return ids
 
-
-def _get_fxdefs_for_set(feature_set_id: int) -> List[Dict]:
+def _get_fxdefs_for_set(feature_set_id: int) -> List[Dict[str, Any]]:
+    """
+    Get feature definitions (fxdefs) for a given feature set.
+    Args:
+        feature_set_id (int): Feature set ID.
+    Returns:
+        List[Dict[str, Any]]: List of fxdef dicts.
+    """
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute(
@@ -85,9 +97,14 @@ def _get_fxdefs_for_set(feature_set_id: int) -> List[Dict]:
         })
     return fxdefs
 
-
 def _get_pipeline_epoch_params(pipeid: int) -> Tuple[float, List[str]]:
-    """Read subepoch_len and include_values from pipeline definition (steps JSON)."""
+    """
+    Read subepoch_len and include_values from pipeline definition (steps JSON).
+    Args:
+        pipeid (int): Pipeline definition ID.
+    Returns:
+        Tuple[float, List[str]]: subepoch_len and include_values.
+    """
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT steps FROM pipedef WHERE id=?", (pipeid,))
@@ -106,9 +123,15 @@ def _get_pipeline_epoch_params(pipeid: int) -> Tuple[float, List[str]]:
             break
     return subepoch_len, include_values
 
-
 def _build_stage_vector(recording_id: int, pipeid: int) -> List[str]:
-    """Recreate epochs for this recording to obtain per-epoch stage labels in the same order."""
+    """
+    Recreate epochs for this recording to obtain per-epoch stage labels in the same order.
+    Args:
+        recording_id (int): Recording ID.
+        pipeid (int): Pipeline definition ID.
+    Returns:
+        List[str]: List of stage labels for each epoch.
+    """
     subepoch_len, include_values = _get_pipeline_epoch_params(pipeid)
     raw = load_recording(recording_id)
     epochs = epoch_by_event(
@@ -120,11 +143,9 @@ def _build_stage_vector(recording_id: int, pipeid: int) -> List[str]:
         min_overlap=0.8,
         include_values=include_values,
     )
-    # Map event integer codes back to labels via events.event_id dict
     inv_map = {v: k for k, v in epochs.event_id.items()}
     labels = [inv_map[int(code)] for code in epochs.events[:, 2]]
     return labels
-
 
 def _parse_values_from_cache(cached: Dict) -> List[float]:
     """
@@ -134,6 +155,10 @@ def _parse_values_from_cache(cached: Dict) -> List[float]:
       - list of numbers
       - scalar number
     Missing/NaN/None → np.nan
+    Args:
+        cached (Dict): Cached value dict.
+    Returns:
+        List[float]: List of float values (np.nan for missing).
     """
     if not cached or cached.get("value") is None:
         return []
@@ -158,21 +183,28 @@ def _parse_values_from_cache(cached: Dict) -> List[float]:
     except Exception:
         return [np.nan]
 
-
-def extract_epoch_matrix(dataset_id: int, feature_set_id: int, limit: int | None = None,
-                         ensure_cache: bool = True) -> Dict:
+def extract_epoch_matrix(
+    dataset_id: int,
+    feature_set_id: int,
+    limit: int | None = None,
+    ensure_cache: bool = True
+) -> Dict[str, Any]:
     """
-    - 确保（或触发）缓存：对缺失缓存的录波调用 run_feature_set
-    - 组装每条录波的 epoch×feature 矩阵（46 维）并附加 stage
-    - 记录耗时与失败率
-
-    Returns
-    -------
-    dict: {
-      'matrix': pandas.DataFrame,
-      'per_recording': List[dict],
-      'per_feature': pandas.DataFrame
-    }
+    Extract epoch-level feature matrix for all recordings in a dataset.
+    Ensures (or triggers) cache: runs feature extraction for missing cache.
+    Assembles an epoch x feature matrix (46 dims) for each recording and attaches stage.
+    Records timing and failure rates.
+    Args:
+        dataset_id (int): Dataset ID.
+        feature_set_id (int): Feature set ID.
+        limit (int | None): Optional limit on number of recordings.
+        ensure_cache (bool): Whether to ensure cache is present.
+    Returns:
+        Dict[str, Any]: {
+            'matrix': pandas.DataFrame,
+            'per_recording': List[dict],
+            'per_feature': pandas.DataFrame
+        }
     """
     fxdefs = _get_fxdefs_for_set(feature_set_id)
     if not fxdefs:
@@ -183,28 +215,23 @@ def extract_epoch_matrix(dataset_id: int, feature_set_id: int, limit: int | None
     if not recording_ids:
         raise ValueError(f"No recordings in dataset {dataset_id}")
 
-    # Group fxdefs
     rel_power_fx = [fx for fx in fxdefs if fx["func"] == "relative_power" and fx["params"].get("band") in REL_POWER_BANDS and fx["chans"] in TARGET_CHANS]
     wide_fx = [fx for fx in fxdefs if fx["func"] in WIDE_FEATURES and fx["chans"] in TARGET_CHANS]
 
-    per_rec_logs = []
-    per_feature_fail = {fx["id"]: 0 for fx in fxdefs}
-
-    rows = []
+    per_rec_logs: List[Dict[str, Any]] = []
+    per_feature_fail: Dict[Any, int] = {fx["id"]: 0 for fx in fxdefs}
+    rows: List[Dict[str, Any]] = []
 
     for rid in recording_ids:
         t0 = time.perf_counter()
         status = "ok"
         try:
             if ensure_cache:
-                # 触发计算（仅对未缓存者，内部已判断）
                 run_feature_set(feature_set_id, rid)
 
-            # 读取阶段标签
             stages = _build_stage_vector(rid, pipeid)
             n_epochs = len(stages)
 
-            # 收集相对功率：4×2=8 列
             rel_cols: Dict[str, List[float]] = {}
             for fx in rel_power_fx:
                 cached = load_cached_feature_value(fx["id"], rid)
@@ -216,12 +243,10 @@ def extract_epoch_matrix(dataset_id: int, feature_set_id: int, limit: int | None
                 key = f"bp_rel__{band}__{fx['chans']}"
                 rel_cols[key] = vals
 
-            # 收集“宽特征”并对 2 通道做中位数聚合：得到 22 列
             wide_cols: Dict[str, List[float]] = {}
             for fname in WIDE_FEATURES:
                 chan_vals = []
                 for ch in TARGET_CHANS:
-                    # 找到对应 fxdef
                     fx = next((f for f in wide_fx if f["func"] == fname and f["chans"] == ch), None)
                     if fx is None:
                         continue
@@ -232,13 +257,12 @@ def extract_epoch_matrix(dataset_id: int, feature_set_id: int, limit: int | None
                         vals = [np.nan] * n_epochs
                     chan_vals.append(vals)
                 if chan_vals:
-                    arr = np.array(chan_vals, dtype=float)  # shape: (2, n_epochs)
-                    med = np.nanmedian(arr, axis=0)         # shape: (n_epochs,)
+                    arr = np.array(chan_vals, dtype=float)
+                    med = np.nanmedian(arr, axis=0)
                     wide_cols[fname] = med.tolist()
                 else:
                     wide_cols[fname] = [np.nan] * n_epochs
 
-            # 组装本录波的矩阵
             for ei in range(n_epochs):
                 row = {
                     "recording_id": rid,
@@ -259,7 +283,6 @@ def extract_epoch_matrix(dataset_id: int, feature_set_id: int, limit: int | None
 
     df = pd.DataFrame(rows)
 
-    # 汇总 per-feature 失败率
     per_feat_df = pd.DataFrame({
         "fxdef_id": list(per_feature_fail.keys()),
         "fail_count": list(per_feature_fail.values()),
@@ -271,8 +294,11 @@ def extract_epoch_matrix(dataset_id: int, feature_set_id: int, limit: int | None
         "per_feature": per_feat_df,
     }
 
-
-def main():
+def main() -> None:
+    """
+    Main entry point for extracting Exp2 epoch-level matrix.
+    Parses command-line arguments and saves output matrix and stats.
+    """
     import argparse
     parser = argparse.ArgumentParser(description="Extract Exp2 epoch-level matrix (46 dims + stage)")
     parser.add_argument("--dataset", type=int, required=True)
@@ -288,7 +314,6 @@ def main():
     df.to_csv(args.out, index=False)
     logger.info(f"Saved epoch matrix to {args.out} with shape {df.shape}")
 
-    # 保存统计
     stats_path = args.out.replace(".csv", "__stats.json")
     with open(stats_path, "w", encoding="utf-8") as f:
         json.dump({
@@ -297,8 +322,5 @@ def main():
         }, f, ensure_ascii=False, indent=2)
     logger.info(f"Saved stats to {stats_path}")
 
-
 if __name__ == "__main__":
     main()
-
-

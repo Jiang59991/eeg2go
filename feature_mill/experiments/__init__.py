@@ -1,16 +1,7 @@
-"""
-Experiment modules for EEG2Go
-
-This package contains various experiment modules for analyzing EEG features.
-Each experiment module should implement a `run()` function with the signature:
-    run(df_feat: pd.DataFrame, df_meta: pd.DataFrame, output_dir: str, **kwargs) -> str
-"""
-
 from . import correlation
 from . import feature_statistics
 from . import classification
 
-# Available experiments with parameter definitions
 AVAILABLE_EXPERIMENTS = {
     'correlation': {
         'name': 'Correlation Analysis',
@@ -152,39 +143,74 @@ AVAILABLE_EXPERIMENTS = {
 }
 
 def get_experiment_info(experiment_name: str) -> dict:
-    """Get information about a specific experiment"""
+    """
+    Get information about a specific experiment.
+
+    Args:
+        experiment_name (str): The name of the experiment.
+
+    Returns:
+        dict: The experiment information dictionary.
+
+    Raises:
+        ValueError: If the experiment is not found.
+    """
     if experiment_name not in AVAILABLE_EXPERIMENTS:
         raise ValueError(f"Experiment '{experiment_name}' not found")
-    
     return AVAILABLE_EXPERIMENTS[experiment_name]
 
 def list_experiments() -> list:
-    """List all available experiments"""
+    """
+    List all available experiments.
+
+    Returns:
+        list: List of experiment names.
+    """
     return list(AVAILABLE_EXPERIMENTS.keys())
 
 def get_experiment_description(experiment_name: str) -> str:
-    """Get description of a specific experiment"""
+    """
+    Get description of a specific experiment.
+
+    Args:
+        experiment_name (str): The name of the experiment.
+
+    Returns:
+        str: The description of the experiment, or not found message.
+    """
     if experiment_name not in AVAILABLE_EXPERIMENTS:
         return f"Experiment '{experiment_name}' not found"
-    
     return AVAILABLE_EXPERIMENTS[experiment_name]['description']
 
 def get_experiment_parameters(experiment_name: str) -> dict:
-    """Get parameter definitions for a specific experiment"""
+    """
+    Get parameter definitions for a specific experiment.
+
+    Args:
+        experiment_name (str): The name of the experiment.
+
+    Returns:
+        dict: The parameter definitions dictionary, or empty dict if not found.
+    """
     if experiment_name not in AVAILABLE_EXPERIMENTS:
         return {}
-    
     return AVAILABLE_EXPERIMENTS[experiment_name].get('parameters', {})
 
 def get_experiment_default_params(experiment_name: str) -> dict:
-    """Get default parameters for a specific experiment"""
+    """
+    Get default parameters for a specific experiment.
+
+    Args:
+        experiment_name (str): The name of the experiment.
+
+    Returns:
+        dict: Dictionary of default parameter values, or empty dict if not found.
+    """
     if experiment_name not in AVAILABLE_EXPERIMENTS:
         return {}
-    
     params = AVAILABLE_EXPERIMENTS[experiment_name].get('parameters', {})
     defaults = {}
     for param_name, param_config in params.items():
         if 'default' in param_config:
             defaults[param_name] = param_config['default']
-    
     return defaults 

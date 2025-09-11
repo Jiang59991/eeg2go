@@ -17,7 +17,6 @@ export function showFeatureExtraction() {
 
 async function loadFeatureExtractionData() {
     try {
-        // 加载数据集
         const datasetsResponse = await fetch('/api/datasets');
         const datasets = await datasetsResponse.json();
         
@@ -27,7 +26,6 @@ async function loadFeatureExtractionData() {
             datasetSelect.innerHTML += `<option value="${dataset.id}">${dataset.name}</option>`;
         });
         
-        // 加载特征集
         const featureSetsResponse = await fetch('/api/feature_sets');
         const featureSets = await featureSetsResponse.json();
         
@@ -37,7 +35,6 @@ async function loadFeatureExtractionData() {
             featureSetSelect.innerHTML += `<option value="${fs.id}">${fs.name}</option>`;
         });
         
-        // 加载提取任务
         await loadExtractionTasks();
         
     } catch (error) {
@@ -184,7 +181,6 @@ export function startFeatureExtraction() {
     .then(data => {
         if (data.task_id) {
             showStatus(`Feature extraction task started (ID: ${data.task_id})`, 'success');
-            // 延迟刷新任务列表，给任务创建一些时间
             setTimeout(() => {
                 loadExtractionTasks();
             }, 1000);
@@ -198,26 +194,21 @@ export function startFeatureExtraction() {
     });
 }
 
-// 全局变量存储当前查看的任务ID
 let currentExtractionTaskId = null;
 
 export function viewExtractionTask(taskId) {
     console.log('Viewing extraction task:', taskId);
     currentExtractionTaskId = taskId;
     
-    // 先显示加载状态
     showExtractionTaskLoadingState();
     
-    // 显示模态框
     const modal = new bootstrap.Modal(document.getElementById('extractionTaskModal'));
     modal.show();
     
-    // 加载任务详情
     loadExtractionTaskDetails(taskId);
 }
 
 function showExtractionTaskLoadingState() {
-    // 显示加载状态
     document.getElementById('extractionTaskId').innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div> Loading...';
     document.getElementById('extractionTaskType').innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div> Loading...';
     document.getElementById('extractionTaskStatus').innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div> Loading...';
@@ -228,17 +219,14 @@ function showExtractionTaskLoadingState() {
     document.getElementById('extractionTaskCompleted').innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div> Loading...';
     document.getElementById('extractionTaskDuration').innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div> Loading...';
     
-    // 进度部分
     document.getElementById('extractionTaskProgressText').innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div> Loading...';
     document.getElementById('extractionTaskProgressBar').innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div>';
     document.getElementById('extractionTaskProcessed').innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div> Loading...';
     document.getElementById('extractionTaskTotal').innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div> Loading...';
     document.getElementById('extractionTaskFailed').innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div> Loading...';
     
-    // 参数部分
     document.getElementById('extractionTaskParams').innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div> Loading task parameters...';
     
-    // 隐藏其他部分
     document.getElementById('extractionTaskResultSection').style.display = 'none';
     document.getElementById('extractionTaskErrorSection').style.display = 'none';
     document.getElementById('extractionTaskNotesSection').style.display = 'none';
@@ -260,7 +248,6 @@ async function loadExtractionTaskDetails(taskId) {
         const task = await response.json();
         console.log('Task details loaded:', task);
         
-        // 检查任务数据是否为空
         if (!task || Object.keys(task).length === 0) {
             console.error('Task data is empty or null');
             showStatus('Task data is empty', 'error');
@@ -268,7 +255,6 @@ async function loadExtractionTaskDetails(taskId) {
             return;
         }
         
-        // 填充任务信息
         document.getElementById('extractionTaskId').textContent = task.id || 'N/A';
         document.getElementById('extractionTaskType').textContent = task.task_type || 'N/A';
         document.getElementById('extractionTaskStatus').innerHTML = `<span class="badge bg-${getTaskStatusBadgeColor(task.status)}">${task.status || 'N/A'}</span>`;
@@ -279,7 +265,6 @@ async function loadExtractionTaskDetails(taskId) {
         document.getElementById('extractionTaskCompleted').textContent = task.completed_at ? new Date(task.completed_at).toLocaleString() : 'N/A';
         document.getElementById('extractionTaskDuration').textContent = task.duration ? `${task.duration.toFixed(1)}s` : 'N/A';
         
-        // 填充进度信息
         const progress = task.progress || 0;
         document.getElementById('extractionTaskProgressText').textContent = `${progress.toFixed(1)}%`;
         document.getElementById('extractionTaskProgressBar').style.width = `${progress}%`;
@@ -288,24 +273,20 @@ async function loadExtractionTaskDetails(taskId) {
         document.getElementById('extractionTaskTotal').textContent = task.total_count || 0;
         document.getElementById('extractionTaskFailed').textContent = task.failed_count || 0;
         
-        // 填充参数
         const params = task.parameters ? JSON.stringify(task.parameters, null, 2) : 'No parameters';
         document.getElementById('extractionTaskParams').textContent = params;
         
-        // 处理结果
         if (task.result && task.status === 'completed') {
             document.getElementById('extractionTaskResultSection').style.display = 'block';
             const result = JSON.stringify(task.result, null, 2);
             document.getElementById('extractionTaskResult').textContent = result;
             
-            // 显示下载按钮
             document.getElementById('extractionTaskDownloadBtn').style.display = 'inline-block';
         } else {
             document.getElementById('extractionTaskResultSection').style.display = 'none';
             document.getElementById('extractionTaskDownloadBtn').style.display = 'none';
         }
         
-        // 处理错误信息
         if (task.error_message) {
             document.getElementById('extractionTaskErrorSection').style.display = 'block';
             document.getElementById('extractionTaskError').textContent = task.error_message;
@@ -313,7 +294,6 @@ async function loadExtractionTaskDetails(taskId) {
             document.getElementById('extractionTaskErrorSection').style.display = 'none';
         }
         
-        // 处理备注
         if (task.notes) {
             document.getElementById('extractionTaskNotesSection').style.display = 'block';
             document.getElementById('extractionTaskNotes').textContent = task.notes;
@@ -331,7 +311,6 @@ async function loadExtractionTaskDetails(taskId) {
 }
 
 function showExtractionTaskErrorState(errorMessage) {
-    // 显示错误状态
     document.getElementById('extractionTaskId').textContent = 'Error';
     document.getElementById('extractionTaskType').textContent = 'Error';
     document.getElementById('extractionTaskStatus').innerHTML = '<span class="badge bg-danger">Error</span>';
@@ -342,7 +321,6 @@ function showExtractionTaskErrorState(errorMessage) {
     document.getElementById('extractionTaskCompleted').textContent = 'Error';
     document.getElementById('extractionTaskDuration').textContent = 'Error';
     
-    // 进度部分
     document.getElementById('extractionTaskProgressText').textContent = 'Error';
     document.getElementById('extractionTaskProgressBar').style.width = '0%';
     document.getElementById('extractionTaskProgressBar').textContent = 'Error';
@@ -350,10 +328,8 @@ function showExtractionTaskErrorState(errorMessage) {
     document.getElementById('extractionTaskTotal').textContent = 'Error';
     document.getElementById('extractionTaskFailed').textContent = 'Error';
     
-    // 参数部分
     document.getElementById('extractionTaskParams').textContent = `Error loading task details: ${errorMessage}`;
     
-    // 隐藏其他部分
     document.getElementById('extractionTaskResultSection').style.display = 'none';
     document.getElementById('extractionTaskErrorSection').style.display = 'none';
     document.getElementById('extractionTaskNotesSection').style.display = 'none';
@@ -373,7 +349,6 @@ export function downloadExtractionResult() {
     }
 }
 
-// 导出到全局作用域
 window.showFeatureExtraction = showFeatureExtraction;
 window.startFeatureExtraction = startFeatureExtraction;
 window.viewExtractionTask = viewExtractionTask;

@@ -12,7 +12,17 @@ mne.set_log_level('WARNING')
 
 
 @auto_gc
-def mean_amplitude(epochs, chans=None):
+def mean_amplitude(epochs, chans=None) -> np.recarray:
+    """
+    Calculate the mean absolute amplitude for each epoch and channel.
+
+    Args:
+        epochs: MNE Epochs object containing EEG data.
+        chans: List of channel names or a single channel name. If None, use all channels.
+
+    Returns:
+        np.recarray: Structured array with mean amplitude for each epoch and channel.
+    """
     data = epochs.get_data()
     raw_ch_names = epochs.info["ch_names"]
     n_epochs = data.shape[0]
@@ -32,12 +42,10 @@ def mean_amplitude(epochs, chans=None):
             mean_amp = np.mean(amp, axis=1)
             values.append(mean_amp)
             valid_chans.append(ch)
-
             del amp, mean_amp
         else:
             values.append(np.full(n_epochs, np.nan))
             valid_chans.append(ch)
-
         gc.collect()
 
     values = np.stack(values, axis=1)
@@ -48,7 +56,17 @@ def mean_amplitude(epochs, chans=None):
 
 
 @auto_gc
-def rms(epochs, chans=None):
+def rms(epochs, chans=None) -> np.recarray:
+    """
+    Calculate the root mean square (RMS) value for each epoch and channel.
+
+    Args:
+        epochs: MNE Epochs object containing EEG data.
+        chans: List of channel names or a single channel name. If None, use all channels.
+
+    Returns:
+        np.recarray: Structured array with RMS value for each epoch and channel.
+    """
     data = epochs.get_data()
     raw_ch_names = epochs.info["ch_names"]
     n_epochs = data.shape[0]
@@ -68,12 +86,10 @@ def rms(epochs, chans=None):
             rms_val = np.sqrt(np.mean(sq, axis=1))
             values.append(rms_val)
             valid_chans.append(ch)
-
             del sq, rms_val
         else:
             values.append(np.full(n_epochs, np.nan))
             valid_chans.append(ch)
-
         gc.collect()
 
     values = np.stack(values, axis=1)
@@ -84,7 +100,17 @@ def rms(epochs, chans=None):
 
 
 @auto_gc
-def zero_crossings(epochs, chans=None):
+def zero_crossings(epochs, chans=None) -> np.recarray:
+    """
+    Count the number of zero crossings in each epoch and channel.
+
+    Args:
+        epochs: MNE Epochs object containing EEG data.
+        chans: List of channel names or a single channel name. If None, use all channels.
+
+    Returns:
+        np.recarray: Structured array with zero crossing counts for each epoch and channel.
+    """
     data = epochs.get_data()
     raw_ch_names = epochs.info["ch_names"]
     n_epochs = data.shape[0]
@@ -109,12 +135,10 @@ def zero_crossings(epochs, chans=None):
                 del epoch
             values.append(zero_cnt)
             valid_chans.append(ch)
-
             del zero_cnt
         else:
             values.append(np.full(n_epochs, np.nan))
             valid_chans.append(ch)
-
         gc.collect()
 
     values = np.stack(values, axis=1)
@@ -124,9 +148,16 @@ def zero_crossings(epochs, chans=None):
     return wrap_structured_result(values, epochs, valid_chans)
 
 @auto_gc
-def signal_variance(epochs, chans=None):
+def signal_variance(epochs, chans=None) -> np.recarray:
     """
-    Calculate signal variance - reflects the fluctuation degree of the signal
+    Calculate the variance of the signal for each epoch and channel.
+
+    Args:
+        epochs: MNE Epochs object containing EEG data.
+        chans: List of channel names or a single channel name. If None, use all channels.
+
+    Returns:
+        np.recarray: Structured array with variance for each epoch and channel.
     """
     data = epochs.get_data()
     raw_ch_names = epochs.info["ch_names"]
@@ -154,9 +185,16 @@ def signal_variance(epochs, chans=None):
     return wrap_structured_result(values, epochs, valid_chans)
 
 @auto_gc
-def signal_skewness(epochs, chans=None):
+def signal_skewness(epochs, chans=None) -> np.recarray:
     """
-    Calculate signal skewness - reflects the asymmetry of signal distribution
+    Calculate the skewness of the signal for each epoch and channel.
+
+    Args:
+        epochs: MNE Epochs object containing EEG data.
+        chans: List of channel names or a single channel name. If None, use all channels.
+
+    Returns:
+        np.recarray: Structured array with skewness for each epoch and channel.
     """
     data = epochs.get_data()
     raw_ch_names = epochs.info["ch_names"]
@@ -186,9 +224,16 @@ def signal_skewness(epochs, chans=None):
     return wrap_structured_result(values, epochs, valid_chans)
 
 @auto_gc
-def signal_kurtosis(epochs, chans=None):
+def signal_kurtosis(epochs, chans=None) -> np.recarray:
     """
-    Calculate signal kurtosis - reflects the sharpness of signal distribution
+    Calculate the kurtosis of the signal for each epoch and channel.
+
+    Args:
+        epochs: MNE Epochs object containing EEG data.
+        chans: List of channel names or a single channel name. If None, use all channels.
+
+    Returns:
+        np.recarray: Structured array with kurtosis for each epoch and channel.
     """
     data = epochs.get_data()
     raw_ch_names = epochs.info["ch_names"]
@@ -218,10 +263,16 @@ def signal_kurtosis(epochs, chans=None):
     return wrap_structured_result(values, epochs, valid_chans)
 
 @auto_gc
-def peak_to_peak_amplitude(epochs, chans=None):
+def peak_to_peak_amplitude(epochs, chans=None) -> np.recarray:
     """
-    Calculate peak-to-peak amplitude - difference between maximum and minimum values
-    Reflects the dynamic range of the signal
+    Calculate the peak-to-peak amplitude (max - min) for each epoch and channel.
+
+    Args:
+        epochs: MNE Epochs object containing EEG data.
+        chans: List of channel names or a single channel name. If None, use all channels.
+
+    Returns:
+        np.recarray: Structured array with peak-to-peak amplitude for each epoch and channel.
     """
     data = epochs.get_data()
     raw_ch_names = epochs.info["ch_names"]
@@ -249,10 +300,16 @@ def peak_to_peak_amplitude(epochs, chans=None):
     return wrap_structured_result(values, epochs, valid_chans)
 
 @auto_gc
-def crest_factor(epochs, chans=None):
+def crest_factor(epochs, chans=None) -> np.recarray:
     """
-    Calculate crest factor - ratio of peak value to RMS
-    Reflects the peak characteristics of the signal
+    Calculate the crest factor (peak value divided by RMS) for each epoch and channel.
+
+    Args:
+        epochs: MNE Epochs object containing EEG data.
+        chans: List of channel names or a single channel name. If None, use all channels.
+
+    Returns:
+        np.recarray: Structured array with crest factor for each epoch and channel.
     """
     data = epochs.get_data()
     raw_ch_names = epochs.info["ch_names"]
@@ -287,10 +344,16 @@ def crest_factor(epochs, chans=None):
     return wrap_structured_result(values, epochs, valid_chans)
 
 @auto_gc
-def shape_factor(epochs, chans=None):
+def shape_factor(epochs, chans=None) -> np.recarray:
     """
-    Calculate shape factor - ratio of RMS to mean absolute value
-    Reflects the shape characteristics of the signal
+    Calculate the shape factor (RMS divided by mean absolute value) for each epoch and channel.
+
+    Args:
+        epochs: MNE Epochs object containing EEG data.
+        chans: List of channel names or a single channel name. If None, use all channels.
+
+    Returns:
+        np.recarray: Structured array with shape factor for each epoch and channel.
     """
     data = epochs.get_data()
     raw_ch_names = epochs.info["ch_names"]
@@ -325,10 +388,16 @@ def shape_factor(epochs, chans=None):
     return wrap_structured_result(values, epochs, valid_chans)
 
 @auto_gc
-def impulse_factor(epochs, chans=None):
+def impulse_factor(epochs, chans=None) -> np.recarray:
     """
-    Calculate impulse factor - ratio of peak value to mean absolute value
-    Reflects the impulse characteristics of the signal
+    Calculate the impulse factor (peak value divided by mean absolute value) for each epoch and channel.
+
+    Args:
+        epochs: MNE Epochs object containing EEG data.
+        chans: List of channel names or a single channel name. If None, use all channels.
+
+    Returns:
+        np.recarray: Structured array with impulse factor for each epoch and channel.
     """
     data = epochs.get_data()
     raw_ch_names = epochs.info["ch_names"]
@@ -363,10 +432,16 @@ def impulse_factor(epochs, chans=None):
     return wrap_structured_result(values, epochs, valid_chans)
 
 @auto_gc
-def margin_factor(epochs, chans=None):
+def margin_factor(epochs, chans=None) -> np.recarray:
     """
-    Calculate margin factor - ratio of peak value to root mean square
-    Reflects the margin characteristics of the signal
+    Calculate the margin factor (peak value divided by RMS) for each epoch and channel.
+
+    Args:
+        epochs: MNE Epochs object containing EEG data.
+        chans: List of channel names or a single channel name. If None, use all channels.
+
+    Returns:
+        np.recarray: Structured array with margin factor for each epoch and channel.
     """
     data = epochs.get_data()
     raw_ch_names = epochs.info["ch_names"]
@@ -401,9 +476,17 @@ def margin_factor(epochs, chans=None):
     return wrap_structured_result(values, epochs, valid_chans)
 
 @auto_gc
-def signal_entropy(epochs, chans=None, bins=50):
+def signal_entropy(epochs, chans=None, bins=50) -> np.recarray:
     """
-    Calculate signal entropy - reflects the randomness and complexity of the signal
+    Calculate the entropy of the signal for each epoch and channel.
+
+    Args:
+        epochs: MNE Epochs object containing EEG data.
+        chans: List of channel names or a single channel name. If None, use all channels.
+        bins: Number of bins for histogram calculation.
+
+    Returns:
+        np.recarray: Structured array with entropy for each epoch and channel.
     """
     data = epochs.get_data()
     raw_ch_names = epochs.info["ch_names"]
@@ -422,9 +505,7 @@ def signal_entropy(epochs, chans=None, bins=50):
             idx = raw_ch_names.index(ch)
             entropy_vals = []
             for epoch in data[:, idx, :]:
-                # Calculate histogram
                 hist, _ = np.histogram(epoch, bins=bins, density=True)
-                # Remove zero probabilities
                 hist = hist[hist > 0]
                 if len(hist) > 0:
                     entropy_vals.append(entropy(hist))
@@ -440,10 +521,17 @@ def signal_entropy(epochs, chans=None, bins=50):
     return wrap_structured_result(values, epochs, valid_chans)
 
 @auto_gc
-def signal_complexity(epochs, chans=None):
+def signal_complexity(epochs, chans=None) -> np.recarray:
     """
-    Calculate signal complexity - based on signal change rate and entropy
-    Reflects the complexity degree of the signal
+    Calculate the signal complexity for each epoch and channel.
+    Complexity is defined as the product of the standard deviation of the first-order difference and the entropy.
+
+    Args:
+        epochs: MNE Epochs object containing EEG data.
+        chans: List of channel names or a single channel name. If None, use all channels.
+
+    Returns:
+        np.recarray: Structured array with complexity for each epoch and channel.
     """
     data = epochs.get_data()
     raw_ch_names = epochs.info["ch_names"]
@@ -462,21 +550,14 @@ def signal_complexity(epochs, chans=None):
             idx = raw_ch_names.index(ch)
             complexity_vals = []
             for epoch in data[:, idx, :]:
-                # Calculate first-order difference of the signal
                 diff = np.diff(epoch)
-                
-                # Calculate change rate
                 change_rate = np.std(diff)
-                
-                # Calculate signal entropy
                 hist, _ = np.histogram(epoch, bins=50, density=True)
                 hist = hist[hist > 0]
                 if len(hist) > 0:
                     signal_entropy_val = entropy(hist)
                 else:
                     signal_entropy_val = 0
-                
-                # Complexity = change rate * entropy
                 complexity = change_rate * signal_entropy_val
                 complexity_vals.append(complexity)
             values.append(complexity_vals)
@@ -489,10 +570,17 @@ def signal_complexity(epochs, chans=None):
     return wrap_structured_result(values, epochs, valid_chans)
 
 @auto_gc
-def signal_regularity(epochs, chans=None):
+def signal_regularity(epochs, chans=None) -> np.recarray:
     """
-    Calculate signal regularity - based on autocorrelation decay rate
-    Reflects the periodic characteristics of the signal
+    Calculate the regularity of the signal for each epoch and channel.
+    Regularity is based on the decay rate of the autocorrelation function.
+
+    Args:
+        epochs: MNE Epochs object containing EEG data.
+        chans: List of channel names or a single channel name. If None, use all channels.
+
+    Returns:
+        np.recarray: Structured array with regularity for each epoch and channel.
     """
     data = epochs.get_data()
     raw_ch_names = epochs.info["ch_names"]
@@ -511,17 +599,13 @@ def signal_regularity(epochs, chans=None):
             idx = raw_ch_names.index(ch)
             regularity_vals = []
             for epoch in data[:, idx, :]:
-                # Calculate autocorrelation
                 autocorr = np.correlate(epoch, epoch, mode='full')
                 autocorr = autocorr[len(autocorr)//2:]
-                
-                # Normalize
                 autocorr = autocorr / autocorr[0]
-                
-                # Calculate decay rate (average decay rate of first 10 points)
+                # Use first 10 points to estimate decay rate
                 if len(autocorr) > 10:
                     decay_rate = np.mean(np.abs(np.diff(autocorr[:10])))
-                    regularity_vals.append(1.0 / (1.0 + decay_rate))  # Convert to regularity index
+                    regularity_vals.append(1.0 / (1.0 + decay_rate))
                 else:
                     regularity_vals.append(np.nan)
             values.append(regularity_vals)
@@ -534,10 +618,17 @@ def signal_regularity(epochs, chans=None):
     return wrap_structured_result(values, epochs, valid_chans)
 
 @auto_gc
-def signal_stability(epochs, chans=None):
+def signal_stability(epochs, chans=None) -> np.recarray:
     """
-    Calculate signal stability - based on signal standard deviation and mean
-    Reflects the stability degree of the signal
+    Calculate the stability of the signal for each epoch and channel.
+    Stability is defined as 1 / (1 + coefficient of variation).
+
+    Args:
+        epochs: MNE Epochs object containing EEG data.
+        chans: List of channel names or a single channel name. If None, use all channels.
+
+    Returns:
+        np.recarray: Structured array with stability for each epoch and channel.
     """
     data = epochs.get_data()
     raw_ch_names = epochs.info["ch_names"]
@@ -558,14 +649,12 @@ def signal_stability(epochs, chans=None):
             for epoch in data[:, idx, :]:
                 std_val = np.std(epoch)
                 mean_val = np.mean(epoch)
-                
                 # Stability = 1 / (1 + coefficient of variation)
                 if mean_val != 0:
                     cv = std_val / abs(mean_val)
                     stability = 1.0 / (1.0 + cv)
                 else:
                     stability = 0.0
-                
                 stability_vals.append(stability)
             values.append(stability_vals)
             valid_chans.append(ch)

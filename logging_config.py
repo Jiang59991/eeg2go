@@ -2,104 +2,80 @@ import logging
 import os
 from datetime import datetime
 
-# 固定日志目录与文件名（用户要求固定为项目 logs 目录）
 LOG_DIR = '/rds/general/user/zj724/home/eeg2go/logs'
 os.makedirs(LOG_DIR, exist_ok=True)
 
-# 允许通过环境变量强制指定完整日志文件路径（用于“每次提交一个批次日志”）
 forced_log_file = os.environ.get('EEG2GO_LOG_FILE')
 if forced_log_file:
     DEFAULT_LOG_FILE = forced_log_file
 else:
-    # 固定文件名（不随 JobID 变化）
     DEFAULT_LOG_FILE = os.path.join(LOG_DIR, 'eeg2go_default.log')
 
-# 日志格式
 LOG_FORMAT = '[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s'
 DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 
-# 创建logger
 logger = logging.getLogger('eeg2go')
 logger.setLevel(logging.INFO)
 
-# 允许通过环境变量禁用文件日志（例如在PBS作业中避免每个作业产生日志文件）
 DISABLE_FILE_LOG = os.environ.get('EEG2GO_NO_FILE_LOG', '').lower() in ('1', 'true', 'yes')
 
-# 避免重复添加handler（某些执行环境会多次导入模块）
+# Avoid duplicate handlers
 if not logger.handlers:
     if not DISABLE_FILE_LOG:
         file_handler = logging.FileHandler(DEFAULT_LOG_FILE, encoding='utf-8')
         file_handler.setFormatter(logging.Formatter(LOG_FORMAT, datefmt=DATE_FORMAT))
         logger.addHandler(file_handler)
 
-    # 控制台Handler（会写到stdout/stderr）
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(logging.Formatter(LOG_FORMAT, datefmt=DATE_FORMAT))
     logger.addHandler(console_handler)
 
-# 可选：抑制mne和其他第三方库的冗余输出
 try:
     import mne
     mne.utils.set_log_level('WARNING')
 except ImportError:
     pass
 
-def create_new_log_file(suffix=None):
+def create_new_log_file(suffix: str = None) -> str:
     """
-    创建新的日志文件
-    
+    Create a new log file and switch logger output to it.
+
     Args:
-        suffix (str, optional): 文件名后缀，如果不提供则使用时间戳
-    
+        suffix (str, optional): Suffix for the log file name. If not provided, use timestamp.
+
     Returns:
-        str: 新日志文件的路径
+        str: The path to the new log file.
     """
     if suffix is None:
         time_str = datetime.now().strftime('%Y%m%d_%H%M%S')
         suffix = time_str
-    
+
     new_log_file = os.path.join(LOG_DIR, f'eeg2go_{suffix}.log')
-    
-    # 移除所有现有的文件handler
+
+    # Remove all existing file handlers
     for handler in logger.handlers[:]:
         if isinstance(handler, logging.FileHandler):
             logger.removeHandler(handler)
             handler.close()
-    
-    # 添加新的文件handler
+
     new_file_handler = logging.FileHandler(new_log_file, encoding='utf-8')
     new_file_handler.setFormatter(logging.Formatter(LOG_FORMAT, datefmt=DATE_FORMAT))
     logger.addHandler(new_file_handler)
-    
-    logger.info(f"日志输出已切换到新文件: {new_log_file}")
+
+    logger.info(f"Log output switched to new file: {new_log_file}")
     return new_log_file
 
-def reset_to_default_log():
+def reset_to_default_log() -> None:
     """
-    重置回默认的日志文件
+    Reset logger output to the default log file.
     """
-    # 移除所有文件handler
     for handler in logger.handlers[:]:
         if isinstance(handler, logging.FileHandler):
             logger.removeHandler(handler)
             handler.close()
-    
-    # 重新添加默认文件handler
+
     file_handler = logging.FileHandler(DEFAULT_LOG_FILE, encoding='utf-8')
     file_handler.setFormatter(logging.Formatter(LOG_FORMAT, datefmt=DATE_FORMAT))
     logger.addHandler(file_handler)
-    
-    logger.info(f"日志输出已重置到默认文件: {DEFAULT_LOG_FILE}")
 
-# 用法示例：
-# from logging_config import logger
-# logger.info('任务开始')
-# logger.error('发生错误')
-# 
-# # 创建新的日志文件
-# from logging_config import create_new_log_file
-# create_new_log_file('experiment_001')
-# 
-# # 重置回默认日志文件
-# from logging_config import reset_to_default_log
-# reset_to_default_log()
+    logger.info(f"Log output reset to default file: {DEFAULT_LOG_FILE}")

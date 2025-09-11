@@ -1,8 +1,4 @@
-// system-mode.js - 系统模式管理模块
-
-/**
- * 更新系统模式显示
- */
+// system-mode.js
 export function updateSystemModeDisplay() {
     const statusElement = document.getElementById('systemModeStatus');
     if (!statusElement) {
@@ -17,7 +13,6 @@ export function updateSystemModeDisplay() {
                 const modeInfo = data.mode_info;
                 const isLocalMode = modeInfo.mode === 'local';
                 
-                // 根据模式设置不同的样式
                 const alertClass = isLocalMode ? 'alert-warning' : 'alert-info';
                 const icon = isLocalMode ? 'bi-cpu' : 'bi-cloud';
                 
@@ -52,24 +47,16 @@ export function updateSystemModeDisplay() {
         });
 }
 
-/**
- * 初始化系统模式模块
- */
 export function initializeSystemMode() {
     console.log('Initializing system mode module...');
     
-    // 立即更新一次
     updateSystemModeDisplay();
     
-    // 每30秒更新一次系统模式状态
     setInterval(updateSystemModeDisplay, 30000);
     
     console.log('System mode module initialized');
 }
 
-/**
- * 获取当前系统模式信息
- */
 export async function getSystemMode() {
     try {
         const response = await fetch('/api/system/mode');
@@ -81,9 +68,6 @@ export async function getSystemMode() {
     }
 }
 
-/**
- * Check if system is in local mode
- */
 export async function isLocalMode() {
     const modeInfo = await getSystemMode();
     return modeInfo ? modeInfo.mode === 'local' : false;

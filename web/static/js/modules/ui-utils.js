@@ -8,7 +8,6 @@ export function showStatus(message, type = 'info') {
     statusDiv.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
     statusDiv.style.display = 'block';
     
-    // 自动隐藏
     setTimeout(() => {
         statusDiv.style.display = 'none';
     }, 5000);

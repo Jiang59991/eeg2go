@@ -8,26 +8,24 @@ from database.add_pipeline import add_pipeline
 from database.add_fxdef import add_fxdefs
 from database.add_featureset import add_featureset
 
-
 DB_PATH = os.path.join(os.path.dirname(__file__), "eeg2go.db")
 
-# Pipeline shortnames required (must already exist in pipedef)
-PIPE_SHORTNAMES = [
+PIPE_SHORTNAMES: List[str] = [
     "P0_minimal_hp",
     "P1_hp_avg_reref",
     "P2_hp_notch50",
     "P3_hp_ica_auto",
 ]
 
-# Bands and channels for Experiment 1 (relative bandpower)
-BANDS = ["delta", "theta", "alpha", "beta"]
-CHANS = ["F3", "F4", "C3", "C4", "O1", "O2"]
+BANDS: List[str] = ["delta", "theta", "alpha", "beta"]
+CHANS: List[str] = ["F3", "F4", "C3", "C4", "O1", "O2"]
 
-
-# === Part A: 先创建/登记实验 1 用到的 pipelines ===
-def create_experiment1_pipelines():
+def create_experiment1_pipelines() -> None:
     """
-    将实验 1 用到的 4 条 pipeline 写入 pipedef（若已存在，add_pipeline 通常会做去重/忽略）。
+    Add the four pipelines used in Experiment 1 to the pipedef table.
+    If a pipeline already exists, add_pipeline will ignore or deduplicate.
+    Returns:
+        None
     """
     pipelines = [
         {
@@ -103,9 +101,16 @@ def create_experiment1_pipelines():
         logger.info(f"Adding pipeline: {p['shortname']}")
         add_pipeline(p)
 
-
-# === Part B: 基于上述 pipelines，创建特征定义与特征集 ===
 def get_pipeline_id_by_shortname(shortname: str) -> int:
+    """
+    Get the pipeline id from pipedef table by its shortname.
+    Args:
+        shortname (str): The shortname of the pipeline.
+    Returns:
+        int: The id of the pipeline.
+    Raises:
+        ValueError: If the pipeline is not found.
+    """
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT id FROM pipedef WHERE shortname = ?", (shortname,))
@@ -115,16 +120,15 @@ def get_pipeline_id_by_shortname(shortname: str) -> int:
         raise ValueError(f"Pipeline shortname '{shortname}' not found. 请先创建对应 pipeline（见 database/default_pipelines.py）。")
     return int(row[0])
 
-
 def build_fxdefs_for_pipeline(pipe_id: int) -> List[int]:
     """
-    为一个 pipeline 构建相对功率（relative_power）特征：
-    频段：delta/theta/alpha/beta
-    通道：F3/F4/C3/C4/O1/O2
-    输出：按 epoch 的 1d 数组（录波级聚合在下游完成）
+    Build relative_power feature definitions for a given pipeline.
+    Args:
+        pipe_id (int): The id of the pipeline.
+    Returns:
+        List[int]: List of feature definition ids created.
     """
     all_fxids: List[int] = []
-
     for band in BANDS:
         fxdef_spec = {
             "func": "relative_power",
@@ -139,29 +143,20 @@ def build_fxdefs_for_pipeline(pipe_id: int) -> List[int]:
         fxids = add_fxdefs(fxdef_spec)
         all_fxids.extend(fxids)
         logger.info(f"Added relative_power({band}) with {len(fxids)} fxdefs for pipe {pipe_id}")
-
     return all_fxids
-
 
 def create_experiment1_featuresets() -> Dict[str, int]:
     """
-    为实验1创建4个 featureset：
-      - exp1_bp_rel__P0_minimal_hp
-      - exp1_bp_rel__P1_hp_avg_reref
-      - exp1_bp_rel__P2_hp_notch50
-      - exp1_bp_rel__P3_hp_ica_auto
-    返回：{featureset_name: featureset_id}
+    Create four featuresets for Experiment 1, one for each pipeline.
+    Returns:
+        Dict[str, int]: Mapping from featureset name to featureset id.
     """
     create_experiment1_pipelines()
-
     results: Dict[str, int] = {}
-
     for shortname in PIPE_SHORTNAMES:
         pipe_id = get_pipeline_id_by_shortname(shortname)
         logger.info(f"Building fxdefs for pipeline {shortname} (id={pipe_id})")
-
         fxids = build_fxdefs_for_pipeline(pipe_id)
-
         fs_name = f"exp1_bp_rel__{shortname}"
         fs_id = add_featureset({
             "name": fs_name,
@@ -174,12 +169,8 @@ def create_experiment1_featuresets() -> Dict[str, int]:
         })
         logger.info(f"Created featureset '{fs_name}' (id={fs_id}) with {len(fxids)} fxdefs")
         results[fs_name] = fs_id
-
     return results
-
 
 if __name__ == "__main__":
     results = create_experiment1_featuresets()
     print("Created featuresets:", results)
-
-

@@ -5,7 +5,6 @@ import { showStatus } from './ui-utils.js';
 export function initializeDatasets() {
     console.log('Initializing datasets module...');
     
-    // 初始化全局变量
     if (!window.currentDatasetId) {
         window.currentDatasetId = null;
     }
@@ -33,7 +32,6 @@ export async function showDatasets() {
     
     updateBreadcrumb('datasets');
     
-    // Clear current dataset - 添加安全检查
     window.currentDatasetId = null;
     window.currentDatasetName = null;
     
@@ -111,7 +109,6 @@ export async function showRecordings(datasetId, datasetName) {
         recordingsView.style.display = 'block';
     }
     
-    // Update breadcrumb
     const breadcrumbRecordings = document.getElementById('breadcrumb-recordings');
     if (breadcrumbRecordings) {
         breadcrumbRecordings.style.display = 'block';
@@ -122,13 +119,11 @@ export async function showRecordings(datasetId, datasetName) {
         breadcrumbRecordingsLink.textContent = datasetName;
     }
     
-    // Update title
     const recordingsTitle = document.getElementById('recordingsTitle');
     if (recordingsTitle) {
         recordingsTitle.textContent = `Recordings - ${datasetName}`;
     }
     
-    // Load recordings for this dataset
     await loadRecordings(datasetId);
 }
 
@@ -191,7 +186,6 @@ export function displayRecordings(recordings) {
     });
 }
 
-// 查看某条 recording 的特征值并显示到模态框
 export function viewFeatureValues(recordingId) {
     if (!recordingId) {
         console.error('viewFeatureValues called without recordingId');
@@ -218,7 +212,6 @@ export function viewFeatureValues(recordingId) {
 
             const formatNum = (v, digits) => (typeof v === 'number' ? v.toFixed(digits) : (v ?? '-'));
 
-            // 概览
             const overviewHtml = (rec && !rec.error) ? `
                 <div class="card mb-3">
                     <div class="card-header"><strong>Recording Overview</strong></div>
@@ -250,7 +243,6 @@ export function viewFeatureValues(recordingId) {
                 </div>
             ` : '';
 
-            // 元数据
             const metaKeys = meta && typeof meta === 'object' ? Object.keys(meta) : [];
             const metadataHtml = metaKeys.length > 0 ? `
                 <div class="card mb-3">
@@ -267,7 +259,6 @@ export function viewFeatureValues(recordingId) {
                 </div>
             ` : '';
 
-            // 事件（摘要 + 可展开详情）
             const eventsArr = Array.isArray(events) ? events : [];
             const eventCounts = eventsArr.reduce((acc, ev) => {
                 const key = ev && ev.event_type ? ev.event_type : 'unknown';
@@ -329,18 +320,15 @@ export function viewFeatureValues(recordingId) {
                 </div>
             `;
 
-            // 特征值（摘要 + 可展开详情）
             const entries = data ? Object.entries(data) : [];
             if (entries.length === 0) {
                 container.innerHTML = overviewHtml + metadataHtml + eventsHtml + '<div class="text-muted">No feature values available for this recording.</div>';
             } else {
-                // 生成特征值摘要
                 const featureSummary = entries.map(([shortname, info]) => {
                     const dim = info && info.dim ? info.dim : '-';
                     const shape = info && Array.isArray(info.shape) && info.shape.length > 0 ? info.shape.join('×') : '-';
                     const notes = info && info.notes ? info.notes : '';
                     
-                    // 生成值摘要
                     let valueSummary = '<span class="text-muted">None</span>';
                     let hasDetails = false;
                     if (info && info.value !== undefined && info.value !== null) {
@@ -384,7 +372,6 @@ export function viewFeatureValues(recordingId) {
                     `;
                 }).join('');
 
-                // 生成详细值（用于弹窗）
                 const featureDetails = {};
                 entries.forEach(([shortname, info]) => {
                     if (info && info.value !== undefined && info.value !== null) {
@@ -429,10 +416,8 @@ export function viewFeatureValues(recordingId) {
                         </div>
                     </div>
                     <script>
-                        // 存储特征详情数据
                         window.featureDetails_${recordingId} = ${JSON.stringify(featureDetails)};
                         
-                        // 显示特征详情的函数
                         window.showFeatureDetails = function(btn, featureName) {
                             const details = window.featureDetails_${recordingId}[featureName];
                             if (details) {
@@ -460,7 +445,6 @@ export function viewFeatureValues(recordingId) {
         });
 }
 
-// 导出到全局作用域
 window.showDatasets = showDatasets;
 window.showRecordings = showRecordings;
 window.viewFeatureValues = viewFeatureValues;

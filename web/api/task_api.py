@@ -2,15 +2,19 @@ from flask import Blueprint, request, jsonify
 import json
 import os
 from task_queue.models import TaskManager, Task, TaskStatus
+from typing import Tuple
 
 task_api = Blueprint('task_api', __name__)
 
-# 全局任务管理器
 task_manager = TaskManager()
 
 @task_api.route('/api/tasks', methods=['POST'])
-def create_task():
-    """创建新任务"""
+def create_task() -> Tuple:
+    """
+    Create a new task.
+    Returns:
+        Tuple: (json response, status code)
+    """
     try:
         data = request.get_json()
         task_type = data.get('task_type')
@@ -23,7 +27,6 @@ def create_task():
         if not task_type:
             return jsonify({'error': 'task_type is required'}), 400
         
-        # 创建任务
         task = Task(task_type, parameters, dataset_id, feature_set_id, experiment_type, priority)
         task_id = task_manager.create_task(task)
         
@@ -37,8 +40,14 @@ def create_task():
         return jsonify({'error': str(e)}), 500
 
 @task_api.route('/api/tasks/<int:task_id>', methods=['GET'])
-def get_task_status(task_id):
-    """获取任务状态"""
+def get_task_status(task_id: int) -> Tuple:
+    """
+    Get the status of a task.
+    Args:
+        task_id (int): The ID of the task.
+    Returns:
+        Tuple: (json response, status code)
+    """
     try:
         task = task_manager.get_task(task_id)
         if not task:
@@ -50,18 +59,22 @@ def get_task_status(task_id):
         return jsonify({'error': str(e)}), 500
 
 @task_api.route('/api/task_details/<int:task_id>', methods=['GET'])
-def get_task_details(task_id):
-    """获取任务详细信息"""
+def get_task_details(task_id: int) -> Tuple:
+    """
+    Get detailed information of a task.
+    Args:
+        task_id (int): The ID of the task.
+    Returns:
+        Tuple: (json response, status code)
+    """
     try:
-        # 直接查询数据库，避免大的result字段
         import sqlite3
-        import os
         
         db_path = os.getenv('DATABASE_PATH', 'database/eeg2go.db')
         conn = sqlite3.connect(db_path)
         c = conn.cursor()
         
-        # 查询任务基本信息，不包含大的result字段
+        # Query task basic info, exclude large result field
         c.execute("""
             SELECT t.id, t.task_type, t.status, t.parameters, t.error_message, 
                    t.created_at, t.started_at, t.completed_at, t.priority,
@@ -83,13 +96,14 @@ def get_task_details(task_id):
                 'error': 'Task not found'
             }), 404
         
-        # 安全地处理JSON字段
         def safe_json_loads(json_str):
+            """
+            Safely load JSON string, return summary if too large.
+            """
             if not json_str:
                 return None
             try:
-                # 如果数据太大，只返回摘要
-                if len(str(json_str)) > 10000:  # 超过10KB
+                if len(str(json_str)) > 10000:
                     return {
                         'type': 'large_data',
                         'size': len(str(json_str)),
@@ -103,7 +117,6 @@ def get_task_details(task_id):
                     'preview': str(json_str)[:200] + "..." if len(str(json_str)) > 200 else str(json_str)
                 }
         
-        # 构建任务详情
         task_details = {
             'id': int(row[0]) if row[0] is not None else None,
             'task_type': str(row[1]) if row[1] is not None else None,
@@ -138,8 +151,14 @@ def get_task_details(task_id):
         }), 500
 
 @task_api.route('/api/tasks/<int:task_id>/cancel', methods=['POST'])
-def cancel_task(task_id):
-    """取消任务"""
+def cancel_task(task_id: int) -> Tuple:
+    """
+    Cancel a task.
+    Args:
+        task_id (int): The ID of the task.
+    Returns:
+        Tuple: (json response, status code)
+    """
     try:
         task = task_manager.get_task(task_id)
         if not task:
@@ -148,7 +167,7 @@ def cancel_task(task_id):
         if task['status'] in ['completed', 'failed']:
             return jsonify({'error': 'Cannot cancel completed or failed task'}), 400
         
-        # 更新任务状态为失败
+        # Set task status to failed
         task_manager.update_task_status(task_id, TaskStatus.FAILED, 
                                       error_message='Task cancelled by user')
         
@@ -158,18 +177,20 @@ def cancel_task(task_id):
         return jsonify({'error': str(e)}), 500
 
 @task_api.route('/api/tasks', methods=['GET'])
-def get_tasks():
-    """获取所有任务列表"""
+def get_tasks() -> Tuple:
+    """
+    Get a list of all tasks (basic info only).
+    Returns:
+        Tuple: (json response, status code)
+    """
     try:
-        # 直接查询数据库，避免大的result字段
         import sqlite3
-        import os
         
         db_path = os.getenv('DATABASE_PATH', 'database/eeg2go.db')
         conn = sqlite3.connect(db_path)
         c = conn.cursor()
         
-        # 只选择最基本的字段，减少数据量
+        # Only select basic fields to reduce data size
         c.execute("""
             SELECT t.id, t.task_type, t.status, t.created_at, t.progress, t.priority,
                    d.name as dataset_name, fs.name as feature_set_name
@@ -183,7 +204,6 @@ def get_tasks():
         rows = c.fetchall()
         conn.close()
         
-        # 处理任务数据，只包含基本字段
         processed_tasks = []
         for row in rows:
             task_dict = {
@@ -201,7 +221,7 @@ def get_tasks():
         return jsonify({
             'success': True,
             'tasks': processed_tasks
-        })
+        }), 200
         
     except Exception as e:
         print(f"Error in get_tasks: {e}")
@@ -211,8 +231,12 @@ def get_tasks():
         }), 500
 
 @task_api.route('/api/system/mode', methods=['GET'])
-def get_system_mode():
-    """获取系统运行模式"""
+def get_system_mode() -> Tuple:
+    """
+    Get the current system running mode.
+    Returns:
+        Tuple: (json response, status code)
+    """
     try:
         use_local_mode = os.getenv('USE_LOCAL_EXECUTOR', 'false').lower() == 'true'
         

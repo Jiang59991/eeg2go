@@ -1,29 +1,26 @@
 #!/usr/bin/env python3
-"""
-Celery Worker for recordings queue
-专门处理单个recording的run_feature_set任务
-"""
 import os
 import sys
 import subprocess
 from logging_config import logger
 
-def start_recordings_worker():
-    """启动recordings队列的Worker"""
+def start_recordings_worker() -> None:
+    """
+    Start a Celery worker dedicated to the 'recordings' queue.
+
+    This function sets up the environment and launches a Celery worker process
+    with specific configuration for handling run_feature_set tasks for individual recordings.
+    """
     try:
-        # 获取当前目录
         current_dir = os.path.dirname(os.path.abspath(__file__))
         project_root = os.path.dirname(current_dir)
-        
-        # 设置环境变量
         os.environ['PYTHONPATH'] = project_root
-        
-        # Worker配置
+
         queue_name = 'recordings'
-        concurrency = 4  # 可以设置更高的并发数，因为单个recording任务相对较大
+        concurrency = 4  # Higher concurrency for large single recording tasks
         hostname = f'recordings_worker@{os.uname().nodename}'
-        
-        # 构建命令
+
+        # Build the Celery worker command
         cmd = [
             'celery',
             '--app=task_queue.celery_app:celery_app',
@@ -37,18 +34,17 @@ def start_recordings_worker():
             '--without-mingle',
             '--without-heartbeat'
         ]
-        
+
         logger.info(f"Starting Celery Worker: {' '.join(cmd)}")
-        
-        # 启动Worker
+
         process = subprocess.Popen(cmd, cwd=project_root)
-        
+
         logger.info(f"Recordings Worker started with PID: {process.pid}")
         logger.info(f"Worker 3 (recordings) started, PID: {process.pid}")
-        
-        # 等待进程结束
+
+        # Wait for the worker process to finish
         process.wait()
-        
+
     except KeyboardInterrupt:
         logger.info("Recordings Worker stopped by user")
     except Exception as e:

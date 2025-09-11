@@ -9,6 +9,7 @@ import tempfile
 import zipfile
 import logging
 import math
+from typing import Any, Dict, List, Optional, Union
 from eeg2fx.featureset_fetcher import run_feature_set
 from eeg2fx.featureset_grouping import load_fxdefs_for_set
 from .utils.pipeline_visualizer import get_pipeline_visualization_data
@@ -18,20 +19,19 @@ from database.add_fxdef import add_fxdefs
 from database.add_featureset import add_featureset
 from web.api.task_api import task_api
 
-# 使用全局日志配置
 from logging_config import logger
 
 app = Flask(__name__)
 
-# 自定义 JSON 编码器，处理 NaN 值
 class SafeJSONEncoder(json.JSONEncoder):
-    def encode(self, obj):
-        # 递归清理 NaN 值
+    """
+    Custom JSON encoder that handles NaN values by converting them to None.
+    """
+    def encode(self, obj: Any) -> str:
         cleaned_obj = self._clean_nan(obj)
         return super().encode(cleaned_obj)
     
-    def _clean_nan(self, obj):
-        """递归清理对象中的 NaN 值"""
+    def _clean_nan(self, obj: Any) -> Any:
         if isinstance(obj, dict):
             return {key: self._clean_nan(value) for key, value in obj.items()}
         elif isinstance(obj, list):
@@ -47,38 +47,32 @@ class SafeJSONEncoder(json.JSONEncoder):
         else:
             return obj
 
-# 设置自定义 JSON 编码器
 app.json_encoder = SafeJSONEncoder
-
-# 注册任务API蓝图
 app.register_blueprint(task_api)
 
-# 打印所有注册的路由
 print("=== Registered routes ===")
 for rule in app.url_map.iter_rules():
     print(f"  {rule.rule} -> {rule.endpoint}")
 print("=== End of routes ===")
 
-# ====== 静态文件路由和 MIME 类型设置 ======
 @app.route('/static/js/<path:filename>')
-def serve_js(filename):
-    """Serve JavaScript files with correct MIME type for ES6 modules"""
+def serve_js(filename: str) -> Any:
+    """Serve JavaScript files with correct MIME type for ES6 modules."""
     return send_from_directory('static/js', filename, mimetype='application/javascript')
 
 @app.route('/static/js/modules/<path:filename>')
-def serve_js_modules(filename):
-    """Serve JavaScript module files with correct MIME type"""
+def serve_js_modules(filename: str) -> Any:
+    """Serve JavaScript module files with correct MIME type."""
     return send_from_directory('static/js/modules', filename, mimetype='application/javascript')
 
 @app.route('/static/css/<path:filename>')
-def serve_css(filename):
-    """Serve CSS files with correct MIME type"""
+def serve_css(filename: str) -> Any:
+    """Serve CSS files with correct MIME type."""
     return send_from_directory('static/css', filename, mimetype='text/css')
 
 @app.route('/static/images/<path:filename>')
-def serve_images(filename):
-    """Serve image files with correct MIME type"""
-    import os
+def serve_images(filename: str) -> Any:
+    """Serve image files with correct MIME type."""
     _, ext = os.path.splitext(filename)
     mime_types = {
         '.png': 'image/png',
@@ -92,9 +86,8 @@ def serve_images(filename):
     return send_from_directory('static/images', filename, mimetype=mimetype)
 
 @app.route('/static/<path:filename>')
-def serve_static(filename):
-    """Serve static files with correct MIME types"""
-    import os
+def serve_static(filename: str) -> Any:
+    """Serve static files with correct MIME types."""
     _, ext = os.path.splitext(filename)
     mime_types = {
         '.js': 'application/javascript',
@@ -116,19 +109,21 @@ def serve_static(filename):
         '.ttf': 'font/ttf',
         '.eot': 'application/vnd.ms-fontobject'
     }
-    
     mimetype = mime_types.get(ext.lower(), 'application/octet-stream')
-    
     return send_from_directory('static', filename, mimetype=mimetype)
 
-def get_db_connection():
-    """Get database connection"""
+def get_db_connection() -> sqlite3.Connection:
+    """
+    Get a new database connection.
+    """
     conn = sqlite3.connect(DATABASE_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
-def sanitize_for_json(obj):
-    """Recursively convert NaN/Infinity to None and non-serializable to str for strict JSON."""
+def sanitize_for_json(obj: Any) -> Any:
+    """
+    Recursively convert NaN/Infinity to None and non-serializable to str for strict JSON.
+    """
     if isinstance(obj, float):
         if math.isnan(obj) or math.isinf(obj):
             return None
@@ -139,13 +134,15 @@ def sanitize_for_json(obj):
         return [sanitize_for_json(x) for x in obj]
     if isinstance(obj, dict):
         return {k: sanitize_for_json(v) for k, v in obj.items()}
-    # Fallback for other types
     try:
         return str(obj)
     except Exception:
         return None
 
-def infer_pipeline_params(steps):
+def infer_pipeline_params(steps: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    Infer pipeline parameters from a list of step definitions.
+    """
     params = {
         "chanset": None,
         "fs": None,
@@ -170,26 +167,30 @@ def infer_pipeline_params(steps):
             params["output_type"] = "epochs"
     return params
 
-
 @app.route('/')
-def index():
-    """Home page"""
+def index() -> Any:
+    """
+    Render the home page.
+    """
     return render_template('index.html', STEP_REGISTRY=STEP_REGISTRY)
 
 @app.route('/api/datasets')
-def get_datasets():
-    """Get all datasets"""
+def get_datasets() -> Any:
+    """
+    Get all datasets.
+    """
     conn = get_db_connection()
     datasets = conn.execute('SELECT * FROM datasets').fetchall()
     conn.close()
     return jsonify([dict(dataset) for dataset in datasets])
 
 @app.route('/api/recordings')
-def get_recordings():
-    """Get recording files list"""
+def get_recordings() -> Any:
+    """
+    Get recording files list.
+    """
     dataset_id = request.args.get('dataset_id', type=int)
     conn = get_db_connection()
-    
     if dataset_id:
         recordings = conn.execute('''
             SELECT r.*, s.age, s.sex 
@@ -203,13 +204,14 @@ def get_recordings():
             FROM recordings r 
             LEFT JOIN subjects s ON r.subject_id = s.subject_id
         ''').fetchall()
-    
     conn.close()
     return jsonify([dict(recording) for recording in recordings])
 
 @app.route('/api/recording_details')
-def get_recording_details():
-    """Get detailed info for a single recording"""
+def get_recording_details() -> Any:
+    """
+    Get detailed info for a single recording.
+    """
     recording_id = request.args.get('recording_id', type=int)
     if not recording_id:
         return jsonify({'error': 'Missing required parameter: recording_id'}), 400
@@ -227,8 +229,10 @@ def get_recording_details():
     return jsonify(dict(recording))
 
 @app.route('/api/recording_metadata')
-def get_recording_metadata():
-    """Get metadata for a recording (if available)"""
+def get_recording_metadata() -> Any:
+    """
+    Get metadata for a recording (if available).
+    """
     recording_id = request.args.get('recording_id', type=int)
     if not recording_id:
         return jsonify({'error': 'Missing required parameter: recording_id'}), 400
@@ -240,8 +244,10 @@ def get_recording_metadata():
     return jsonify(dict(meta) if meta else {})
 
 @app.route('/api/recording_events')
-def get_recording_events():
-    """Get events for a recording (if any)"""
+def get_recording_events() -> Any:
+    """
+    Get events for a recording (if any).
+    """
     recording_id = request.args.get('recording_id', type=int)
     if not recording_id:
         return jsonify({'error': 'Missing required parameter: recording_id'}), 400
@@ -255,22 +261,22 @@ def get_recording_events():
     return jsonify([dict(e) for e in events])
 
 @app.route('/api/feature_sets')
-def get_feature_sets():
-    """Get feature sets list"""
+def get_feature_sets() -> Any:
+    """
+    Get feature sets list.
+    """
     conn = get_db_connection()
     feature_sets = conn.execute('SELECT * FROM feature_sets').fetchall()
     conn.close()
     return jsonify([dict(feature_set) for feature_set in feature_sets])
 
 @app.route('/api/feature_set_details/<int:feature_set_id>')
-def get_feature_set_details(feature_set_id):
-    """Get feature set details"""
+def get_feature_set_details(feature_set_id: int) -> Any:
+    """
+    Get feature set details.
+    """
     conn = get_db_connection()
-    
-    # Get feature set basic info
     feature_set = conn.execute('SELECT * FROM feature_sets WHERE id = ?', (feature_set_id,)).fetchone()
-    
-    # Get feature definitions in the feature set
     features = conn.execute('''
         SELECT f.*, p.shortname as pipeline_name, p.description as pipeline_desc
         FROM fxdef f
@@ -278,27 +284,24 @@ def get_feature_set_details(feature_set_id):
         LEFT JOIN pipedef p ON f.pipedef_id = p.id
         WHERE fsi.feature_set_id = ?
     ''', (feature_set_id,)).fetchall()
-    
     conn.close()
-    
     return jsonify({
         'feature_set': dict(feature_set),
         'features': [dict(feature) for feature in features]
     })
 
 @app.route('/api/extract_features', methods=['POST'])
-def extract_features():
-    """Extract features"""
+def extract_features() -> Any:
+    """
+    Extract features for a list of recordings and a feature set.
+    """
     data = request.json
     recording_ids = data.get('recording_ids', [])
     feature_set_id = data.get('feature_set_id')
-    
     if not recording_ids or not feature_set_id:
         return jsonify({'error': 'Missing required parameters'}), 400
-    
     results = []
     errors = []
-    
     for recording_id in recording_ids:
         try:
             print(f"Processing recording file {recording_id}...")
@@ -313,7 +316,6 @@ def extract_features():
             error_msg = f"Error processing recording file {recording_id}: {str(e)}"
             errors.append(error_msg)
             print(error_msg)
-    
     return jsonify({
         'results': results,
         'errors': errors,
@@ -323,19 +325,19 @@ def extract_features():
     })
 
 @app.route('/api/feature_values')
-def get_feature_values():
+def get_feature_values() -> Any:
+    """
+    Get feature values for a specific recording.
+    """
     recording_id = request.args.get('recording_id', type=int)
     if not recording_id:
         return jsonify({'error': 'Missing required parameter: recording_id'}), 400
-
     conn = get_db_connection()
-    # 查找该recording的所有特征定义
     fxdefs = conn.execute('''
         SELECT f.* FROM fxdef f
         JOIN feature_values fv ON f.id = fv.fxdef_id
         WHERE fv.recording_id = ?
     ''', (recording_id,)).fetchall()
-
     feature_values = {}
     for fxdef in fxdefs:
         fxdef_id = fxdef['id']
@@ -343,19 +345,15 @@ def get_feature_values():
             SELECT * FROM feature_values 
             WHERE fxdef_id = ? AND recording_id = ?
         ''', (fxdef_id, recording_id)).fetchone()
-        
         if value:
-            # 解析 value 与 shape，容错并清洗 NaN/Inf
             parsed_value = None
             raw_value = value['value']
             if raw_value is not None and raw_value != 'null':
                 try:
                     parsed_value = json.loads(raw_value)
                 except Exception:
-                    # 如果数据库中并非严格JSON，保留为原始字符串
                     parsed_value = raw_value
             parsed_value = sanitize_for_json(parsed_value)
-
             parsed_shape = []
             if value['shape']:
                 try:
@@ -363,7 +361,6 @@ def get_feature_values():
                 except Exception:
                     parsed_shape = []
             parsed_shape = sanitize_for_json(parsed_shape)
-
             feature_values[fxdef['shortname']] = {
                 'value': parsed_value,
                 'dim': value['dim'],
@@ -381,36 +378,28 @@ def get_feature_values():
     return jsonify(feature_values)
 
 @app.route('/api/export_features', methods=['POST'])
-def export_features():
-    """Export feature data"""
+def export_features() -> Any:
+    """
+    Export feature data for a set of recordings and a feature set as CSV.
+    """
     data = request.json
     recording_ids = data.get('recording_ids', [])
     feature_set_id = data.get('feature_set_id')
-    
     if not recording_ids or not feature_set_id:
         return jsonify({'error': 'Missing required parameters'}), 400
-    
     conn = get_db_connection()
-    
-    # Get feature set info
     feature_set = conn.execute('SELECT * FROM feature_sets WHERE id = ?', (feature_set_id,)).fetchone()
-    
-    # Get feature definitions
     fxdefs = conn.execute('''
         SELECT f.* FROM fxdef f
         JOIN feature_set_items fsi ON f.id = fsi.fxdef_id
         WHERE fsi.feature_set_id = ?
     ''', (feature_set_id,)).fetchall()
-    
-    # Get recording files info
     recordings = conn.execute('''
         SELECT r.*, s.age, s.sex 
         FROM recordings r 
         LEFT JOIN subjects s ON r.subject_id = s.subject_id 
         WHERE r.id IN ({})
     '''.format(','.join('?' * len(recording_ids))), recording_ids).fetchall()
-    
-    # Build data frame
     data_rows = []
     for recording in recordings:
         row = {
@@ -423,15 +412,12 @@ def export_features():
             'age': recording['age'],
             'sex': recording['sex']
         }
-        
-        # Add feature values
         for fxdef in fxdefs:
             fxdef_id = fxdef['id']
             value = conn.execute('''
                 SELECT * FROM feature_values 
                 WHERE fxdef_id = ? AND recording_id = ?
             ''', (fxdef_id, recording['id'])).fetchone()
-            
             if value and value['value'] != 'null':
                 try:
                     parsed_value = json.loads(value['value'])
@@ -445,19 +431,12 @@ def export_features():
                     row[fxdef['shortname']] = None
             else:
                 row[fxdef['shortname']] = None
-        
         data_rows.append(row)
-    
     conn.close()
-    
-    # Create DataFrame and export
     df = pd.DataFrame(data_rows)
-    
-    # Create temporary file
     with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
         df.to_csv(f.name, index=False)
         temp_file = f.name
-    
     return send_file(
         temp_file,
         as_attachment=True,
@@ -466,41 +445,35 @@ def export_features():
     )
 
 @app.route('/api/pipelines')
-def get_pipelines():
-    """Get all pipelines"""
+def get_pipelines() -> Any:
+    """
+    Get all pipelines.
+    """
     conn = get_db_connection()
     pipelines = conn.execute('SELECT * FROM pipedef').fetchall()
     conn.close()
     return jsonify([dict(pipeline) for pipeline in pipelines])
 
 @app.route('/api/pipeline_details/<int:pipeline_id>')
-def get_pipeline_details(pipeline_id):
-    """Get pipeline details with nodes and edges"""
+def get_pipeline_details(pipeline_id: int) -> Any:
+    """
+    Get pipeline details with nodes and edges.
+    """
     conn = get_db_connection()
-    
-    # Get pipeline basic info
     pipeline = conn.execute('SELECT * FROM pipedef WHERE id = ?', (pipeline_id,)).fetchone()
-    
-    # Get pipeline nodes
     nodes = conn.execute('''
         SELECT pn.* FROM pipe_nodes pn
         JOIN pipe_edges pe ON pn.nodeid = pe.from_node OR pn.nodeid = pe.to_node
         WHERE pe.pipedef_id = ?
         GROUP BY pn.nodeid
     ''', (pipeline_id,)).fetchall()
-    
-    # Get pipeline edges
     edges = conn.execute('''
         SELECT * FROM pipe_edges WHERE pipedef_id = ?
     ''', (pipeline_id,)).fetchall()
-    
-    # Get fxdefs that use this pipeline
     fxdefs = conn.execute('''
         SELECT * FROM fxdef WHERE pipedef_id = ?
     ''', (pipeline_id,)).fetchall()
-    
     conn.close()
-    
     return jsonify({
         'pipeline': dict(pipeline),
         'nodes': [dict(node) for node in nodes],
@@ -509,8 +482,10 @@ def get_pipeline_details(pipeline_id):
     })
 
 @app.route('/api/pipeline_visualization/<int:pipeline_id>')
-def get_pipeline_visualization(pipeline_id):
-    """Get pipeline visualization data including SVG"""
+def get_pipeline_visualization(pipeline_id: int) -> Any:
+    """
+    Get pipeline visualization data including SVG.
+    """
     try:
         visualization_data = get_pipeline_visualization_data(pipeline_id)
         if visualization_data:
@@ -521,8 +496,10 @@ def get_pipeline_visualization(pipeline_id):
         return jsonify({'error': f'Error generating visualization: {str(e)}'}), 500
 
 @app.route('/api/fxdefs')
-def get_fxdefs():
-    """Get all feature definitions"""
+def get_fxdefs() -> Any:
+    """
+    Get all feature definitions.
+    """
     conn = get_db_connection()
     fxdefs = conn.execute('''
         SELECT f.*, p.shortname as pipeline_name 
@@ -533,26 +510,22 @@ def get_fxdefs():
     return jsonify([dict(fxdef) for fxdef in fxdefs])
 
 @app.route('/api/fxdef_details/<int:fxdef_id>')
-def get_fxdef_details(fxdef_id):
-    """Get feature definition details"""
+def get_fxdef_details(fxdef_id: int) -> Any:
+    """
+    Get feature definition details.
+    """
     conn = get_db_connection()
-    
-    # Get fxdef basic info
     fxdef = conn.execute('''
         SELECT f.*, p.shortname as pipeline_name, p.description as pipeline_desc
         FROM fxdef f
         LEFT JOIN pipedef p ON f.pipedef_id = p.id
         WHERE f.id = ?
     ''', (fxdef_id,)).fetchone()
-    
-    # Get feature sets that include this fxdef
     feature_sets = conn.execute('''
         SELECT fs.* FROM feature_sets fs
         JOIN feature_set_items fsi ON fs.id = fsi.feature_set_id
         WHERE fsi.fxdef_id = ?
     ''', (fxdef_id,)).fetchall()
-    
-    # Get sample feature values (first 10)
     sample_values = conn.execute('''
         SELECT fv.*, r.filename 
         FROM feature_values fv
@@ -560,9 +533,7 @@ def get_fxdef_details(fxdef_id):
         WHERE fv.fxdef_id = ?
         LIMIT 10
     ''', (fxdef_id,)).fetchall()
-    
     conn.close()
-    
     return jsonify({
         'fxdef': dict(fxdef),
         'feature_sets': [dict(fs) for fs in feature_sets],
@@ -570,15 +541,14 @@ def get_fxdef_details(fxdef_id):
     })
 
 @app.route('/api/featuresets_detailed')
-def get_featuresets_detailed():
-    """Get all feature sets with detailed information"""
+def get_featuresets_detailed() -> Any:
+    """
+    Get all feature sets with detailed information.
+    """
     conn = get_db_connection()
-    
     feature_sets = conn.execute('SELECT * FROM feature_sets').fetchall()
     detailed_sets = []
-    
     for fs in feature_sets:
-        # Get fxdefs in this feature set
         fxdefs = conn.execute('''
             SELECT f.*, p.shortname as pipeline_name
             FROM fxdef f
@@ -586,49 +556,43 @@ def get_featuresets_detailed():
             LEFT JOIN pipedef p ON f.pipedef_id = p.id
             WHERE fsi.feature_set_id = ?
         ''', (fs['id'],)).fetchall()
-        
         detailed_sets.append({
             'feature_set': dict(fs),
             'fxdefs': [dict(fxdef) for fxdef in fxdefs],
             'fxdef_count': len(fxdefs)
         })
-    
     conn.close()
     return jsonify(detailed_sets)
 
 @app.route('/api/add_pipeline', methods=['POST'])
-def api_add_pipeline():
+def api_add_pipeline() -> Any:
+    """
+    Add a new pipeline definition.
+    """
     pipeline_def = request.json
     steps = pipeline_def.get("steps", [])
-    # 1. 校验步骤参数
     try:
-        # 转换为add_pipeline需要的格式
         steps_for_validate = [[s["step_name"], s["func"], s["inputnames"], s["params"]] for s in steps]
         validate_pipeline(steps_for_validate, STEP_REGISTRY)
     except Exception as e:
         return jsonify({'success': False, 'error': f'Parameter validation failed: {str(e)}'}), 400
-
-    # 2. 检查重复/无效步骤（如重复epoch）
     seen = set()
     for s in steps:
-        if s["func"] in seen and s["func"] in ["epoch"]:  # 可扩展更多只允许出现一次的步骤
+        if s["func"] in seen and s["func"] in ["epoch"]:
             return jsonify({'success': False, 'error': f"Step '{s['func']}' is duplicated, which is not allowed."}), 400
         seen.add(s["func"])
-
-    # 3. 推断参数
     inferred = infer_pipeline_params(steps)
-    # 4. 合成完整pipeline_def
     full_pipeline_def = {
         "shortname": pipeline_def.get("shortname"),
         "description": pipeline_def.get("description"),
         "source": pipeline_def.get("source"),
-        "chanset": pipeline_def.get("chanset"),   # <--- 改这里
+        "chanset": pipeline_def.get("chanset"),
         "fs": inferred["fs"],
         "hp": inferred["hp"],
         "lp": inferred["lp"],
         "epoch": inferred["epoch"],
         "steps": steps_for_validate,
-        "sample_rating": 5.0  # 可选
+        "sample_rating": 5.0
     }
     try:
         pipeline_id = add_pipeline(full_pipeline_def)
@@ -637,11 +601,17 @@ def api_add_pipeline():
         return jsonify({'success': False, 'error': str(e)}), 400
 
 @app.route('/api/steps/registry')
-def get_steps_registry():
+def get_steps_registry() -> Any:
+    """
+    Get the step registry.
+    """
     return jsonify(STEP_REGISTRY)
 
 @app.route('/api/pipeline/validate', methods=['POST'])
-def validate_pipeline_api():
+def validate_pipeline_api() -> Any:
+    """
+    Validate a pipeline definition.
+    """
     pipeline = request.json.get("steps")
     try:
         validate_pipeline(pipeline, STEP_REGISTRY)
@@ -650,9 +620,12 @@ def validate_pipeline_api():
         return jsonify({"valid": False, "error": str(e)}), 400
 
 @app.route('/api/feature_functions')
-def api_feature_functions():
+def api_feature_functions() -> Any:
+    """
+    Get all feature functions and their dimensions.
+    """
     from eeg2fx.function_registry import FEATURE_METADATA
-    def infer_dim(meta_type):
+    def infer_dim(meta_type: str) -> str:
         if meta_type == "scalar":
             return "scalar"
         else:
@@ -663,17 +636,22 @@ def api_feature_functions():
     ])
 
 @app.route('/api/add_fxdef', methods=['POST'])
-def api_add_fxdef():
+def api_add_fxdef() -> Any:
+    """
+    Add new feature definitions.
+    """
     data = request.json
     try:
-        # 这里直接用add_fxdefs
         add_fxdefs(data)
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 400
 
 @app.route('/api/add_featureset', methods=['POST'])
-def api_add_featureset():
+def api_add_featureset() -> Any:
+    """
+    Add a new feature set.
+    """
     data = request.json
     try:
         add_featureset(data)
@@ -682,52 +660,36 @@ def api_add_featureset():
         return jsonify({'success': False, 'error': str(e)}), 400
 
 @app.route('/api/featureset_dag/<int:feature_set_id>')
-def get_featureset_dag(feature_set_id):
-    """Get merged DAG visualization data for a feature set"""
+def get_featureset_dag(feature_set_id: int) -> Any:
+    """
+    Get merged DAG visualization data for a feature set.
+    """
     try:
         from eeg2fx.featureset_grouping import load_fxdefs_for_set, build_feature_dag
-        
-        # 加载feature set中的所有fxdefs
         fxdefs = load_fxdefs_for_set(feature_set_id)
-        
         if not fxdefs:
             return jsonify({'error': 'No feature definitions found in this feature set'}), 404
-        
-        # 构建合并的DAG
         dag = build_feature_dag(fxdefs)
-        
-        # 转换为Cytoscape.js格式
         nodes = []
         edges = []
-        node_id_map = {}  # 用于映射内部ID到Cytoscape ID
-        
-        # 添加节点
+        node_id_map = {}
         for nid, node in dag.items():
-            # 跳过split_channel节点
             if "split_channel" in node["func"]:
                 continue
-                
             cytoscape_id = f"node_{nid}"
             node_id_map[nid] = cytoscape_id
-            
-            # 确定节点类型和样式
             node_type = "process"
             if "feature" in node["func"]:
                 node_type = "output"
             elif node["func"] in ["raw", "load_recording"]:
                 node_type = "input"
-            
-            # 格式化参数显示
             params_str = ""
             if node["params"]:
                 param_pairs = []
                 for key, value in node["params"].items():
                     param_pairs.append(f"{key}={value}")
                 params_str = "(" + ", ".join(param_pairs) + ")"
-            
-            # 组合函数名和参数
             node_label = f"{node['func']}\n{params_str}" if params_str else node["func"]
-            
             nodes.append({
                 "data": {
                     "id": cytoscape_id,
@@ -737,19 +699,13 @@ def get_featureset_dag(feature_set_id):
                 },
                 "classes": node_type
             })
-        
-        # 添加边
         edge_set = set()
         for nid, node in dag.items():
-            # 跳过split_channel节点
             if "split_channel" in node["func"]:
                 continue
-                
             from_id = node_id_map[nid]
             for input_node in node["inputnodes"]:
-                # 如果输入节点是split_channel，找到它的输入节点
                 if input_node in dag and "split_channel" in dag[input_node]["func"]:
-                    # 跳过split_channel，直接连接到它的输入
                     split_inputs = dag[input_node]["inputnodes"]
                     for split_input in split_inputs:
                         if split_input in node_id_map:
@@ -776,7 +732,6 @@ def get_featureset_dag(feature_set_id):
                             }
                         })
                         edge_set.add(edge_key)
-        
         return jsonify({
             'success': True,
             'cytoscape_data': {
@@ -787,7 +742,6 @@ def get_featureset_dag(feature_set_id):
             'node_count': len(nodes),
             'edge_count': len(edges)
         })
-        
     except Exception as e:
         return jsonify({'error': f'Failed to generate DAG: {str(e)}'}), 500
 

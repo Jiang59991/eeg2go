@@ -10,7 +10,6 @@ import { showTasks } from './task-queue.js';
 export function initializeNavigation() {
     console.log('Initializing navigation module...');
     
-    // 绑定导航按钮事件
     document.getElementById('navDatasetsBtn').addEventListener('click', showDatasets);
     document.getElementById('navPipelinesBtn').addEventListener('click', showPipelines);
     document.getElementById('navFxdefsBtn').addEventListener('click', showFxdefs);
@@ -21,12 +20,10 @@ export function initializeNavigation() {
 }
 
 export function setActiveNavButton(activeButton) {
-    // 移除所有按钮的活跃状态
     document.querySelectorAll('.nav-buttons .btn').forEach(btn => {
         btn.classList.remove('active');
     });
     
-    // 设置当前按钮为活跃状态
     if (activeButton) {
         activeButton.classList.add('active');
     }
@@ -53,12 +50,10 @@ export function hideAllViews() {
 }
 
 export function updateBreadcrumb(page) {
-    // 隐藏所有面包屑项
     document.querySelectorAll('.breadcrumb-item').forEach(item => {
         item.style.display = 'none';
     });
     
-    // 显示对应的面包屑项
     const breadcrumbMap = {
         'datasets': 'breadcrumb-datasets',
         'recordings': 'breadcrumb-recordings',
