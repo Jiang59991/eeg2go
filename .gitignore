@@ -14,3 +14,8 @@ tmp/database/*.db-*
 *.db-shm
 dump.rdb
 tmp/
+generate_downloads.py
+rebuild_experiment_tables.sh
+database/rebuild_experiment_tables.py
+database/rebuild_experiment_tables.sql
+database/view_all_tables.py
